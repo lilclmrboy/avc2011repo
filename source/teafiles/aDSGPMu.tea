@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*                                                                 */
-/* file: aDS-GPMu.tea                                                  */
+/* file: aDSGPMu.tea                                                  */
 /*                                                                 */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*                                                                 */
@@ -36,8 +36,8 @@
 /*                                                                 */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _aDS_GPMu_T_
-#define _aDS_GPMu_T_
+#ifndef _aDSGPMu_T_
+#define _aDSGPMu_T_
 
 #include <aI2C.tea>
 
@@ -202,4 +202,4 @@ int aGPM_GetAnalogInput(char addr, char n)
 #define	aGPM_SetPortDir(addr, dir)	aI2C_WriteChar(addr, 0, dir)
 #define	aGPM_SetPortBits(addr, bits)	aI2C_WriteChar(addr, 1, bits)
 
-#endif /* _aDS_GPMu_T_ */
+#endif /* _aDSGPMu_T_ */
