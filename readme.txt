@@ -23,3 +23,4 @@ $ make dump
 This should create a file to load all the TEAWare onto the Stem network. From the aConsole application:
 
 brainstem> braindump avc2011_dump.dump
+wtf
