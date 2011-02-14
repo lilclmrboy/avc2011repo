@@ -6,6 +6,10 @@
 void main()
 {
   aPrint_String("Hello kitty.\n");
+
+#ifdef aDEBUG	
+	aPrint_String("Debugging on.\n");
+#endif	
 	
 	/* stall for a second */
   aCore_Sleep(10000);
