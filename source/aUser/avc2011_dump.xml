@@ -9,5 +9,9 @@
   <SLOT>11</SLOT>
   <NAME>"gMonitorGP.cup"</NAME>
  </CUP>
+ 
+ <BATCH>
+  <NAME>"reset.bag"</NAME>
+ </BATCH> 
 
 </BRAINDUMP>

@@ -1,2 +1,11 @@
 /* module configuration params */
 
+/* Adjust the heartbeat rate */
+2 18 2 10
+
+/* Set the VM Boot file 1 */
+/* We want to use the gMonitorGP.tea file */
+2 18 15 11
+
+/* Save the settings */
+2 19
