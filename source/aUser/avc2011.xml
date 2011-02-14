@@ -4,6 +4,10 @@
   <NAME>"gp_cfg.bag"</NAME>
  </BATCH>
  
+ <BATCH>
+  <NAME>"moto_cfg.bag"</NAME>
+ </BATCH> 
+ 
  <CUP>
   <MODULE>2</MODULE>
   <SLOT>11</SLOT>

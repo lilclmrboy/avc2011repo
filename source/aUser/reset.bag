@@ -1,5 +1,8 @@
 /* module configuration params */
 
+/* Reset the Moto 1.0 module */
+4 24
+
 /* Reset the GP 2.0 module */
 2 24
 

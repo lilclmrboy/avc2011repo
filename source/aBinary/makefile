@@ -6,4 +6,4 @@ all : dump
 .PHONY : dump
 dump : 
 	./steep gMonitorGP.tea
-	./makedump avc2011_dump.xml
+	./makedump avc2011.xml
