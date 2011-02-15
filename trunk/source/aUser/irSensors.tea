@@ -1,0 +1,135 @@
+/* ************************************************************************** */
+/* IR sensor polling thread */
+
+#include "avc2011.tea"
+#include <aA2D.tea>
+
+#define aTIMESLICE 500
+#define SENSOR_MIN_THRESHOLD 20
+
+// The 0 degree angle is the straight ahead reading for the robot
+// Integer scaled cosine and sine values
+// for example, cosine(pi/4) * 10 = 70
+
+// At a 30 degree angle from the straight ahead direction 
+#define SENSOR_LEFT_ID 0
+#define SENSOR_LEFT_ANGLE_COSINE 86
+#define SENSOR_LEFT_ANGLE_SINE 50
+
+// At a -30 (aka 270) degree angle from the straight ahead direction 
+#define SENSOR_RIGHT_ID 1
+#define SENSOR_RIGHT_ANGLE_COSINE 86
+#define SENSOR_RIGHT_ANGLE_SINE -50
+
+/* ************************************************************************** */
+/* Computes a scalar that is equal to the distance
+ */
+int gp2dxx_magnitude(char index) {
+	int result = 0;
+	int reading = 0;
+	
+	// Take the reading.
+	reading = aA2D_ReadInt(index);
+	
+	// Read the result and scale it down
+	if (reading < SENSOR_MIN_THRESHOLD)
+		result = 0;
+	else
+		result = reading >> 2;
+	
+	// Return the value with a distance approximation
+	return result;
+}
+
+/* ************************************************************************** */
+void main(char callingProcID)
+{
+
+	int magnitude = 0;
+	int directionCosine = 0;
+	int directionSine = 0;
+	int Ux = 0;
+	int Uy = 0;
+	char id = 0;
+
+#ifdef aDEBUG
+	aCore_Sleep(5000);
+	aPrint_String("irSensors launched.\n");
+#endif
+
+	while(1) {
+	
+		// For each sensor, we do the following
+		// 1.) Read the sensor
+		// 2.) Calculate the X and Y force component
+		// 3.) Aggregate all the X and Y forces
+		// 4.) Write X and Y result to scratchpad
+		if (aPad_ReadChar(aSPAD_IR_PROCESS_ENABLE)) {
+		
+			// Walk through the sensors. we set the id here so we can 
+			// scale the code very easily.
+			// We can also build up the Ux and Uy components
+			switch (id) {
+			
+				case 0: 
+					id = SENSOR_LEFT_ID;
+					directionCosine = SENSOR_LEFT_ANGLE_COSINE;
+					directionSine = SENSOR_LEFT_ANGLE_SINE;
+					break;
+					
+				case 1: 
+					id = SENSOR_RIGHT_ID;
+					directionCosine = SENSOR_RIGHT_ANGLE_COSINE;
+					directionSine = SENSOR_RIGHT_ANGLE_SINE;
+					break;	
+			
+			
+				default:
+					aPad_WriteInt(aSPAD_REPULSIVE_UX, Ux);
+					aPad_WriteInt(aSPAD_REPULSIVE_UY, Uy);
+					
+					// Set the Ux and Uy values back to zero
+					Ux = 0;
+					Uy = 0;
+					
+					// Set the id back to 0
+					id = 0;
+					
+					break;
+			}
+		
+
+			// Get the reading magnitude value 
+			magnitude = gp2dxx_magnitude(id);
+			
+			// Since we know that fixed positions of the sensors, we can just
+			// hard code the resulting trig math fancyness. 
+			// Keeping it simple. 
+			// Scale the result down to an integer value we can work with
+			Ux = ((magnitude * directionCosine)/10) + Ux;
+			Uy = ((magnitude * directionSine)/10) + Uy;
+			
+#ifdef aDEBUG
+			aPrint_String("(id Mag Ux Uy):");
+			aPrint_IntDec(id);
+			aPrint_String(",");
+			aPrint_IntDec(magnitude);
+			aPrint_String(",");
+			aPrint_IntDec(Ux);
+			aPrint_String(",");
+			aPrint_IntDec(Uy);
+			aPrint_Char('\n');
+			aCore_Sleep(2000);
+#endif
+
+			// Move to the next sensor id value
+			id++;
+		
+		} // end if reading values
+		
+		// We don't want to swamp the processor
+		aCore_Sleep(aTIMESLICE);
+		
+	} // end of while loop
+	
+} // end of main
