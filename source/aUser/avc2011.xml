@@ -10,6 +10,12 @@
  
  <CUP>
   <MODULE>2</MODULE>
+  <SLOT>0</SLOT>
+  <NAME>"irSensors.cup"</NAME>
+ </CUP> 
+ 
+ <CUP>
+  <MODULE>2</MODULE>
   <SLOT>11</SLOT>
   <NAME>"gMonitorGP.cup"</NAME>
  </CUP>
