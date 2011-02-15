@@ -3,6 +3,8 @@
 
 #include "avc2011.tea"
 
+#define aSLICE 500
+
 /* ************************************************************************** */
 /* 1.) Configure scatchpad values
  */
@@ -10,6 +12,30 @@ void init() {
 
 	/* Configure scratchpad values */
 	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE,0);
+	aPad_WriteChar(aSPAD_GPMONITOR_SHUTDOWN,0);
+	
+	/* Zero out other placehoder readings */
+	aPad_WriteInt(aSPAD_REPULSIVE_UX,0);
+	aPad_WriteInt(aSPAD_REPULSIVE_UY,0);
+	
+}
+
+/* ************************************************************************** */
+void shutdown() {
+
+#ifdef aDEBUG	
+	aPrint_String("gMonitorGP shutdown.\n");
+	aCore_Sleep(500);
+#endif
+
+	/* Disable IR sensor polling */
+	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE, 0);
+
+	/* Clean up billy! */
+	aMulti_Kill(aIR_POLLING_PROCESS);
+
+	/* stall for a second */
+  aCore_Sleep(1000);
 	
 }
 
@@ -30,13 +56,18 @@ void main()
 	/* Spawn the IR polling thread */
 	aMulti_Spawn(aIR_POLLING_SLOT, aIR_POLLING_PROCESS);
 	
-	/* stall for a second */
-  aCore_Sleep(10000);
-	
 	/* Enable IR sensor polling */
 	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE, 1);
 	
-	/* stall for a second */
-  aCore_Sleep(10000);
+	// Do monitor relevant things. Bookkeeping, coordinating, etc. 
+	while (!aPad_ReadChar(aSPAD_GPMONITOR_SHUTDOWN)) {
+	
+		/* stall for a timeslice */
+		aCore_Sleep(aSLICE);
+	
+	} // end pseudo infinite while loop
+	
+	// clean up and shutdown
+	shutdown();
 	
 }

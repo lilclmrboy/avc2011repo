@@ -106,8 +106,8 @@ void main(char callingProcID)
 			// hard code the resulting trig math fancyness. 
 			// Keeping it simple. 
 			// Scale the result down to an integer value we can work with
-			Ux = ((magnitude * directionCosine)/10) + Ux;
-			Uy = ((magnitude * directionSine)/10) + Uy;
+			Ux = ((-1*magnitude * directionCosine)/10) + Ux;
+			Uy = ((-1*magnitude * directionSine)/10) + Uy;
 			
 #ifdef aDEBUG
 			aPrint_String("(id Mag Ux Uy):");
