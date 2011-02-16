@@ -3,9 +3,12 @@
 /* Adjust the heartbeat rate */
 2 18 2 10
 
-/* Set the VM Boot file 1 */
-/* We want to use the gMonitorGP.tea file */
-//2 18 15 11
+/* Specify if we want any VMs to run on boot */
+/* No, we don't. */
+2 18 15 255
+2 18 16 255
+2 18 17 255
+2 18 18 255
 
 /* Save the settings */
 2 19

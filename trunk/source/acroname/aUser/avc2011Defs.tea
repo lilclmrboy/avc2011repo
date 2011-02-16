@@ -7,14 +7,35 @@
 #define aGP2_MODULE 2
 #define aMOTO_MODULE 4
 
+#define aMOTOR_LEFT 0
+#define aMOTOR_RIGHT 1
+
 #define aDEBUG
 
-// Scratchpad Locations on the GP 2.0
+// Scratchpad Locations are globally located on the GP 2.0
 // Data Bytes stored in scratchpad
-#define aSPAD_IR_PROCESS_ENABLE 0
-#define aSPAD_GPMONITOR_SHUTDOWN 1
+#define aSPAD_GPMONITOR_SHUTDOWN 0
+#define aSPAD_IR_PROCESS_ENABLE 1
+#define aSPAD_MOTION_PROCESS_ENABLE 2
 
 // Data Ints stored in scratchpad. These are 2 bytes long.
-#define aSPAD_REPULSIVE_UX 2
-#define aSPAD_REPULSIVE_UY 4
+#define aSPAD_REPULSIVE_UX 10
+#define aSPAD_REPULSIVE_UY 12
+#define aSPAD_MOTION_SETPOINT_RIGHT 14
+#define aSPAD_MOTION_SETPOINT_LEFT 16
 
+/* ************************************************************************** */
+/* Information Specific to the GP module */
+/* Processes on the GP Module */
+#define aIR_POLLING_PROCESS 1
+
+/* Slots on the GP Module */
+#define aIR_POLLING_SLOT 0
+
+/* ************************************************************************** */
+/* Information Specific to the Moto module */
+/* Processes on the Moto Module */
+#define aMOTION_UPDATING_PROCESS 0
+
+/* Slots on the Moto Module */
+#define aMOTION_UPDATING_SLOT 0
