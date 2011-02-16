@@ -1,0 +1,17 @@
+/* module configuration params */
+
+/* Adjust the heartbeat rate */
+4 18 2 5
+
+/* Set the router address to match the GP */
+4 18 1 4
+
+/* Motor channel 0 configuration */
+4 63 0 0 2 0
+
+/* Motor channel 1 configuration */
+4 63 1 0 2 0
+
+/* Save the settings */
+4 19
+
