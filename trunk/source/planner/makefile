@@ -21,17 +21,20 @@
 #   4. We link against the pthread, X11, and OpenGL libraries as well as 
 #      4 in the acroname download (aUtil, aIO, aStem, and aUI).
 
-APP = aGarciaKey
+PREFIX = ../
+APP = MotionPlanner
 CC = g++
 CFLAGS = -DaUNIX \
-	 -I../../acroname/aInclude \
-	 -I../../acroname/aSource \
-	 -I../../acroname/aSystem
+	 -I$(PREFIX)acroname/aInclude \
+	 -I$(PREFIX)acroname/aSource \
+	 -I$(PREFIX)acroname/aSystem \
+	 -I$(PREFIX)acroname/aUser
+CFLAGS += -m32
 LFLAGS = -Wl,-rpath,.
-SRC = ../../acroname/aSource
-BIN = ../../acroname/aBinary
-LIBS = -lpthread -lcrypto -lssl -lX11 -lGL -lGLU \
-       -L../../acroname/aBinary -laUtil -laIO -laMath -laStem -laUI
+SRC = $(PREFIX)acroname/aSource
+BIN = $(PREFIX)acroname/aBinary
+LIBS = -lpthread -lcrypto -lssl \
+       -L$(PREFIX)acroname/aBinary -laUtil -laIO -laMath -laStem
 
 OBJ = unix_$(APP)_Data
 
@@ -44,11 +47,8 @@ $(OBJ) :
 $(BIN)/MotionPlanner : $(OBJ)/MotionPlanner.o
 	$(CC) -g $(CFLAGS) $(LFLAGS) $^ $(LIBS) -o $@
 
-$(OBJ)/MotionPlanner.o : MotionPlanner.cpp MotionPlanner.h
+$(OBJ)/MotionPlanner.o : main.cpp
 	$(CC) -c $(CFLAGS) $< -o $@
-
-#$(OBJ)/acpGarcia.o : $(SRC)/acpGarcia.cpp $(SRC)/acpGarcia.h
-#	$(CC) -c $(CFLAGS) $< -o $@
 
 .PHONY : clean
 clean :
