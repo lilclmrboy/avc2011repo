@@ -8,8 +8,8 @@
   <NAME>"moto_cfg.bag"</NAME>
  </BATCH> 
  
- <CUP>
-  <MODULE>2</MODULE>
+<CUP>
+ <MODULE>2</MODULE>
   <SLOT>0</SLOT>
   <NAME>"irSensors.cup"</NAME>
  </CUP> 
