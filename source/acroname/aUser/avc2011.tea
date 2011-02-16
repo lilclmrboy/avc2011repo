@@ -9,7 +9,38 @@
 #include <aMath.tea>
 #include <aMulti.tea>
 #include <aPad.tea>
+#include <aBus.tea>
 
-#define aIR_POLLING_PROCESS 1
+/* Launches a persisting process. */
+void aMoto_Multi_Spawn(char fileID, char ProcID)
+{
+  asm
+  {
+    /* run fileID in VM[ProcID] with calling ProcID as input */
+    pushlb	aMOTO_MODULE	/* address of Moto */
+    pushlb	5
+    pushlb	cmdVM_RUN
+    pushlb	7		/* RUNCTRL */
+    pushsb	8		/* FileID */
+    pushsb	8		/* ProcID */
+    pushmb	aPortProcID	/* calling ProcID */
+    pushlb	7
+    popcmd
+    pushlb	20		/* let process start */
+    popbm	aPortVMTimer
+  }
+}
 
-#define aIR_POLLING_SLOT 0
+/* Kills an active process. */
+void aMoto_Multi_Kill(char ProcID)
+{
+  asm
+  {
+    pushlb	aMOTO_MODULE	/* address of Moto */
+    pushlb	2
+    pushlb	cmdVM_KILL
+    pushsb	6		/* ProcID */
+    pushlb	4
+    popcmd
+  }
+}
