@@ -1,0 +1,66 @@
+/* ************************************************************************** */
+/* motion updating thread */
+
+#include "avc2011.tea"
+#include <aMotion.tea>
+
+#ifdef aDEBUG
+#include <aPrint.tea>
+#endif
+
+#define aTIMESLICE 100
+
+
+/* ************************************************************************** */
+void main(char callingProcID)
+{
+
+	int leftSetpoint = 0;
+	int rightSetpoint = 0;
+	int oldRightSetpoint = 0;
+	int oldLeftSetpoint = 0;
+	int newRightSetpoint = 0;
+	int newLeftSetpoint = 0;
+
+#ifdef aDEBUG
+	aCore_Sleep(5000);
+	aPrint_String("motionUpdate launched.\n");
+#endif
+
+	while(1) {
+	
+		if (1) {
+		
+			newRightSetpoint = aBus_ReadPadInt(aGP2_MODULE, aSPAD_MOTION_SETPOINT_RIGHT);
+			newLeftSetpoint = aBus_ReadPadInt(aGP2_MODULE, aSPAD_MOTION_SETPOINT_LEFT);
+			
+			if ((newRightSetpoint != oldRightSetpoint) 
+				|| (newLeftSetpoint != oldLeftSetpoint)) {
+				
+				// Send the setpoint values to the Moto
+				aMotion_SetSetpoint(aMOTOR_LEFT, newLeftSetpoint);
+				aMotion_SetSetpoint(aMOTOR_RIGHT, newRightSetpoint);
+				
+				// Store the old values
+				oldRightSetpoint = newRightSetpoint;
+				oldLeftSetpoint = newLeftSetpoint;
+				
+#ifdef aDEBUG
+				aPrint_String("RM, LM: ");
+				aPrint_IntDec(newRightSetpoint);
+				aPrint_String(",");
+				aPrint_IntDec(newLeftSetpoint);
+				aPrint_Char('\n');
+				aCore_Sleep(1000);
+#endif
+				
+			} // end if for grabbing and setting setpoints
+		
+		} // end if performing motion updates
+		
+		// We don't want to swamp the processor
+		aCore_Sleep(aTIMESLICE);
+		
+	} // end of while loop
+	
+} // end of main
