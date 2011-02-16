@@ -7,9 +7,15 @@
  <BATCH>
   <NAME>"moto_cfg.bag"</NAME>
  </BATCH> 
- 
-<CUP>
- <MODULE>2</MODULE>
+
+ <CUP>
+  <MODULE>4</MODULE>
+  <SLOT>0</SLOT>
+  <NAME>"motionUpdate.cup"</NAME>
+ </CUP> 
+
+ <CUP>
+  <MODULE>2</MODULE>
   <SLOT>0</SLOT>
   <NAME>"irSensors.cup"</NAME>
  </CUP> 
@@ -20,8 +26,10 @@
   <NAME>"gMonitorGP.cup"</NAME>
  </CUP>
  
+
+ 
  <BATCH>
   <NAME>"reset.bag"</NAME>
- </BATCH> 
-
+ </BATCH>  
+ 
 </BRAINDUMP>

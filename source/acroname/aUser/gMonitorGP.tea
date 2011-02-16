@@ -13,6 +13,7 @@ void init() {
 	/* Configure scratchpad values */
 	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE,0);
 	aPad_WriteChar(aSPAD_GPMONITOR_SHUTDOWN,0);
+	aPad_WriteChar(aSPAD_MOTION_PROCESS_ENABLE,0);
 	
 	/* Zero out other placehoder readings */
 	aPad_WriteInt(aSPAD_REPULSIVE_UX,0);
@@ -31,8 +32,12 @@ void shutdown() {
 	/* Disable IR sensor polling */
 	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE, 0);
 
+	/* Disable motion updating thread */
+	aPad_WriteChar(aSPAD_MOTION_PROCESS_ENABLE, 0);
+
 	/* Clean up billy! */
 	aMulti_Kill(aIR_POLLING_PROCESS);
+	aMoto_Multi_Kill(aMOTION_UPDATING_PROCESS);
 
 	/* stall for a second */
   aCore_Sleep(1000);
@@ -56,8 +61,14 @@ void main()
 	/* Spawn the IR polling thread */
 	aMulti_Spawn(aIR_POLLING_SLOT, aIR_POLLING_PROCESS);
 	
+	/* Spawn the motion updating thread */
+	//aMoto_Multi_Spawn(aMOTION_UPDATING_SLOT, aMOTION_UPDATING_PROCESS);
+	
 	/* Enable IR sensor polling */
 	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE, 1);
+	
+	/* Enable motion updating */
+	aPad_WriteChar(aSPAD_MOTION_PROCESS_ENABLE, 1);
 	
 	// Do monitor relevant things. Bookkeeping, coordinating, etc. 
 	while (!aPad_ReadChar(aSPAD_GPMONITOR_SHUTDOWN)) {
