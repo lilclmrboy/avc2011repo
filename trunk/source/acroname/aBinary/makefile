@@ -7,4 +7,5 @@ all : dump
 dump : 
 	./steep gMonitorGP.tea	
 	./steep irSensors.tea
+	./steep motionUpdate.tea
 	./makedump avc2011.xml
