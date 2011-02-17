@@ -5,6 +5,90 @@
 
 #define aSLICE 500
 
+
+/* ************************************************************************** */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Writes a char value to a scratchpad location on a remote module.
+ */
+/*
+void aBus_WritePadChar(char cModule, char cIndex, char cData)
+{
+  asm
+  {
+    pushsb 	5
+    pushlb 	3
+    pushlb 	cmdPAD_IO
+    pushsb 	7
+    pushsb	7
+    pushlb 	5
+    popcmd
+  }
+
+} 
+
+void aMulti_Spawn(char fileID, char ProcID)
+{
+  asm
+  {
+    // run fileID in VM[ProcID] with calling ProcID as input
+    pushmb	aPortAddress	// address of self 
+    pushlb	5
+    pushlb	cmdVM_RUN
+    pushlb	7		// RUNCTRL
+    pushsb	8		// FileID 
+    pushsb	8		// ProcID 
+    pushmb	aPortProcID	// calling ProcID
+    pushlb	7
+    popcmd
+    pushlb	20		// let process start
+    popbm	aPortVMTimer
+  }
+}
+*/
+
+/* ************************************************************************** */
+/* on entry, the stack looks like this:
+ *  0    5    cModule
+ *  1    4    fileID
+ *  2    3    ProcID
+ *  3    2    retaddrh
+ *  4    1    retaddrl
+ */
+void aBus_Multi_Spawn(char cModule, char fileID, char ProcID)
+{
+  asm
+  {
+    /* run fileID in VM[ProcID] with calling ProcID as input */
+    pushsb  5            /* the module */
+    pushlb	5            /* the number of bytes in the command */
+    pushlb	cmdVM_RUN
+    pushlb	7            /* RUNCTRL */
+    pushsb	8            /* FileID, was 8 */
+    pushsb	8            /* ProcID, was 8 */
+    pushmb	aPortProcID  /* calling ProcID, was aPortProcID */
+    pushlb	7            /* We are sending 7 bytes to the popcmd */
+    popcmd
+    pushlb	20           /* let process start */
+    popbm	aPortVMTimer
+  }
+}
+
+/* ************************************************************************** */
+/* on entry, the stack looks like this:
+ *  0    4    cModule
+ *  1    3    ProcID
+ *  2    2    retaddrh
+ *  3    1    retaddrl
+ */
+void aBus_Multi_Kill(char cModule, char ProcID)
+{
+#ifdef aDEBUG	
+	aPrint_String("  WARNING: aBus_Multi_Kill NOT IMPLEMENTED.\n");
+	aCore_Sleep(5000);
+#endif
+}
+
+
 /* ************************************************************************** */
 /* 1.) Configure scatchpad values
  */
@@ -13,14 +97,14 @@ void init() {
 	/* Configure scratchpad values */
 	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE,0);
 	aPad_WriteChar(aSPAD_GPMONITOR_SHUTDOWN,0);
-	aPad_WriteChar(aSPAD_MOTION_PROCESS_ENABLE,0);
+	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MOTION_PROCESS_ENABLE,0);
 	
 	/* Zero out other placehoder readings */
 	aPad_WriteInt(aSPAD_REPULSIVE_UX,0);
 	aPad_WriteInt(aSPAD_REPULSIVE_UY,0);
 	
 	/* Set other non zero defaults */
-	aPad_WriteInt(aSPAD_MOTION_RAMPACC_TIME, aACCELRATION_TIME);
+	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MOTION_RAMPACC_TIME, aACCELRATION_TIME);
 	
 }
 
@@ -36,12 +120,21 @@ void shutdown() {
 	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE, 0);
 
 	/* Disable motion updating thread */
-	aPad_WriteChar(aSPAD_MOTION_PROCESS_ENABLE, 0);
+	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MOTION_PROCESS_ENABLE,0);
 
+#ifdef aDEBUG	
+	aPrint_String("irSensors shutdown.\n");
+	aCore_Sleep(500);
+#endif
 	/* Clean up billy! */
 	aMulti_Kill(aIR_POLLING_PROCESS);
-	aMoto_Multi_Kill(aMOTION_UPDATING_PROCESS);
 
+#ifdef aDEBUG	
+	aPrint_String("motionUpdate shutdown.\n");
+	aCore_Sleep(2000);
+#endif	
+	aBus_Multi_Kill(aMOTO_MODULE, aMOTION_UPDATING_PROCESS);
+	
 	/* stall for a second */
   aCore_Sleep(1000);
 	
@@ -65,13 +158,14 @@ void main()
 	aMulti_Spawn(aIR_POLLING_SLOT, aIR_POLLING_PROCESS);
 	
 	/* Spawn the motion updating thread */
-	//aMoto_Multi_Spawn(aMOTION_UPDATING_SLOT, aMOTION_UPDATING_PROCESS);
+	// Write a aBus_Multi_Spawn function. Add this to the aBus library
+	aBus_Multi_Spawn(aMOTO_MODULE, aMOTION_UPDATING_SLOT, aMOTION_UPDATING_PROCESS);
 	
 	/* Enable IR sensor polling */
 	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE, 1);
 	
 	/* Enable motion updating */
-	aPad_WriteChar(aSPAD_MOTION_PROCESS_ENABLE, 1);
+	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MOTION_PROCESS_ENABLE,1);
 	
 	// Do monitor relevant things. Bookkeeping, coordinating, etc. 
 	while (!aPad_ReadChar(aSPAD_GPMONITOR_SHUTDOWN)) {

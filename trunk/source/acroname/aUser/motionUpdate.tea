@@ -21,6 +21,8 @@ void main(char callingProcID)
 	int oldLeftSetpoint = 0;
 	int newRightSetpoint = 0;
 	int newLeftSetpoint = 0;
+	int accTimeLeft = aACCELRATION_TIME;
+	int accTimeRight = aACCELRATION_TIME;
 
 #ifdef aDEBUG
 	aCore_Sleep(5000);
@@ -31,23 +33,24 @@ void main(char callingProcID)
 	aMotion_SetRampFlags(aMOTOR_LEFT, 0x0001);
 	aMotion_SetRampFlags(aMOTOR_RIGHT, 0x0001);
 	
-	// Default is slower. Just a stab at this.
-	aMotion_SetRampAccStepTime(aMOTOR_LEFT, aACCELRATION_TIME);
-	aMotion_SetRampAccStepTime(aMOTOR_RIGHT, aACCELRATION_TIME);
+	// Default is a slower acceleration time step. Just a stab at this.
+	// Likely break this out into a scratchpad variabile
+	aMotion_SetRampAccStepTime(aMOTOR_LEFT, accTimeLeft);
+	aMotion_SetRampAccStepTime(aMOTOR_RIGHT, accTimeRight);
 	
-	aMotion_RampEnable(0, 1);
-	aMotion_RampEnable(1, 1);
+	aMotion_RampEnable(aMOTOR_LEFT, 1);
+	aMotion_RampEnable(aMOTOR_RIGHT, 1);
 
 	while(1) {
 	
 		// Check with the scratchpad to see if we should be doing some updates
-		if (aBus_ReadPadChar(aGP2_MODULE,aSPAD_MOTION_PROCESS_ENABLE)) {
+		if (aPad_ReadInt(aSPAD_MOTION_PROCESS_ENABLE)) {
 		
-			newRightSetpoint = aBus_ReadPadInt(aGP2_MODULE, aSPAD_MOTION_SETPOINT_RIGHT);
-			newLeftSetpoint = aBus_ReadPadInt(aGP2_MODULE, aSPAD_MOTION_SETPOINT_LEFT);
+			newRightSetpoint = aPad_ReadInt(aSPAD_MOTION_SETPOINT_RIGHT);
+			newLeftSetpoint = aPad_ReadInt(aSPAD_MOTION_SETPOINT_LEFT);
 
-			//aMotion_SetRampAccStepTime(aMOTOR_LEFT,aBus_ReadPadInt(aGP2_MODULE, aSPAD_MOTION_RAMPACC_TIME));
-			//aMotion_SetRampAccStepTime(aMOTOR_RIGHT,aBus_ReadPadInt(aGP2_MODULE, aSPAD_MOTION_RAMPACC_TIME));
+			aMotion_SetRampAccStepTime(aMOTOR_LEFT, accTimeLeft);
+			aMotion_SetRampAccStepTime(aMOTOR_RIGHT, accTimeRight);
 				
 			if ((newRightSetpoint != oldRightSetpoint) 
 				|| (newLeftSetpoint != oldLeftSetpoint)) {
