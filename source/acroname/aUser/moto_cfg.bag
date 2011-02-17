@@ -35,7 +35,7 @@
 4 63 0 5 0x7F 0xFF
 
 /* Set the period */
-4 63 0 6 0 0x32
+4 63 0 6 0 0x14
 
 /* Set the PWM frequency */
 4 63 0 8 0 255
@@ -44,9 +44,38 @@
 /* See cmdMO_RMPCFG */
 //4 67 0 ...
 
+/* Save the motion settings */
+4 64 0
+
 /* Motor channel 1 configuration */
-/* See above comments for details */
-4 63 1 0 0 0
+/* Configure the motion control mode */
+/* 2nd to last byte is the mode */
+/* Last byte is the control bits */
+4 63 1 0 7 3
+
+/* Set the P value */
+4 63 1 1 0 0x20
+
+/* Set the I value */
+4 63 1 2 0 0
+
+/* Set the D value */
+4 63 1 3 0 0
+
+/* Set the offset */
+4 63 1 4 0 0
+
+/* Set the rail */
+4 63 1 5 0x7F 0xFF
+
+/* Set the period */
+4 63 1 6 0 0x14
+
+/* Set the PWM frequency */
+4 63 1 8 0 255
+
+/* Save the motion settings */
+4 64 1
 
 /* Save the settings */
 4 19
