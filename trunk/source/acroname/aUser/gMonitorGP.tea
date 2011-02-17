@@ -19,6 +19,9 @@ void init() {
 	aPad_WriteInt(aSPAD_REPULSIVE_UX,0);
 	aPad_WriteInt(aSPAD_REPULSIVE_UY,0);
 	
+	/* Set other non zero defaults */
+	aPad_WriteInt(aSPAD_MOTION_RAMPACC_TIME, aACCELRATION_TIME);
+	
 }
 
 /* ************************************************************************** */
