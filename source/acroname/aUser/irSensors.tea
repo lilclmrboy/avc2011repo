@@ -109,7 +109,7 @@ void main(char callingProcID)
 			Ux = ((-1*magnitude * directionCosine)/10) + Ux;
 			Uy = ((-1*magnitude * directionSine)/10) + Uy;
 			
-#ifdef aDEBUG
+#ifdef aDEBUG_IRPOLLING
 			aPrint_String("(id Mag Ux Uy):");
 			aPrint_IntDec(id);
 			aPrint_String(",");

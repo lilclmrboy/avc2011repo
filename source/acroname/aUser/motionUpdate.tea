@@ -8,7 +8,7 @@
 #include <aPrint.tea>
 #endif
 
-#define aTIMESLICE 100
+#define aTIMESLICE 50
 
 
 /* ************************************************************************** */
@@ -27,19 +27,33 @@ void main(char callingProcID)
 	aPrint_String("motionUpdate launched.\n");
 #endif
 
+	// Enable velocity ramping for both motor channels
+	aMotion_SetRampFlags(aMOTOR_LEFT, 0x0001);
+	aMotion_SetRampFlags(aMOTOR_RIGHT, 0x0001);
+	
+	// Default is slower. Just a stab at this.
+	aMotion_SetRampAccStepTime(aMOTOR_LEFT, aACCELRATION_TIME);
+	aMotion_SetRampAccStepTime(aMOTOR_RIGHT, aACCELRATION_TIME);
+	
+	aMotion_RampEnable(0, 1);
+	aMotion_RampEnable(1, 1);
+
 	while(1) {
 	
-		if (1) {
+		// Check with the scratchpad to see if we should be doing some updates
+		if (aBus_ReadPadChar(aGP2_MODULE,aSPAD_MOTION_PROCESS_ENABLE)) {
 		
 			newRightSetpoint = aBus_ReadPadInt(aGP2_MODULE, aSPAD_MOTION_SETPOINT_RIGHT);
 			newLeftSetpoint = aBus_ReadPadInt(aGP2_MODULE, aSPAD_MOTION_SETPOINT_LEFT);
-			
+
+			//aMotion_SetRampAccStepTime(aMOTOR_LEFT,aBus_ReadPadInt(aGP2_MODULE, aSPAD_MOTION_RAMPACC_TIME));
+			//aMotion_SetRampAccStepTime(aMOTOR_RIGHT,aBus_ReadPadInt(aGP2_MODULE, aSPAD_MOTION_RAMPACC_TIME));
+				
 			if ((newRightSetpoint != oldRightSetpoint) 
 				|| (newLeftSetpoint != oldLeftSetpoint)) {
 				
-				// Send the setpoint values to the Moto
-				aMotion_SetSetpoint(aMOTOR_LEFT, newLeftSetpoint);
-				aMotion_SetSetpoint(aMOTOR_RIGHT, newRightSetpoint);
+				// Send the setpoint values to the Moto using velocity ramping
+				aMotion_SetRampVelocity(newLeftSetpoint, newRightSetpoint);
 				
 				// Store the old values
 				oldRightSetpoint = newRightSetpoint;
