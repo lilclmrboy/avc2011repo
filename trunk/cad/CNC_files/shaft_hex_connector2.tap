@@ -1,0 +1,46 @@
+N5 (File Name = shaft_hex_connector on Friday, February 18, 2011)
+N10 (Default Mill Post)
+N15  G91.1
+N20 G0  Z1.0000
+
+N25 M3 
+N30  X-8.000  Y-17.0000
+N35  Z0.1000 
+
+( *** Cut-out the Hex Head Shape *** )
+( 3/8" End mill ) 
+
+N36 G41 D04
+	
+N40 G1  Z-5.0000  F45.00
+
+N44  X-8.000  Y-17.0000
+N45  Y4.6180
+N46  X0.0000  Y9.2376
+N47  X8.0000  Y4.6180
+N48  Y-4.6180
+N49  X0.0000  Y-9.2376
+N50  X-15.7978 Y-0.1168
+
+N51 G40 (*** end cutter offset)
+N75 G0  Z1.0000 
+
+N80 G0  X-7.000  Y-16.000
+
+N81 G41 D04
+
+N82 G1  Z-5.0000  F45.00
+
+N83 X-7.000  Y-16.000
+N84 Y4.0415
+N85 X0.000  Y8.0829
+N86 X7.000  Y4.0415
+N87 Y-4.0415
+N88 X0.000  Y-8.0829
+N89 X-14.8230 Y0.4752
+N90 G40
+
+N125 G0  Z1.0000 
+N130 M5
+N135 M30
+

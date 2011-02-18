@@ -505,7 +505,7 @@ $TDINDWG
   9
 $TDUSRTIMER
  40
-2455611.563406574
+2455611.545132917
   9
 $USRTIMER
  70
@@ -545,7 +545,7 @@ $SPLINESEGS
   9
 $HANDSEED
   5
-1B0
+1AE
   9
 $SURFTAB1
  70
@@ -1115,7 +1115,7 @@ ObjectDBX Classes
  90
         0
  91
-        4
+        5
 280
      0
 281
@@ -1131,7 +1131,7 @@ ObjectDBX Classes
  90
      4095
  91
-        4
+        5
 280
      0
 281
@@ -1147,7 +1147,7 @@ ObjectDBX Classes
  90
      1153
  91
-        4
+        5
 280
      0
 281
@@ -1163,7 +1163,7 @@ ObjectDBX Classes
  90
      1153
  91
-        4
+        5
 280
      0
 281
@@ -1179,7 +1179,7 @@ ObjectDBX Classes
  90
         0
  91
-        4
+        5
 280
      0
 281
@@ -1227,7 +1227,7 @@ ObjectDBX Classes
  90
      4095
  91
-        4
+        5
 280
      0
 281
@@ -1243,7 +1243,7 @@ ISM
  90
         0
  91
-        4
+        5
 280
      0
 281
@@ -1259,7 +1259,7 @@ ObjectDBX Classes
  90
      1152
  91
-        4
+        5
 280
      0
 281
@@ -2108,6 +2108,12 @@ AcDbBlockTableRecord
 SW_NOTE_0
 340
 0
+102
+{BLKREFS
+331
+0
+102
+}
  70
      0
 280
@@ -2128,6 +2134,12 @@ AcDbBlockTableRecord
 SW_NOTE_1
 340
 0
+102
+{BLKREFS
+331
+0
+102
+}
  70
      0
 280
@@ -2151,7 +2163,7 @@ SW_CENTERMARKSYMBOL_0
 102
 {BLKREFS
 331
-0
+D6
 102
 }
  70
@@ -2177,7 +2189,7 @@ SW_CENTERMARKSYMBOL_1
 102
 {BLKREFS
 331
-0
+E2
 102
 }
  70
@@ -2203,7 +2215,7 @@ SW_CENTERMARKSYMBOL_2
 102
 {BLKREFS
 331
-0
+EE
 102
 }
  70
@@ -2229,7 +2241,7 @@ SW_CENTERMARKSYMBOL_3
 102
 {BLKREFS
 331
-0
+FA
 102
 }
  70
@@ -2255,7 +2267,7 @@ SW_CENTERMARKSYMBOL_4
 102
 {BLKREFS
 331
-0
+106
 102
 }
  70
@@ -2281,7 +2293,7 @@ SW_CENTERMARKSYMBOL_5
 102
 {BLKREFS
 331
-0
+112
 102
 }
  70
@@ -2307,7 +2319,7 @@ SW_CENTERMARKSYMBOL_6
 102
 {BLKREFS
 331
-0
+11E
 102
 }
  70
@@ -2333,7 +2345,7 @@ SW_CENTERMARKSYMBOL_7
 102
 {BLKREFS
 331
-0
+12A
 102
 }
  70
@@ -2359,7 +2371,7 @@ SW_CENTERMARKSYMBOL_8
 102
 {BLKREFS
 331
-0
+136
 102
 }
  70
@@ -2385,7 +2397,7 @@ SW_CENTERMARKSYMBOL_9
 102
 {BLKREFS
 331
-0
+142
 102
 }
  70
@@ -2411,7 +2423,7 @@ SW_CENTERMARKSYMBOL_10
 102
 {BLKREFS
 331
-0
+14E
 102
 }
  70
@@ -2437,7 +2449,7 @@ SW_CENTERMARKSYMBOL_11
 102
 {BLKREFS
 331
-0
+15A
 102
 }
  70
@@ -2463,7 +2475,7 @@ SW_CENTERMARKSYMBOL_12
 102
 {BLKREFS
 331
-0
+166
 102
 }
  70
@@ -2489,7 +2501,7 @@ SW_CENTERMARKSYMBOL_13
 102
 {BLKREFS
 331
-0
+172
 102
 }
  70
@@ -2515,7 +2527,7 @@ SW_CENTERMARKSYMBOL_14
 102
 {BLKREFS
 331
-0
+17E
 102
 }
  70
@@ -2541,7 +2553,7 @@ SW_CENTERMARKSYMBOL_15
 102
 {BLKREFS
 331
-0
+18A
 102
 }
  70
@@ -7965,6 +7977,838 @@ AcDbArc
  51
 75.00000000000006
   0
+CIRCLE
+  5
+BB
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+28.57499999999999
+ 20
+-12.5
+ 30
+0.0
+ 40
+1.564880275515009
+  0
+CIRCLE
+  5
+BC
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 40
+4.762500000000045
+  0
+CIRCLE
+  5
+BD
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+0.0
+ 20
+15.875
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+BE
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+28.57499999999999
+ 20
+23.8125
+ 30
+0.0
+ 40
+1.270000000000039
+  0
+CIRCLE
+  5
+BF
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+11.22532015129997
+ 20
+11.22532015129997
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+C0
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+11.22532015129997
+ 20
+-11.22532015130002
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+C1
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+0.0
+ 20
+-15.875
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+C2
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+-11.22532015130002
+ 20
+-11.22532015130002
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+C3
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+-15.875
+ 20
+0.0
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+C4
+330
+1F
+100
+AcDbEntity
+  8
+Holes
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+-11.22532015130002
+ 20
+11.22532015129997
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+C5
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+45.41298022699999
+ 20
+16.837980227
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+C6
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+52.38749999999999
+ 20
+0.0
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+C7
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+45.41298022699999
+ 20
+-16.837980227
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+C8
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+28.57499999999999
+ 20
+-23.8125
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+C9
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+11.73701977299999
+ 20
+-16.837980227
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+CIRCLE
+  5
+CA
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+    15
+100
+AcDbCircle
+ 10
+11.73701977299999
+ 20
+16.837980227
+ 30
+0.0
+ 40
+1.269999999999982
+  0
+INSERT
+  5
+D6
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_0
+ 10
+28.57499999999999
+ 20
+-12.5
+ 30
+0.0
+  0
+INSERT
+  5
+E2
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_1
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  0
+INSERT
+  5
+EE
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_2
+ 10
+0.0
+ 20
+15.875
+ 30
+0.0
+  0
+INSERT
+  5
+FA
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_3
+ 10
+28.57499999999999
+ 20
+23.8125
+ 30
+0.0
+  0
+INSERT
+  5
+106
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_4
+ 10
+11.22532015129997
+ 20
+11.22532015129997
+ 30
+0.0
+  0
+INSERT
+  5
+112
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_5
+ 10
+11.22532015129997
+ 20
+-11.22532015130002
+ 30
+0.0
+  0
+INSERT
+  5
+11E
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_6
+ 10
+0.0
+ 20
+-15.875
+ 30
+0.0
+  0
+INSERT
+  5
+12A
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_7
+ 10
+-11.22532015130002
+ 20
+-11.22532015130002
+ 30
+0.0
+  0
+INSERT
+  5
+136
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_8
+ 10
+-15.875
+ 20
+0.0
+ 30
+0.0
+  0
+INSERT
+  5
+142
+330
+1F
+100
+AcDbEntity
+  8
+Holes
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_9
+ 10
+-11.22532015130002
+ 20
+11.22532015129997
+ 30
+0.0
+  0
+INSERT
+  5
+14E
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_10
+ 10
+45.41298022699999
+ 20
+16.837980227
+ 30
+0.0
+  0
+INSERT
+  5
+15A
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_11
+ 10
+52.38749999999999
+ 20
+0.0
+ 30
+0.0
+  0
+INSERT
+  5
+166
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_12
+ 10
+45.41298022699999
+ 20
+-16.837980227
+ 30
+0.0
+  0
+INSERT
+  5
+172
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_13
+ 10
+28.57499999999999
+ 20
+-23.8125
+ 30
+0.0
+  0
+INSERT
+  5
+17E
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_14
+ 10
+11.73701977299999
+ 20
+-16.837980227
+ 30
+0.0
+  0
+INSERT
+  5
+18A
+330
+1F
+100
+AcDbEntity
+  8
+0
+  6
+Continuous
+ 62
+     7
+370
+     0
+100
+AcDbBlockReference
+  2
+SW_CENTERMARKSYMBOL_15
+ 10
+11.73701977299999
+ 20
+16.837980227
+ 30
+0.0
+  0
 ENDSEC
   0
 SECTION
@@ -9765,7 +10609,7 @@ TABLESTYLE
 102
 {ACAD_XDICTIONARY
 360
-1AE
+1A8
 102
 }
 330
@@ -10437,7 +11281,7 @@ Color_5
   0
 DICTIONARY
   5
-1AE
+1A8
 330
 18E
 100
@@ -10449,19 +11293,19 @@ AcDbDictionary
   3
 ACAD_ROUNDTRIP_2008_TABLESTYLE_CELLSTYLEMAP
 360
-1AF
+1A9
   0
 CELLSTYLEMAP
   5
-1AF
+1A9
 102
 {ACAD_REACTORS
 330
-1AE
+1A8
 102
 }
 330
-1AE
+1A8
 100
 AcDbCellStyleMap
  90
