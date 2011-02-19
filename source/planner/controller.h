@@ -7,10 +7,18 @@
 
 #include "motModule.h"
 #include "locModule.h"
+#include "planner.h"
 #include "logger.h"
 #include "aCmd.tea"
 #include "aStem.h"
 #include "avc2011Defs.tea"
+#include "avc2011Structs.h"
+
+#ifdef aDEBUG_H
+	#define aDEBUG_PRINT(arg) printf(arg);fflush(stdout)
+#else 
+	#define aDEBUG_PRINT(arg)
+#endif
 
 class avcController
 {
@@ -25,7 +33,8 @@ public:
 
 private:
 	aSettingFileRef m_settings;
-	//avcMotion m_mot;
+	avcMotion m_mot;
+	avcPlanner m_planner;
 	//avcPosition m_pos;
 	//avcLogger m_logger; 
 	acpStem m_stem;
