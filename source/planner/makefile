@@ -1,8 +1,9 @@
-# examples/aGarciaKey makefile
-#
-# This builds the aGarciaKey demonstration program and places it in the
-# ../../acroname/aBinary directory.  This will only build if the examples
-# directory this file lives in is a sibling of the acroname Garcia download.
+# This builds the MotionPlanner program and places it in the
+# ../../acroname/aBinary directory.  This will only build if the planner
+# directory this file lives in is a sibling of the acroname download containing
+# among other things the aInclude, aBinary, an aUser directory. This is the host
+# module for an autonomous robotic platform which includes Tea files and 
+# definitions.
 #
 # When we set up the build environment below, some things warrant description:
 #
@@ -18,7 +19,7 @@
 #      an LD_LIBRARY_PATH variable, but both of these alternate approaches
 #      will still work.
 #
-#   4. We link against the pthread, X11, and OpenGL libraries as well as 
+#   4. We link against the crypto an ssl libraries as well as 
 #      4 in the acroname download (aUtil, aIO, aStem, and aUI).
 
 PREFIX = ../
@@ -45,11 +46,15 @@ app : $(OBJ) $(BIN)/$(APP)
 $(OBJ) : 
 	mkdir $(OBJ)
 
-$(BIN)/MotionPlanner : $(OBJ)/MotionPlanner.o
+$(BIN)/MotionPlanner : $(OBJ)/MotionPlanner.o $(OBJ)/controller.o
 	$(CC) -g $(CFLAGS) $(LFLAGS) $^ $(LIBS) -o $@
 
 $(OBJ)/MotionPlanner.o : main.cpp
 	$(CC) -c $(CFLAGS) $< -o $@
+
+$(OBJ)/%.o : %.cpp %.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
 
 .PHONY : clean
 clean :
