@@ -22,10 +22,11 @@
 #   4. We link against the crypto an ssl libraries as well as 
 #      4 in the acroname download (aUtil, aIO, aStem, and aUI).
 
+
 PREFIX = ../
 APP = MotionPlanner
 CC = g++
-CFLAGS = -DaUNIX \
+CFLAGS = -DaUNIX -DaDEBUG_H\
 	 -I$(PREFIX)acroname/aInclude \
 	 -I$(PREFIX)acroname/aSource \
 	 -I$(PREFIX)acroname/aSystem \
@@ -40,13 +41,19 @@ LIBS = -lpthread -lcrypto -lssl \
 
 OBJ = unix_$(APP)_Data
 
+OBJECTS = $(OBJ)/controller.o \
+	  $(OBJ)/planner.o \
+	  $(OBJ)/motModule.o 
+
+
+
 .PHONY : app
 app : $(OBJ) $(BIN)/$(APP)
 
 $(OBJ) : 
 	mkdir $(OBJ)
 
-$(BIN)/MotionPlanner : $(OBJ)/MotionPlanner.o $(OBJ)/controller.o
+$(BIN)/MotionPlanner : $(OBJ)/MotionPlanner.o $(OBJECTS)
 	$(CC) -g $(CFLAGS) $(LFLAGS) $^ $(LIBS) -o $@
 
 $(OBJ)/MotionPlanner.o : main.cpp
