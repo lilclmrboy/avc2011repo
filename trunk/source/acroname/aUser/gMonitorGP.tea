@@ -3,49 +3,6 @@
 
 #include "avc2011.tea"
 
-#define aSLICE 500
-
-
-/* ************************************************************************** */
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Writes a char value to a scratchpad location on a remote module.
- */
-/*
-void aBus_WritePadChar(char cModule, char cIndex, char cData)
-{
-  asm
-  {
-    pushsb 	5
-    pushlb 	3
-    pushlb 	cmdPAD_IO
-    pushsb 	7
-    pushsb	7
-    pushlb 	5
-    popcmd
-  }
-
-} 
-
-void aMulti_Spawn(char fileID, char ProcID)
-{
-  asm
-  {
-    // run fileID in VM[ProcID] with calling ProcID as input
-    pushmb	aPortAddress	// address of self 
-    pushlb	5
-    pushlb	cmdVM_RUN
-    pushlb	7		// RUNCTRL
-    pushsb	8		// FileID 
-    pushsb	8		// ProcID 
-    pushmb	aPortProcID	// calling ProcID
-    pushlb	7
-    popcmd
-    pushlb	20		// let process start
-    popbm	aPortVMTimer
-  }
-}
-*/
-
 /* ************************************************************************** */
 /* on entry, the stack looks like this:
  *  0    5    cModule
@@ -95,16 +52,17 @@ void aBus_Multi_Kill(char cModule, char ProcID)
 void init() {
 
 	/* Configure scratchpad values */
-	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE,0);
-	aPad_WriteChar(aSPAD_GPMONITOR_SHUTDOWN,0);
-	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MOTION_PROCESS_ENABLE,0);
+	aPad_WriteChar(aSPAD_GP2_IR_PROCESS_ENABLE,0);
+	aPad_WriteChar(aSPAD_GP2_GPMONITOR_SHUTDOWN,0);
+	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,0);
+	aPad_WriteChar(aSPAD_GP2_SONAR_PROCESS_ENABLE,0);
 	
 	/* Zero out other placehoder readings */
-	aPad_WriteInt(aSPAD_REPULSIVE_UX,0);
-	aPad_WriteInt(aSPAD_REPULSIVE_UY,0);
+	aPad_WriteInt(aSPAD_GP2_REPULSIVE_UX,0);
+	aPad_WriteInt(aSPAD_GP2_REPULSIVE_UY,0);
 	
 	/* Set other non zero defaults */
-	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MOTION_RAMPACC_TIME, aACCELRATION_TIME);
+	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RAMPACC_TIME, aACCELRATION_TIME);
 	
 }
 
@@ -117,23 +75,33 @@ void shutdown() {
 #endif
 
 	/* Disable IR sensor polling */
-	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE, 0);
+	aPad_WriteChar(aSPAD_GP2_IR_PROCESS_ENABLE, 0);
+	
+	/* Disable sonar sensor polling */
+	aPad_WriteChar(aSPAD_GP2_SONAR_PROCESS_ENABLE, 0);
 
 	/* Disable motion updating thread */
-	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MOTION_PROCESS_ENABLE,0);
+	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,0);
 
 #ifdef aDEBUG	
 	aPrint_String("irSensors shutdown.\n");
 	aCore_Sleep(500);
 #endif
 	/* Clean up billy! */
-	aMulti_Kill(aIR_POLLING_PROCESS);
+	aMulti_Kill(aIR_POLLING_GP2_PROCESS);
+	
+#ifdef aDEBUG	
+	aPrint_String("sonarSensors shutdown.\n");
+	aCore_Sleep(500);
+#endif
+	/* Clean up billy! */
+	aMulti_Kill(aSONAR_POLLING_GP2_PROCESS);	
 
 #ifdef aDEBUG	
 	aPrint_String("motionUpdate shutdown.\n");
 	aCore_Sleep(2000);
 #endif	
-	aBus_Multi_Kill(aMOTO_MODULE, aMOTION_UPDATING_PROCESS);
+	aBus_Multi_Kill(aMOTO_MODULE, aMOTION_UPDATING_MO_PROCESS);
 	
 	/* stall for a second */
   aCore_Sleep(1000);
@@ -155,20 +123,20 @@ void main()
 #endif
 
 	/* Spawn the IR polling thread */
-	aMulti_Spawn(aIR_POLLING_SLOT, aIR_POLLING_PROCESS);
+	aMulti_Spawn(aIR_POLLING_GP2_SLOT, aIR_POLLING_GP2_PROCESS);
 	
 	/* Spawn the motion updating thread */
 	// Write a aBus_Multi_Spawn function. Add this to the aBus library
-	aBus_Multi_Spawn(aMOTO_MODULE, aMOTION_UPDATING_SLOT, aMOTION_UPDATING_PROCESS);
+	aBus_Multi_Spawn(aMOTO_MODULE, aMOTION_UPDATING_MO_SLOT, aMOTION_UPDATING_MO_PROCESS);
 	
 	/* Enable IR sensor polling */
-	aPad_WriteChar(aSPAD_IR_PROCESS_ENABLE, 1);
+	aPad_WriteChar(aSPAD_GP2_IR_PROCESS_ENABLE, 1);
 	
 	/* Enable motion updating */
-	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MOTION_PROCESS_ENABLE,1);
+	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,1);
 	
 	// Do monitor relevant things. Bookkeeping, coordinating, etc. 
-	while (!aPad_ReadChar(aSPAD_GPMONITOR_SHUTDOWN)) {
+	while (!aPad_ReadChar(aSPAD_GP2_GPMONITOR_SHUTDOWN)) {
 	
 		/* stall for a timeslice */
 		aCore_Sleep(aSLICE);

@@ -4,22 +4,21 @@
 #include "avc2011.tea"
 #include <aA2D.tea>
 
-#define aTIMESLICE 500
-#define SENSOR_MIN_THRESHOLD 20
+#define IR_MIN_THRESHOLD 20
 
 // The 0 degree angle is the straight ahead reading for the robot
 // Integer scaled cosine and sine values
 // for example, cosine(pi/4) * 10 = 70
 
 // At a 30 degree angle from the straight ahead direction 
-#define SENSOR_LEFT_ID 0
-#define SENSOR_LEFT_ANGLE_COSINE 86
-#define SENSOR_LEFT_ANGLE_SINE 50
+#define IR_LEFT_ID 0
+#define IR_LEFT_ANGLE_COSINE 86
+#define IR_LEFT_ANGLE_SINE 50
 
 // At a -30 (aka 270) degree angle from the straight ahead direction 
-#define SENSOR_RIGHT_ID 1
-#define SENSOR_RIGHT_ANGLE_COSINE 86
-#define SENSOR_RIGHT_ANGLE_SINE -50
+#define IR_RIGHT_ID 1
+#define IR_RIGHT_ANGLE_COSINE 86
+#define IR_RIGHT_ANGLE_SINE -50
 
 /* ************************************************************************** */
 /* Computes a scalar that is equal to the distance
@@ -32,7 +31,7 @@ int gp2dxx_magnitude(char index) {
 	reading = aA2D_ReadInt(index);
 	
 	// Read the result and scale it down
-	if (reading < SENSOR_MIN_THRESHOLD)
+	if (reading < IR_MIN_THRESHOLD)
 		result = 0;
 	else
 		result = reading >> 2;
@@ -64,7 +63,7 @@ void main(char callingProcID)
 		// 2.) Calculate the X and Y force component
 		// 3.) Aggregate all the X and Y forces
 		// 4.) Write X and Y result to scratchpad
-		if (aPad_ReadChar(aSPAD_IR_PROCESS_ENABLE)) {
+		if (aPad_ReadChar(aSPAD_GP2_IR_PROCESS_ENABLE)) {
 		
 			// Walk through the sensors. we set the id here so we can 
 			// scale the code very easily.
@@ -72,21 +71,22 @@ void main(char callingProcID)
 			switch (id) {
 			
 				case 0: 
-					id = SENSOR_LEFT_ID;
-					directionCosine = SENSOR_LEFT_ANGLE_COSINE;
-					directionSine = SENSOR_LEFT_ANGLE_SINE;
+					id = IR_LEFT_ID;
+					directionCosine = IR_LEFT_ANGLE_COSINE;
+					directionSine = IR_LEFT_ANGLE_SINE;
 					break;
 					
 				case 1: 
-					id = SENSOR_RIGHT_ID;
-					directionCosine = SENSOR_RIGHT_ANGLE_COSINE;
-					directionSine = SENSOR_RIGHT_ANGLE_SINE;
+					id = IR_RIGHT_ID;
+					directionCosine = IR_RIGHT_ANGLE_COSINE;
+					directionSine = IR_RIGHT_ANGLE_SINE;
 					break;	
 			
 			
 				default:
-					aPad_WriteInt(aSPAD_REPULSIVE_UX, Ux);
-					aPad_WriteInt(aSPAD_REPULSIVE_UY, Uy);
+					// Write result to the scratchpad
+					aPad_WriteInt(aSPAD_GP2_REPULSIVE_UX, Ux);
+					aPad_WriteInt(aSPAD_GP2_REPULSIVE_UY, Uy);
 					
 					// Set the Ux and Uy values back to zero
 					Ux = 0;
@@ -98,7 +98,6 @@ void main(char callingProcID)
 					break;
 			}
 		
-
 			// Get the reading magnitude value 
 			magnitude = gp2dxx_magnitude(id);
 			
@@ -128,7 +127,7 @@ void main(char callingProcID)
 		} // end if reading values
 		
 		// We don't want to swamp the processor
-		aCore_Sleep(aTIMESLICE);
+		aCore_Sleep(aSLICE);
 		
 	} // end of while loop
 	
