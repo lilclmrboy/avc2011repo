@@ -22,6 +22,12 @@
  
  <CUP>
   <MODULE>2</MODULE>
+  <SLOT>1</SLOT>
+  <NAME>"sonarSensors.cup"</NAME>
+ </CUP> 
+ 
+ <CUP>
+  <MODULE>2</MODULE>
   <SLOT>11</SLOT>
   <NAME>"gMonitorGP.cup"</NAME>
  </CUP>

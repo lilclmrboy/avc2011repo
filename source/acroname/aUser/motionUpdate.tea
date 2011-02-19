@@ -44,10 +44,10 @@ void main(char callingProcID)
 	while(1) {
 	
 		// Check with the scratchpad to see if we should be doing some updates
-		if (aPad_ReadInt(aSPAD_MOTION_PROCESS_ENABLE)) {
+		if (aPad_ReadInt(aSPAD_MO_MOTION_PROCESS_ENABLE)) {
 		
-			newRightSetpoint = aPad_ReadInt(aSPAD_MOTION_SETPOINT_RIGHT);
-			newLeftSetpoint = aPad_ReadInt(aSPAD_MOTION_SETPOINT_LEFT);
+			newRightSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_RIGHT);
+			newLeftSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_LEFT);
 
 			aMotion_SetRampAccStepTime(aMOTOR_LEFT, accTimeLeft);
 			aMotion_SetRampAccStepTime(aMOTOR_RIGHT, accTimeRight);

@@ -4,18 +4,19 @@
 #include "avc2011.tea"
 #include <aSRF08.tea>
 
-#define aTIMESLICE 500
-#define SENSOR_MIN_THRESHOLD 20
+#define SONAR_MIN_THRESHOLD 20
 
 // The 0 degree angle is the straight ahead reading for the robot
 // Integer scaled cosine and sine values
 // for example, cosine(pi/4) * 10 = 70
 
 // At a 0 degree angle from the straight ahead direction 
-#define SENSOR_LEFT_ID 0
-#define SENSOR_LEFT_ADDR (char) 0xE2
-#define SENSOR_LEFT_ANGLE_COSINE 100
-#define SENSOR_LEFT_ANGLE_SINE 0
+#define SONAR_LEFT_ID 0
+#define SONAR_LEFT_ADDR (char) 0xE2
+#define SONAR_LEFT_ANGLE_COSINE 100
+#define SONAR_LEFT_ANGLE_SINE 0
+
+#define aSRF0X_MAX_DISTANCE_CM 50
 
 
 /* ************************************************************************** */
@@ -42,7 +43,7 @@ void main(char callingProcID)
 		// 2.) Calculate the X and Y force component
 		// 3.) Aggregate all the X and Y forces
 		// 4.) Write X and Y result to scratchpad
-		if (aPad_ReadChar(aSPAD_SONAR_PROCESS_ENABLE)) {
+		if (aPad_ReadChar(aSPAD_GP2_SONAR_PROCESS_ENABLE)) {
 		
 			// Walk through the sensors. we set the id here so we can 
 			// scale the code very easily.
@@ -50,15 +51,15 @@ void main(char callingProcID)
 			switch (id) {
 			
 				case 0: 
-					id = SENSOR_LEFT_ID;
-					directionCosine = SENSOR_LEFT_ANGLE_COSINE;
-					directionSine = SENSOR_LEFT_ANGLE_SINE;
-					addr = SENSOR_LEFT_ADDR;
+					id = SONAR_LEFT_ID;
+					directionCosine = SONAR_LEFT_ANGLE_COSINE;
+					directionSine = SONAR_LEFT_ANGLE_SINE;
+					addr = SONAR_LEFT_ADDR;
 					break;
 			
 				default:
-					aPad_WriteInt(aSPAD_SONAR_REPULSIVE_UX, Ux);
-					aPad_WriteInt(aSPAD_SONAR_REPULSIVE_UY, Uy);
+					aPad_WriteInt(aSPAD_GP2_SONAR_REPULSIVE_UX, Ux);
+					aPad_WriteInt(aSPAD_GP2_SONAR_REPULSIVE_UY, Uy);
 					
 					// Set the Ux and Uy values back to zero
 					Ux = 0;
@@ -70,8 +71,9 @@ void main(char callingProcID)
 					break;
 			}
 		
-			// Get the reading magnitude value 
-			magnitude = aSRF08_RangeInt(addr, aSRF08_CM);
+			// Get the reading magnitude value
+			// y = -x + b 
+			magnitude = -1*aSRF08_RangeInt(addr, aSRF08_CM) + aSRF0X_MAX_DISTANCE_CM;
 			
 			// Since we know that fixed positions of the sensors, we can just
 			// hard code the resulting trig math fancyness. 
@@ -99,7 +101,7 @@ void main(char callingProcID)
 		} // end if reading values
 		
 		// We don't want to swamp the processor
-		aCore_Sleep(aTIMESLICE);
+		aCore_Sleep(aSLICE);
 		
 	} // end of while loop
 	
