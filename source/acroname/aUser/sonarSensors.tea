@@ -16,7 +16,7 @@
 #define SONAR_LEFT_ANGLE_COSINE 100
 #define SONAR_LEFT_ANGLE_SINE 0
 
-#define aSRF0X_MAX_DISTANCE_CM 50
+#define aSRF0X_MAX_DISTANCE_CM 60
 
 
 /* ************************************************************************** */
@@ -71,9 +71,17 @@ void main(char callingProcID)
 					break;
 			}
 		
-			// Get the reading magnitude value
-			// y = -x + b 
-			magnitude = -1*aSRF08_RangeInt(addr, aSRF08_CM) + aSRF0X_MAX_DISTANCE_CM;
+			// limit ir sensor reading to ~60cm (aSRF0X_MAX_DISTANCE_CM) and provide
+			// the negation of the distance to the force calculation
+			magnitude = aSRF08_RangeInt(addr, aSRF08_CM);
+			if(magnitude > aSRF0X_MAX_DISTANCE_CM) {
+				magnitude = 0;
+			}
+			else {
+				// Calc the reading magnitude value
+				// y = -x + b 
+				magnitude = -1*aSRF08_RangeInt(addr, aSRF08_CM) + aSRF0X_MAX_DISTANCE_CM;
+			}
 			
 			// Since we know that fixed positions of the sensors, we can just
 			// hard code the resulting trig math fancyness. 
