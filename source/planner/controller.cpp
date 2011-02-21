@@ -69,13 +69,13 @@ avcController::run(void) {
     
       		avcForceVector ir = {0, 0};
       
-      		ir.x = m_stem.PAD_IO(aGP2_MODULE, aSPAD_REPULSIVE_UX);
+      		ir.x = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX);
       		ir.x = ir.x << 8;
-      		ir.x += m_stem.PAD_IO(aGP2_MODULE, aSPAD_REPULSIVE_UX+1);
+      		ir.x += m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
       
-      		ir.y = m_stem.PAD_IO(aGP2_MODULE, aSPAD_REPULSIVE_UY);
+      		ir.y = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY);
       		ir.y = ir.y << 8;
-      		ir.y += m_stem.PAD_IO(aGP2_MODULE, aSPAD_REPULSIVE_UY+1);
+      		ir.y += m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
 		
 		int l,r;
 		m_mot.getVelocity(l,r, &ir);
