@@ -8,5 +8,6 @@ avcPlanner::~avcPlanner(void) {}
 
 /////////////////////////////////////////////////////////////////////////////
 
-void
-avcPlanner::getMotivation(void) {}
+avcForceVector 
+avcPlanner::getMotivation(const avcStateVector pos,
+			  const avcForceVector repulse) {}
