@@ -15,7 +15,13 @@ public:
 	avcMotion(void) {}
 	~avcMotion(void){}
 	
-	avcControlUpdate updateControl(const avcForceVector& potential);
+	aErr init(acpStem *pStem);
+	
+	aErr updateControl(const avcForceVector& potential, 
+																 const double radian);
+	
+private: 
+	acpStem *m_pStem;
 
 };
 

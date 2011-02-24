@@ -31,6 +31,9 @@ avcController::init(const int argc, const char* argv[]) {
       		throw acpException(e, "creating settings");
     
     aArguments_Separate(m_ioRef, m_settings, NULL, argc, argv);
+	
+	
+	// Don't forget to init the motModule :)
 
 }
 
@@ -79,7 +82,7 @@ avcController::run(void) {
       		ir.y |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
 		
 		avcControlUpdate rl;
-		rl = m_mot.updateControl(ir);
+		rl = m_mot.updateControl(ir, 0);
       		 
 	   	 // sleep a bit so we don't wail on the processor
 	    	aIO_MSSleep(m_ioRef, 100, NULL);
