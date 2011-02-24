@@ -63,10 +63,13 @@ avcController::run(void) {
 
 	//We have a valid stem connection.
 	aDEBUG_PRINT("done\n");
-    	// Now, just loop getting values from the scratchpad.
-    	aDEBUG_PRINT("Starting Pad Read\n");
 	while (1 && timeout < aSTEM_CONN_TIMEOUT) {
-    
+		
+   		//First do the localization step. Lets get relevant GPS
+   		//info from the unit, and compass heading. Along with 
+   		//the previous state and control vector. 
+		
+ 
       		avcForceVector ir = {0, 0};
       
       		ir.x = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX);
