@@ -16,6 +16,7 @@ public:
 
 	//The main operation, we'll take some inputs, and product a unit
 	//vector output.
-	void getMotivation(void);
+	avcForceVector getMotivation(const avcStateVector pos, 	
+				     const avcForceVector repulse);
 
 };
