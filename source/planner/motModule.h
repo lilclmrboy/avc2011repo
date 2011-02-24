@@ -14,7 +14,7 @@ public:
 	// The primary. This will take a variable number of input vectores,
 	// sum them, and output setpoints for the vehicle's drive untis.
 	// IMPORTANT: The terminal variable of this function must be a NULL.
-	void getVelocity(int& lV, int& rV, ... );
+	void getVelocity(int& lV, int& rV, int ct, ... );
 
 };
 

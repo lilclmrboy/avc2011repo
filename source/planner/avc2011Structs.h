@@ -4,6 +4,6 @@
 // component vectors, state vectors, and the like.
 //
 typedef struct avcForceVector {
-  int x;
-  int y;
+  short x;
+  short y;
 } avcForceVector;
