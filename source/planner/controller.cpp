@@ -64,14 +64,12 @@ avcController::run(void) {
 	//We have a valid stem connection.
 	aDEBUG_PRINT("done\n");
 	while (1 && timeout < aSTEM_CONN_TIMEOUT) {
-		
    		//First do the localization step. Lets get relevant GPS
    		//info from the unit, and compass heading. Along with 
    		//the previous state and control vector. 
 		
- 
       		avcForceVector ir = {0, 0};
-      
+      		
       		ir.x = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX);
       		ir.x = ir.x << 8;
       		ir.x |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
@@ -80,8 +78,8 @@ avcController::run(void) {
       		ir.y = ir.y << 8;
       		ir.y |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
 		
-		int l,r;
-		m_mot.getVelocity(l,r, 1, &ir);
+		avcControlUpdate rl;
+		rl = m_mot.updateControl(ir);
       		 
 	   	 // sleep a bit so we don't wail on the processor
 	    	aIO_MSSleep(m_ioRef, 100, NULL);

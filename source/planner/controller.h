@@ -40,8 +40,8 @@
 // 	Setpoints for our left and right motors. According to the equations in 
 // 	the motion control paper.
 
-#ifndef _controller_h_
-#define _controller_h_
+#ifndef _controller_H_
+#define _controller_H_
 
 #include "motModule.h"
 #include "locModule.h"
@@ -82,5 +82,5 @@ private:
 	
 };
 
-#endif //_controller_h_
+#endif //_controller_H_
 

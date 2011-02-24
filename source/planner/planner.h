@@ -7,6 +7,7 @@
 // Its inputs are the current robot position, repulsive vector, 
 // and the overall goal. It outputs the atractive force vector based 
 //on these inputs.
+#include "avc2011Structs.h"
 
 class avcPlanner {
 
