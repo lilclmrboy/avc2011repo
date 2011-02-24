@@ -36,7 +36,7 @@ LFLAGS = -Wl,-rpath,.
 SRC = $(PREFIX)acroname/aSource
 BIN = $(PREFIX)acroname/aBinary
 LIBS = -lpthread -lcrypto -lssl \
-       -L/lib \
+       -L/lib -L/usr/lib\
        -L$(PREFIX)acroname/aBinary -laUtil -laIO -laMath -laStem
 
 OBJ = unix_$(APP)_Data

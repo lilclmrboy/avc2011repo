@@ -56,7 +56,7 @@ avcController::run(void) {
     	
 	//If we timed out we should report an error condition.
 	//The error was a timeout, so not so critical return 1.
-	if (timeout = aSTEM_CONN_TIMEOUT) {
+	if (timeout == aSTEM_CONN_TIMEOUT) {
 		aDEBUG_PRINT("\n");
 		return 1;
 	}
@@ -71,14 +71,14 @@ avcController::run(void) {
       
       		ir.x = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX);
       		ir.x = ir.x << 8;
-      		ir.x += m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
+      		ir.x |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
       
       		ir.y = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY);
       		ir.y = ir.y << 8;
-      		ir.y += m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
+      		ir.y |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
 		
 		int l,r;
-		m_mot.getVelocity(l,r, &ir);
+		m_mot.getVelocity(l,r, 1, &ir);
       		 
 	   	 // sleep a bit so we don't wail on the processor
 	    	aIO_MSSleep(m_ioRef, 100, NULL);
