@@ -11,8 +11,8 @@
 using std::vector;
 
 typedef struct avcForceVector {
-  short x;
-  short y;
+  double x;
+  double y;
 } avcForceVector;
 
 typedef struct avcStateVector {
@@ -20,10 +20,5 @@ typedef struct avcStateVector {
   double y;
   double h; //heading
 } avcStateVector;
-
-typedef struct avcControlUpdate {
-  int setpointr;
-  int setpointl;
-} avcControlUpdate;
 
 #endif //_avc2011Structs_H_

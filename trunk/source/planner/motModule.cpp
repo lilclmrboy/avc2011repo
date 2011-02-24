@@ -1,8 +1,46 @@
 #include "motModule.h"
 
-avcControlUpdate 
-avcMotion::updateControl(const avcForceVector& potential) {
+///////////////////////////////////////////////////////////////////////////
+
+avcMotion::avcMotion() :
+  m_stem(NULL)
+{
+}
+
+///////////////////////////////////////////////////////////////////////////
+aErr
+avcMotion::init(acpStem *pStem) {
+	
+	m_pStem = pStem;
+	
+	return aErrNone;
+	
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+aErr
+avcMotion::updateControl(const avcForceVector& potential,
+												 const double radian) {
 
 	printf("Received Force Vector (x,y): %d, %d \n",
 		potential.x, potential.y);
+	
+	return aErrNone;
+	
 }
+
+
+///////////////////////////////////////////////////////////////////////////
+
+#ifdef aDEBUG_MOTMODULE
+
+int main()
+{
+	
+	
+	return 0;
+	
+}
+
+#endif
