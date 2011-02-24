@@ -1,4 +1,4 @@
-# This builds the MotionPlanner program and places it in the
+# This builds the motModuleTest program and places it in the
 # ../../acroname/aBinary directory.  This will only build if the planner
 # directory this file lives in is a sibling of the acroname download containing
 # among other things the aInclude, aBinary, an aUser directory. This is the host
@@ -24,20 +24,23 @@
 
 
 PREFIX = ../
-APP = MotionPlanner
+APP = motModuleTest
 CC = g++
-CFLAGS = -DaUNIX -DaDEBUG_H\
+CFLAGS = -DaMACX -DaUNIX -DaDEBUG_H -DaDEBUG_MOTMODULE\
 	 -I$(PREFIX)acroname/aInclude \
 	 -I$(PREFIX)acroname/aSource \
 	 -I$(PREFIX)acroname/aSystem \
 	 -I$(PREFIX)acroname/aUser
-CFLAGS += -m32 -Werror
+CFLAGS += -m32 -Wall -Werror
 LFLAGS = -Wl,-rpath,.
 SRC = $(PREFIX)acroname/aSource
 BIN = $(PREFIX)acroname/aBinary
-LIBS = -lpthread -lcrypto -lssl \
-       -L/lib -L/usr/lib\
-       -L$(PREFIX)acroname/aBinary -laUtil -laIO -laMath -laStem
+LIBS = -lpthread -lcrypto -lssl
+FRAMEWORKS = -F$(PREFIX)acroname/aBinary \
+			 -framework aUtil \
+			 -framework aIO \
+			 -framework aMath \
+			 -framework aStem
 
 OBJ = unix_$(APP)_Data
 
@@ -45,21 +48,16 @@ OBJECTS = $(OBJ)/controller.o \
 	  $(OBJ)/planner.o \
 	  $(OBJ)/motModule.o 
 
-
-
 .PHONY : app
 app : $(OBJ) $(BIN)/$(APP)
 
 $(OBJ) : 
 	mkdir $(OBJ)
 
-$(BIN)/MotionPlanner : $(OBJ)/MotionPlanner.o $(OBJECTS)
-	$(CC) -g $(CFLAGS) $(LFLAGS) $^ $(LIBS) -o $@
+$(BIN)/motModuleTest : $(OBJ)/motModule.o
+	$(CC) -g $(CFLAGS) $(LFLAGS) $^ $(LIBS) $(FRAMEWORKS) -o $@
 
-$(OBJ)/MotionPlanner.o : main.cpp
-	$(CC) -c $(CFLAGS) $< -o $@
-
-$(OBJ)/%.o : %.cpp %.h
+$(OBJ)/motModule.o : motModule.cpp
 	$(CC) -c $(CFLAGS) $< -o $@
 
 .PHONY : clean
