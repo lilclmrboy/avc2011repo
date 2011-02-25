@@ -2,6 +2,8 @@
 // Filename: motModule.cpp
 
 #include "motModule.h"
+#include "avc2011Defs.tea"
+#include <math.h>
 
 #ifdef aDEBUG_MOTMODULE
 #ifdef aDEBUG_H
@@ -10,6 +12,8 @@
 #define aDEBUG_PRINT(arg)
 #endif
 #endif
+
+#define sgn(x) (x > 0.0) ? 1.0 : ((x < 0.0) ? -1.0 : 0.0)
 
 ///////////////////////////////////////////////////////////////////////////
 avcMotion::avcMotion() :
@@ -33,37 +37,58 @@ avcMotion::init(acpStem *pStem) {
 // Given a new goal vector, update the each motor setpoint
 
 aErr
-avcMotion::updateControl(const avcForceVector& potential,
-												 const double radian) 
+avcMotion::updateControl(const avcForceVector& potential) 
 {
-	aErr e = aErrNone;
+	double t = 0.0;
+	double r = 0.0;
+	double v[2] = {0.0, 0.0};
 	
-#ifdef aDEBUG_H	
 	// Make sure you other hackers initialized this first
 	if (!m_pStem) {
-		printf("avcMotion::updateControl failed. acpStem is NULL\n"
-								 "  Call avcMotion::init(acpStem *)\n");
+		aDEBUG_PRINT("avcMotion::updateControl failed. acpStem is NULL\n"
+								 " \tCall avcMotion::init(acpStem *)\n");
 		return aErrInitialization;
 	}
-	
+
 	// Boundary check the input force vectors
 	if (potential.x > 1.0 || potential.x < -1.0) {
-		printf("avcMotion::updateControl failed. "
-					 "avcForceVector.x is out of range\n");
+		aDEBUG_PRINT("avcMotion::updateControl failed.\n"
+					 "\tavcForceVector.x is out of range\n");
 		return aErrRange;
 	}
 	if (potential.y > 1.0 || potential.y < -1.0) {
-		printf("avcMotion::updateControl failed. "
-					 "avcForceVector.y is out of range\n");
+		aDEBUG_PRINT("avcMotion::updateControl failed.\n"
+					 "\tavcForceVector.y is out of range\n");
 		return aErrRange;
 	}
 
 	// Show us what we got
-	printf("  DEBUG: <x,y,rad>: <%2.2f, %2.2f, %2.2f>\n",
-		potential.x, potential.y, radian);
-#endif
+	printf("\n  DEBUG: <x,y,rad>: <%2.2f, %2.2f>\n",
+		potential.x, potential.y);
 	
-	return e;
+	// calculate the magnitude of the resultant input vector
+	double magnitude = sqrt(potential.x * potential.x + potential.y * potential.y);
+	double delta = atan2(potential.x, potential.y);
+	
+	// Straight from the research paper
+	t = cos(delta) * cos(delta) * sgn(cos(delta));
+	r = sin(delta) * sin(delta) * sgn(sin(delta));
+	
+	printf("\n  DEBUG: <t,r,magnitude>: <%2.2f, %2.2f, %2.2f>\n",
+				 t, r, magnitude);
+	
+	// Use the magnitude to scale the velocity
+	v[aMOTOR_LEFT] = magnitude * (t -r);
+	v[aMOTOR_RIGHT] = magnitude * (t + r);
+	
+	// Apply the maximum setpoint threshold to the computed normalized velocities
+	// Write this to the Stem's scratchpads
+	
+	printf("v[%d] = %2.2f \tv[%d] = %2.2f\n", 
+				 aMOTOR_LEFT, v[aMOTOR_LEFT], 
+				 aMOTOR_RIGHT, v[aMOTOR_RIGHT]);
+	
+	return aErrNone;
 	
 }
 
@@ -72,6 +97,8 @@ avcMotion::updateControl(const avcForceVector& potential,
 // You will need to set up a stem object and work from that.
 // Use the makefile_motModule to build this in isolation.
 #ifdef aDEBUG_MOTMODULE
+
+#define aTESTWITHSTEM 0
 
 ////////////////////////////////////////
 int doTests(acpStem *pStem);
@@ -82,24 +109,45 @@ int doTests(acpStem *pStem) {
 	avcForceVector Uresult = {0, 0};
 	aErr e = aErrNone;
 	
-	///////////////////////////////////////////////////
-	printf("No initialization test...\n");
-	e = motion.updateControl(Uresult, 0);
-	if (e != aErrInitialization) {
-		printf("FAIL: No initialization test\n");
-		return 1;
-	}
+	printf("---------------------------------------------------------\n");
+	printf("Performing tests on motModule\n");
 	
 	///////////////////////////////////////////////////
-	// Initialize the stem object
+	
+	printf("Failure to initialize test...");
+	
+	e = motion.updateControl(Uresult);
+	
+	if (e != aErrInitialization) {
+		printf("failed\n");
+		return 1;
+	}
+	printf("passed\n");
+	
+	///////////////////////////////////////////////////
+	// Initialize the stem object for the rest of the tests
 	e = motion.init(pStem);
 	
 	// Check the upper x range
+	printf("Force X component to large test...");
+	
 	Uresult.x = 1.5;
-	if (!e)
-		e = motion.updateControl(Uresult, 0);
+	e = motion.updateControl(Uresult);
 	
+	if (e != aErrRange) {
+		printf("failed\n");
+		return 2;
+	}
+	printf("passed\n");
 	
+	// Check the upper x range
+	printf("Force X component within range test...");
+	
+	Uresult.x = 0.0;
+	Uresult.y = 0.5;
+	e = motion.updateControl(Uresult);
+	
+	printf("passed\n");
 	
 	// Everything is all good from here. let's go home.
 	return 0;
@@ -149,12 +197,14 @@ main(int argc,
 		printf(".");
 		aIO_MSSleep(ioRef, 500, NULL);
 		++timeout;
-	} while (!stem.isConnected() && timeout < 10);
+	} while (!stem.isConnected() && timeout < 3);
 	
 	printf("\n");
-	
+
+#if aTESTWITHSTEM	
 	// Bail if no stem. What's the point little man?
 	if (timeout == 10) { return 1; }
+#endif	
 	
 	//////////////////////////////////
 	// Begin the real actual testing

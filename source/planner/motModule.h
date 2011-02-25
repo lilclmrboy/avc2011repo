@@ -18,8 +18,7 @@ public:
 	
 	aErr init(acpStem *pStem);
 	
-	aErr updateControl(const avcForceVector& potential, 
-																 const double radian);
+	aErr updateControl(const avcForceVector& potential);
 	
 private: 
 	acpStem *m_pStem;
