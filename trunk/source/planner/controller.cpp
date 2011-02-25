@@ -30,10 +30,12 @@ avcController::init(const int argc, const char* argv[]) {
 			        &e))
       		throw acpException(e, "creating settings");
     
-    aArguments_Separate(m_ioRef, m_settings, NULL, argc, argv);
+    	aArguments_Separate(m_ioRef, m_settings, NULL, argc, argv);
 	
 	
-	// Don't forget to init the motModule :)
+	// Don't forget to init the modules :)
+	m_mot.init(&m_stem);
+	m_pos.init(&m_stem);
 
 }
 
@@ -67,25 +69,22 @@ avcController::run(void) {
 	//We have a valid stem connection.
 	aDEBUG_PRINT("done\n");
 	while (1 && timeout < aSTEM_CONN_TIMEOUT) {
-   		//First do the localization step. Lets get relevant GPS
+   		aErr e = aErrNone;
+		//First do the localization step. Lets get relevant GPS
    		//info from the unit, and compass heading. Along with 
    		//the previous state and control vector. 
-		
-      		avcForceVector ir = {0, 0};
+			        
+
+
+		// motion planning step	
+      		avcForceVector ir;
+		e = m_mot.updateControl(ir, 0);
       		
-      		ir.x = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX);
-      		ir.x = ir.x << 8;
-      		ir.x |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
-      
-      		ir.y = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY);
-      		ir.y = ir.y << 8;
-      		ir.y |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
-		
-		avcControlUpdate rl;
-		rl = m_mot.updateControl(ir, 0);
-      		 
+		avcStateVector pos;
+		pos = m_pos.getPosition(ir);
+
 	   	 // sleep a bit so we don't wail on the processor
-	    	aIO_MSSleep(m_ioRef, 100, NULL);
+	    	aIO_MSSleep(m_ioRef, 2000, NULL);
     	} // while
 }
 
