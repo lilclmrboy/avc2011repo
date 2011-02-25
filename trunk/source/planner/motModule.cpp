@@ -2,10 +2,12 @@
 // Filename: motModule.cpp
 
 #include "motModule.h"
-#include "avc2011Defs.tea"
 #include <math.h>
 
 #ifdef aDEBUG_MOTMODULE
+
+bool bDebugHeader = true;
+
 #ifdef aDEBUG_H
 #define aDEBUG_PRINT(arg) printf(arg);fflush(stdout)
 #else 
@@ -16,9 +18,34 @@
 #define sgn(x) (x > 0.0) ? 1.0 : ((x < 0.0) ? -1.0 : 0.0)
 
 ///////////////////////////////////////////////////////////////////////////
+double sigmoid(double x);
+
+double sigmoid (double x) {
+	
+	if (x > 0.0001)
+		return 1.0;
+		
+	if (x < 0.0001)
+		return -1.0;
+	
+	return 0;
+
+}
+
+///////////////////////////////////////////////////////////////////////////
 avcMotion::avcMotion() :
-  m_pStem(NULL)
+  m_pStem(NULL),
+  m_setpointMax(aMOTOR_SETPOINT_MAX)
 {
+	
+	// set up all the setpoint holders
+	for (int m = 0; m < 2; m++) {
+		
+		m_setpoint[m] = 0;
+		m_setpointLast[m] = 0;
+		
+	}
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -42,6 +69,8 @@ avcMotion::updateControl(const avcForceVector& potential)
 	double t = 0.0;
 	double r = 0.0;
 	double v[2] = {0.0, 0.0};
+	double magnitude = 0.0;
+	double delta = 0.0;
 	
 	// Make sure you other hackers initialized this first
 	if (!m_pStem) {
@@ -62,31 +91,61 @@ avcMotion::updateControl(const avcForceVector& potential)
 		return aErrRange;
 	}
 
-	// Show us what we got
-	printf("\n  DEBUG: <x,y,rad>: <%2.2f, %2.2f>\n",
-		potential.x, potential.y);
-	
 	// calculate the magnitude of the resultant input vector
-	double magnitude = sqrt(potential.x * potential.x + potential.y * potential.y);
-	double delta = atan2(potential.x, potential.y);
+	magnitude = sqrt(potential.x * potential.x + potential.y * potential.y);
+	delta = atan2(potential.y, potential.x);
 	
 	// Straight from the research paper
-	t = cos(delta) * cos(delta) * sgn(cos(delta));
-	r = sin(delta) * sin(delta) * sgn(sin(delta));
-	
-	printf("\n  DEBUG: <t,r,magnitude>: <%2.2f, %2.2f, %2.2f>\n",
-				 t, r, magnitude);
+	t = (cos(delta) * cos(delta)) * sigmoid(cos(delta));
+	r = (sin(delta) * sin(delta)) * sigmoid(sin(delta));
 	
 	// Use the magnitude to scale the velocity
-	v[aMOTOR_LEFT] = magnitude * (t -r);
+	v[aMOTOR_LEFT] = magnitude * (t - r);
 	v[aMOTOR_RIGHT] = magnitude * (t + r);
 	
-	// Apply the maximum setpoint threshold to the computed normalized velocities
-	// Write this to the Stem's scratchpads
+	// Calculate the setpoints for the Moto to go chase
+	// Boundary check the setpoints
+	for (int m = 0; m < 2; m++) {
+		
+		// calc setpoint bounded by setpoint
+		m_setpoint[m] = v[m] * m_setpointMax;
+		
+		
+	} // end of for loop
 	
-	printf("v[%d] = %2.2f \tv[%d] = %2.2f\n", 
-				 aMOTOR_LEFT, v[aMOTOR_LEFT], 
-				 aMOTOR_RIGHT, v[aMOTOR_RIGHT]);
+	
+	// Write the values to the scratchpad
+	m_pStem->PAD_IO(aMOTO_MODULE, 
+								aSPAD_MO_MOTION_SETPOINT_LEFT, 
+								m_setpoint[aMOTOR_LEFT]);
+	
+	m_pStem->PAD_IO(aMOTO_MODULE, 
+								aSPAD_MO_MOTION_SETPOINT_RIGHT, 
+								m_setpoint[aMOTOR_RIGHT]);
+
+
+#ifdef aDEBUG_MOTMODULE	
+	// Show us what we got
+	if (bDebugHeader) {
+		printf("DEBUG: Ux,\tUy,\t"
+					 "t,\tr,\tmag,\t"
+					 "delta,\t"
+					 "vL,\tvR,\tsetL,\tsetR \n");
+		bDebugHeader = false;
+	}
+	
+	printf("DEBUG: %2.2f,\t%2.2f,\t"
+				 "%2.2f,\t%2.2f,\t%2.2f,\t"
+				 "%2.2f,\t"
+				 "%2.2f,\t%2.2f,\t"
+				 "%d,\t%d\n",
+				 potential.x, potential.y, 
+				 t, r, magnitude,
+				 delta,
+				 v[aMOTOR_LEFT], v[aMOTOR_RIGHT],
+				 m_setpoint[aMOTOR_LEFT], m_setpoint[aMOTOR_RIGHT]);
+	
+#endif	
 	
 	return aErrNone;
 	
@@ -98,7 +157,7 @@ avcMotion::updateControl(const avcForceVector& potential)
 // Use the makefile_motModule to build this in isolation.
 #ifdef aDEBUG_MOTMODULE
 
-#define aTESTWITHSTEM 0
+#define aTESTWITHSTEM 1
 
 ////////////////////////////////////////
 int doTests(acpStem *pStem);
@@ -114,7 +173,7 @@ int doTests(acpStem *pStem) {
 	
 	///////////////////////////////////////////////////
 	
-	printf("Failure to initialize test...");
+	printf("Failure to initialize test...\n");
 	
 	e = motion.updateControl(Uresult);
 	
@@ -122,14 +181,13 @@ int doTests(acpStem *pStem) {
 		printf("failed\n");
 		return 1;
 	}
-	printf("passed\n");
 	
 	///////////////////////////////////////////////////
 	// Initialize the stem object for the rest of the tests
 	e = motion.init(pStem);
 	
 	// Check the upper x range
-	printf("Force X component to large test...");
+	printf("Force X component to large test...\n");
 	
 	Uresult.x = 1.5;
 	e = motion.updateControl(Uresult);
@@ -138,14 +196,30 @@ int doTests(acpStem *pStem) {
 		printf("failed\n");
 		return 2;
 	}
-	printf("passed\n");
 	
 	// Check the upper x range
-	printf("Force X component within range test...");
+	printf("Force X component within range test...\n");
 	
-	Uresult.x = 0.0;
-	Uresult.y = 0.5;
-	e = motion.updateControl(Uresult);
+	Uresult.x = -1.0;
+	Uresult.y = 0.0;
+	
+	while (Uresult.x <= 1.0) {
+		
+		e = motion.updateControl(Uresult);
+		
+		pStem->sleep(1000);
+		
+		Uresult.x += 0.1;
+	} // end while loop
+	
+	// Turn off the motors.
+	pStem->PAD_IO(aMOTO_MODULE, 
+								aSPAD_MO_MOTION_SETPOINT_RIGHT, 
+								0);
+	
+	pStem->PAD_IO(aMOTO_MODULE, 
+								aSPAD_MO_MOTION_SETPOINT_LEFT, 
+								0);
 	
 	printf("passed\n");
 	
@@ -172,7 +246,7 @@ main(int argc,
 	// Read from a settings file if it exists.
 	if (aSettingFile_Create(ioRef, 
 													128,
-													"motmodule.config",
+													"console.config",
 													&settings,
 													&e))
 		throw acpException(e, "creating settings");
@@ -197,7 +271,7 @@ main(int argc,
 		printf(".");
 		aIO_MSSleep(ioRef, 500, NULL);
 		++timeout;
-	} while (!stem.isConnected() && timeout < 3);
+	} while (!stem.isConnected() && timeout < 10);
 	
 	printf("\n");
 
@@ -219,6 +293,7 @@ main(int argc,
 		printf("All tests passed\n");
 	}
 
+	aIO_MSSleep(ioRef, 1000, NULL);
 	
 	//////////////////////////////////
 	

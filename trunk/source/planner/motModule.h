@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include "avc2011Structs.h"
+#include "avc2011Defs.tea"
 
 class avcMotion {
 
@@ -16,12 +17,26 @@ public:
 	avcMotion(void);
 	~avcMotion(void){}
 	
+	// Must call this first before doing any updates. Failure to do so will
+	// cause all calls on updateControl to return an error.
 	aErr init(acpStem *pStem);
 	
+	// Updates the wheel velocity setpoints with a desired
+	// force vector. 
 	aErr updateControl(const avcForceVector& potential);
+	
+	// Gives other folks the last setpoint value we calculated for the motor
+	// motor should be: aMOTOR_LEFT or aMOTOR_RIGHT
+	short inline getSetpointMotor(const aUInt8 motor) 
+		{ return m_setpoint[motor]; };
+	
 	
 private: 
 	acpStem *m_pStem;
+	
+	short m_setpointMax;
+	short m_setpoint[2];
+	short m_setpointLast[2];
 
 };
 
