@@ -73,7 +73,7 @@ private:
 	aSettingFileRef m_settings;
 	avcMotion m_mot;
 	avcPlanner m_planner;
-	//avcPosition m_pos;
+	avcPosition m_pos;
 	//avcLogger m_logger; 
 	acpStem m_stem;
 	aIOLib m_ioRef;

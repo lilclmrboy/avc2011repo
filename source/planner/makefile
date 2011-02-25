@@ -43,8 +43,8 @@ OBJ = unix_$(APP)_Data
 
 OBJECTS = $(OBJ)/controller.o \
 	  $(OBJ)/planner.o \
-	  $(OBJ)/motModule.o 
-
+	  $(OBJ)/motModule.o \
+	  $(OBJ)/locModule.o
 
 
 .PHONY : app

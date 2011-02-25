@@ -19,6 +19,7 @@ typedef struct avcStateVector {
   double x;
   double y;
   double h; //heading
+  avcStateVector(void) : x(0.0), y(0.0), h(0.0) {}
 } avcStateVector;
 
 #endif //_avc2011Structs_H_

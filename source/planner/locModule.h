@@ -12,12 +12,20 @@
 class avcPosition 
 {
 public: 
-	avcPosition(void);
-	~avcPosition(void);
+	avcPosition(void) : 
+	  m_pStem(NULL),
+	  m_curGPSTimeSec(0) {};
+	~avcPosition(void) {};
 
-	avcStateVector getPosition(const avcStateVector& prevPos,
-				   const avcForceVector& prevCont,
-				   acpStem& stem);
+	aErr init(acpStem* Stem);
+
+	avcStateVector getPosition(const avcForceVector& Control);
+
+private:
+	acpStem* m_pStem;
+	int m_curGPSTimeSec;
+	avcStateVector m_curPos;	
+	int getGPSTimeSec(void);
 	
 };
 
