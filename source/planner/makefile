@@ -41,8 +41,9 @@ LIBS = -lpthread -lcrypto -lssl \
 
 OBJ = unix_$(APP)_Data
 
-OBJECTS = $(OBJ)/controller.o \
-	  $(OBJ)/planner.o \
+OBJECTS = \
+      $(OBJ)/planner.o \
+      $(OBJ)/controller.o \
 	  $(OBJ)/motModule.o \
 	  $(OBJ)/locModule.o
 

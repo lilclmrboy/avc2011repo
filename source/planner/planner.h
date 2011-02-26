@@ -19,5 +19,20 @@ public:
 	//vector output.
 	avcForceVector getMotivation(const avcStateVector pos, 	
 				     const avcForceVector repulse);
+	
+
+	// inserts waypoints into the map of waypoints
+	// new points are inserted as the next unpassed waypoint
+	// should be used by camera/laser system to add "bonus" waypoints
+	aErr insertMapPoint(const avcStateVector newPosition);
+
+private:
+	std::vector<avcWaypointVector> waypoints;
+	
+	// used by getMotivation to check for and update passed waypoints
+	aErr checkForPassedWayPoints(void);
+	
+	// used by planner functions to get the index of the first unpassed waypoint
+	int getFirstUnpassedWayPoint(void);
 
 };
