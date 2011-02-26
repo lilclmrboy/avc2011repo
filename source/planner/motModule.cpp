@@ -68,7 +68,7 @@ avcMotion::updateControl(const avcForceVector& potential)
 {
 	double t = 0.0;
 	double r = 0.0;
-	double v[2] = {0.0, 0.0};
+	double v[aMOTOR_NUM] = {0.0, 0.0};
 	double magnitude = 0.0;
 	double delta = 0.0;
 	
@@ -105,40 +105,43 @@ avcMotion::updateControl(const avcForceVector& potential)
 	
 	// Calculate the setpoints for the Moto to go chase
 	// Boundary check the setpoints
-	for (int m = 0; m < 2; m++) {
+	for (int m = 0; m < aMOTOR_NUM; m++) {
 		
 		// calc setpoint bounded by setpoint
 		m_setpoint[m] = v[m] * m_setpointMax;
 		
+		// Let's only send updates if the new velocity is different then the last
+		// one we sent. No point in doing EXTRA work, right?
+		if (m_setpoint[m] != m_setpointLast[m]) {
+			
+			// Write the values to the scratchpad
+			m_pStem->PAD_IO(aMOTO_MODULE, 
+											(m == aMOTOR_LEFT) ? aSPAD_MO_MOTION_SETPOINT_LEFT : aSPAD_MO_MOTION_SETPOINT_RIGHT, 
+											m_setpoint[m]);
+			
+		}
+		
+		// Store the last setpoint reading for next time
+		m_setpointLast[m] = m_setpoint[m];
+		
 		
 	} // end of for loop
 	
-	
-	// Write the values to the scratchpad
-	m_pStem->PAD_IO(aMOTO_MODULE, 
-								aSPAD_MO_MOTION_SETPOINT_LEFT, 
-								m_setpoint[aMOTOR_LEFT]);
-	
-	m_pStem->PAD_IO(aMOTO_MODULE, 
-								aSPAD_MO_MOTION_SETPOINT_RIGHT, 
-								m_setpoint[aMOTOR_RIGHT]);
-
-
 #ifdef aDEBUG_MOTMODULE	
 	// Show us what we got
 	if (bDebugHeader) {
-		printf("DEBUG: Ux,\tUy,\t"
-					 "t,\tr,\tmag,\t"
-					 "delta,\t"
-					 "vL,\tvR,\tsetL,\tsetR \n");
+		printf("DEBUG: Ux\tUy\t"
+					 "t\tr\tmag\t"
+					 "delta\t"
+					 "vL\tvR\tsetL\tsetR\n");
 		bDebugHeader = false;
 	}
 	
-	printf("DEBUG: %2.2f,\t%2.2f,\t"
-				 "%2.2f,\t%2.2f,\t%2.2f,\t"
-				 "%2.2f,\t"
-				 "%2.2f,\t%2.2f,\t"
-				 "%d,\t%d\n",
+	printf("DEBUG: %2.2f\t%2.2f\t"
+				 "%2.2f\t%2.2f\t%2.2f\t"
+				 "%2.2f\t"
+				 "%2.2f\t%2.2f\t"
+				 "%d\t%d\n",
 				 potential.x, potential.y, 
 				 t, r, magnitude,
 				 delta,
@@ -197,18 +200,17 @@ int doTests(acpStem *pStem) {
 		return 2;
 	}
 	
-	// Check the upper x range
-	printf("Force X component within range test...\n");
+	///////////////////////////////////////////////////
+	// Check the Ux range
+#if 0	
+	printf("Ux component within range test...\n");
 	
 	Uresult.x = -1.0;
 	Uresult.y = 0.0;
 	
 	while (Uresult.x <= 1.0) {
-		
 		e = motion.updateControl(Uresult);
-		
 		pStem->sleep(1000);
-		
 		Uresult.x += 0.1;
 	} // end while loop
 	
@@ -221,7 +223,59 @@ int doTests(acpStem *pStem) {
 								aSPAD_MO_MOTION_SETPOINT_LEFT, 
 								0);
 	
-	printf("passed\n");
+	pStem->sleep(1000);
+	
+	///////////////////////////////////////////////////
+	// Check the Uy range
+	printf("Uy component within range test...\n");
+	
+	Uresult.x = 0.0;
+	Uresult.y = -1.0;
+	
+	while (Uresult.y <= 1.0) {
+		e = motion.updateControl(Uresult);
+		pStem->sleep(1000);
+		Uresult.y += 0.1;
+	} // end while loop
+	
+	// Turn off the motors.
+	pStem->PAD_IO(aMOTO_MODULE, 
+								aSPAD_MO_MOTION_SETPOINT_RIGHT, 
+								0);
+	
+	pStem->PAD_IO(aMOTO_MODULE, 
+								aSPAD_MO_MOTION_SETPOINT_LEFT, 
+								0);
+	
+	pStem->sleep(1000);
+	
+#endif
+	
+	///////////////////////////////////////////////////
+	// Check with the IR rangers. 
+	
+	Uresult.x = 0.0;
+	Uresult.y = 0.0;
+	e = motion.updateControl(Uresult);
+	
+	// Read the IR Repulsive force
+	int i = 0;
+	short x = 0;
+	short y = 0;
+	while (i < 50) {
+		
+		x = (pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX)) << 8;
+		x |= pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX + 1);
+		
+		y = (pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY)) << 8;
+		y |= pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY + 1);
+		
+		printf("x = %d \t y = %d\n", x, y);
+		
+		pStem->sleep(250);
+		
+		i++;
+	}
 	
 	// Everything is all good from here. let's go home.
 	return 0;
@@ -284,20 +338,11 @@ main(int argc,
 	// Begin the real actual testing
 	// We are connected to the stem now, we can beat on the motion control 
 	// module. Ya!!!
-	
-	int result = doTests(&stem);
-	
-	if (result) {
-		printf("Failed on the %d test.\n", result);
-	} else {
-		printf("All tests passed\n");
-	}
+	doTests(&stem);
 
 	aIO_MSSleep(ioRef, 1000, NULL);
 	
 	//////////////////////////////////
-	
-	
 	// Clean up and get outta here
 	aSettingFile_Destroy(ioRef, settings, NULL);
 	aIO_ReleaseLibRef(ioRef, NULL);

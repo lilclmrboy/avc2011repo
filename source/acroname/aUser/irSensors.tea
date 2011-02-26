@@ -4,11 +4,7 @@
 #include "avc2011.tea"
 #include <aA2D.tea>
 
-#define IR_MIN_THRESHOLD 20
-
-// The 0 degree angle is the straight ahead reading for the robot
-// Integer scaled cosine and sine values
-// for example, cosine(pi/4) * 10 = 70
+#define IR_MIN_THRESHOLD 50
 
 // At a 30 degree angle from the straight ahead direction 
 #define IR_LEFT_ID 0
@@ -22,6 +18,7 @@
 
 /* ************************************************************************** */
 /* Computes a scalar that is equal to the distance
+ * Capped at 1000
  */
 int gp2dxx_magnitude(char index) {
 	int result = 0;
@@ -34,10 +31,13 @@ int gp2dxx_magnitude(char index) {
 	if (reading < IR_MIN_THRESHOLD)
 		result = 0;
 	else
-		result = reading >> 2;
+		result = reading << 1;
+		
+	if (result > 1000)
+		result = 1000;
 	
 	// Return the value with a distance approximation
-	return result;
+	return (result / 10);
 }
 
 /* ************************************************************************** */
@@ -82,7 +82,6 @@ void main(char callingProcID)
 					directionSine = IR_RIGHT_ANGLE_SINE;
 					break;	
 			
-			
 				default:
 					// Write result to the scratchpad
 					aPad_WriteInt(aSPAD_GP2_REPULSIVE_UX, Ux);
@@ -105,8 +104,8 @@ void main(char callingProcID)
 			// hard code the resulting trig math fancyness. 
 			// Keeping it simple. 
 			// Scale the result down to an integer value we can work with
-			Ux = ((-1*magnitude * directionCosine)/10) + Ux;
-			Uy = ((-1*magnitude * directionSine)/10) + Uy;
+			Ux = -1 * magnitude * directionCosine + Ux;
+			Uy = -1 * magnitude * directionSine + Uy;
 			
 #ifdef aDEBUG_IRPOLLING
 			aPrint_String("(id Mag Ux Uy):");

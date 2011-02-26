@@ -27,7 +27,7 @@ public:
 	
 	// Gives other folks the last setpoint value we calculated for the motor
 	// motor should be: aMOTOR_LEFT or aMOTOR_RIGHT
-	short inline getSetpointMotor(const aUInt8 motor) 
+	short inline getSetpointMotor(const unsigned char motor) 
 		{ return m_setpoint[motor]; };
 	
 	
@@ -35,8 +35,8 @@ private:
 	acpStem *m_pStem;
 	
 	short m_setpointMax;
-	short m_setpoint[2];
-	short m_setpointLast[2];
+	short m_setpoint[aMOTOR_NUM];
+	short m_setpointLast[aMOTOR_NUM];
 
 };
 
