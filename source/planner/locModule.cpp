@@ -30,7 +30,8 @@ avcPosition::getGPSTimeSec() {
 	m_pStem->IIC_RD( aGP2_MODULE, GPS_MODULE, 0x06, pData);
 	secs = (pData[0] *10 + pData[1])* 3600 
 	       + (pData[2] * 10 + pData[3]) * 60 + (pData[4] * 10 + pData[5]);
-
+	
+	m_pStem->	
 	return secs;	
 }
 
