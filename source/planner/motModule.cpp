@@ -8,11 +8,9 @@
 
 bool bDebugHeader = true;
 
-#ifdef aDEBUG_H
 #define aDEBUG_PRINT(arg) printf(arg);fflush(stdout)
 #else 
 #define aDEBUG_PRINT(arg)
-#endif
 #endif
 
 #define sgn(x) (x > 0.0) ? 1.0 : ((x < 0.0) ? -1.0 : 0.0)
