@@ -8,6 +8,7 @@
 #define _locModule_H_
 
 #include "avc2011Structs.h"
+#include "avc2011Defs.tea"
 
 class avcPosition 
 {
