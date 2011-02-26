@@ -78,7 +78,7 @@ avcController::run(void) {
 
 		// motion planning step	
       		avcForceVector ir;
-		e = m_mot.updateControl(ir, 0);
+		e = m_mot.updateControl(ir);
       		
 		avcStateVector pos;
 		pos = m_pos.getPosition(ir);
