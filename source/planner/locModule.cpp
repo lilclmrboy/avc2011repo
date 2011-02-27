@@ -10,13 +10,21 @@ avcPosition::init(acpStem* pStem) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-avcStateVector 
-avcPosition::getPosition(const avcForceVector& Control) {
+void 
+avcPosition::updateState(const avcControlVector& control) {
 	
+	//First we must do an estimation step, given the previous position
+  //and the current control information.
+	
+	//We really only want to use GPS information if enough time has passed.
 	int curSec = getGPSTimeSec();
+	if (curSec != m_curGPSTimeSec) {
+		//Grab current GPS and compass settings, otherwise we'll rely on 
+		//a Kalman update with encoder values only.
+	}
+
 	printf("Current GPS seconds in the day: %d\n", curSec);
-	fflush(stdout);
-	return m_curPos;
+
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -52,19 +52,13 @@
 #include "avc2011Defs.tea"
 #include "avc2011Structs.h"
 
-#ifdef aDEBUG_H
-	#define aDEBUG_PRINT(arg) printf(arg);fflush(stdout)
-#else 
-	#define aDEBUG_PRINT(arg)
-#endif
-
 class avcController
 {
 public:
 	avcController(void);
 	~avcController(void);
 	
-	bool init(const int argc, const char* argv[]);
+	int init(const int argc, const char* argv[]);
 	
 	//return of non-zero is error condition.
 	int run(void);
@@ -78,7 +72,9 @@ private:
 	acpStem m_stem;
 	aIOLib m_ioRef;
 	avcStateVector m_curState;
-	avcForceVector m_curControl;	
+	//This contains the current setpoints for the left
+  //and right motors.
+	avcControlVector m_curControl;	
 	
 };
 
