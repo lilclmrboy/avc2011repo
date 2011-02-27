@@ -80,8 +80,15 @@ $(OBJ)/MotionPlanner.o : main.cpp
 
 $(OBJ)/%.o : %.cpp %.h
 	$(CC) -c $(CFLAGS) $< -o $@
+	
+.PHONY : motModuleTest
+motModuleTest : $(OBJ)
+	$(CC) -c $(CFLAGS) -DaDEBUG_MOTMODULE motModule.cpp -o $(OBJ)/motModule.o
+	$(CC) -g $(CFLAGS) $(LFLAGS) $(OBJ)/motModule.o $(LIBS) $(FRAMEWORKS) -o motModuleTest
 
 .PHONY : clean
 clean :
 	rm -rf $(OBJ)
 	rm -f $(BIN)/$(APP)
+	rm -f $(BIN)/motModuleTest
+	
