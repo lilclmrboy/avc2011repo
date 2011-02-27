@@ -19,6 +19,8 @@
 /* ************************************************************************** */
 /* Computes a scalar that is equal to the distance
  * Capped at 1000
+ * At the closest distance, the sharp rangers is at 2.5V. Our A2D is 10-bit
+ * over a 0-5V range. 
  */
 int gp2dxx_magnitude(char index) {
 	int result = 0;
@@ -28,16 +30,12 @@ int gp2dxx_magnitude(char index) {
 	reading = aA2D_ReadInt(index);
 	
 	// Read the result and scale it down
-	if (reading < IR_MIN_THRESHOLD)
-		result = 0;
-	else
-		result = reading << 1;
+	result = reading << 5;
+
+	if (result > 0x4000) result = 0x4000;
 		
-	if (result > 1000)
-		result = 1000;
-	
 	// Return the value with a distance approximation
-	return (result / 10);
+	return (result / 100);
 }
 
 /* ************************************************************************** */
@@ -69,19 +67,19 @@ void main(char callingProcID)
 			// scale the code very easily.
 			// We can also build up the Ux and Uy components
 			switch (id) {
-			
+
 				case 0: 
 					id = IR_LEFT_ID;
 					directionCosine = IR_LEFT_ANGLE_COSINE;
 					directionSine = IR_LEFT_ANGLE_SINE;
 					break;
-					
+
 				case 1: 
 					id = IR_RIGHT_ID;
 					directionCosine = IR_RIGHT_ANGLE_COSINE;
 					directionSine = IR_RIGHT_ANGLE_SINE;
 					break;	
-			
+
 				default:
 					// Write result to the scratchpad
 					aPad_WriteInt(aSPAD_GP2_REPULSIVE_UX, Ux);
