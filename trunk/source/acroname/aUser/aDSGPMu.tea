@@ -131,14 +131,6 @@ int aGPM_Get4DigitInt(char addr, char reg)
   return value;
 }
 
-int aGPM_GetYear(char addr)
-{
-  int year;
-  year =   aGPM_Get2DigitInt(addr, 10) * 100
-         + aGPM_Get2DigitInt(addr, 12);
-  return year;
-}
-
 int aGPM_GetAltitude(char addr)
 {
   int altm;
@@ -165,6 +157,7 @@ int aGPM_GetAnalogInput(char addr, char n)
 #define	aGPM_GetSeconds(addr)		aGPM_Get2DigitInt(addr, 4)
 #define	aGPM_GetDay(addr)		aGPM_Get2DigitInt(addr, 6)
 #define	aGPM_GetMonth(addr)		aGPM_Get2DigitInt(addr, 8)
+#define aGPM_GetYear(addr)		aGPM_Get4DigitInt(addr, 10)
 
 #define	aGPM_GetLatitudeDegrees(addr)	aGPM_Get2DigitInt(addr, 14)
 #define	aGPM_GetLatitudeMinutes(addr)	aGPM_Get2DigitInt(addr, 16)
