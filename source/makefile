@@ -1,6 +1,6 @@
 # whole project makefile
 
-OS := (shell uname)
+OS := $(shell uname)
 ifeq ($(OS), Darwin)
 TAROS = mac
 else
