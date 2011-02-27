@@ -25,6 +25,12 @@
   <SLOT>1</SLOT>
   <NAME>"sonarSensors.cup"</NAME>
  </CUP> 
+
+ <CUP>
+	<MODULE>2</MODULE>
+	<SLOT>2</SLOT>
+	<NAME>"locSensors.cup"</NAME>
+ </CUP>
  
  <CUP>
   <MODULE>2</MODULE>

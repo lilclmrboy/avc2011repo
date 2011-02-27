@@ -10,7 +10,8 @@
 
 #define aGP2_MODULE 2
 #define aMOTO_MODULE 4
-#define GPS_MODULE 0xD0
+#define GPS_MODULE (char) 0xD0
+#define CMPS_MODULE (char) 0xC0
 
 //IIC bus speed index, and value for gps.  
 #define IIC_SPD_VAL_INDEX 3
@@ -32,6 +33,7 @@
 #define aSPAD_GP2_GPMONITOR_SHUTDOWN 0
 #define aSPAD_GP2_IR_PROCESS_ENABLE 1
 #define aSPAD_GP2_SONAR_PROCESS_ENABLE 2
+#define aSPAD_GP2_LOC_PROCESS_ENABLE 3
 
 // Data Ints stored in scratchpad. These are 2 bytes long.
 #define aSPAD_GP2_REPULSIVE_UX 10
@@ -39,6 +41,23 @@
 
 #define aSPAD_GP2_SONAR_REPULSIVE_UX 14
 #define aSPAD_GP2_SONAR_REPULSIVE_UY 16
+
+// GPS and Compass Scratchpad slots.
+// 4 bytes minute from start of day UTC, and seconds in minute.
+#define aSPAD_GP2_GPS_MIN 18
+#define aSPAD_GP2_GPS_SEC 20
+// Lat and lon are 6 bytes.
+#define aSPAD_GP2_GPS_LAT 22
+#define aSPAD_GP2_GPS_LON 28
+//speed and heading are 4 bytes
+#define aSPAD_GP2_GPS_SPD 34
+#define aSPAD_GP2_GPS_HD 38
+
+// Two byte compass data
+#define aSPAD_GP2_CMPS_HD 42
+#define aSPAD_GP2_ACC_X 44
+#define aSPAD_GP2_ACC_Y 46
+#define aSPAD_GP2_ACC_Z 48
 
 // Scratchpad Locations are located on the Moto 1.0
 // Single byte values
@@ -58,10 +77,12 @@
 /* Processes on the GP Module */
 #define aIR_POLLING_GP2_PROCESS 1
 #define aSONAR_POLLING_GP2_PROCESS 2
+#define aLOC_POLLING_GP2_PROCESS 3
 
 /* Slots on the GP Module */
 #define aIR_POLLING_GP2_SLOT 0
 #define aSONAR_POLLING_GP2_SLOT 1
+#define aLOC_POLLING_GP2_SLOT 2
 
 /* ************************************************************************** */
 /* Information Specific to the Moto module */
