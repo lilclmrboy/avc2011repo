@@ -5,16 +5,7 @@
 #include <math.h>
 
 #ifdef aDEBUG_MOTMODULE
-
 bool bDebugHeader = true;
-
-#ifndef aDEBUG_PRINT
-#define aDEBUG_PRINT(arg) printf(arg);fflush(stdout)
-#endif
-#else 
-#ifndef aDEBUG_PRINT
-#define aDEBUG_PRINT(arg)
-#endif
 #endif
 
 // Not sure why this doesn't work. But, it doesn't.
@@ -174,8 +165,8 @@ avcMotion::updateControl(const avcForceVector& potential)
 ///////////////////////////////////////////////////////////////////////////
 // This section is for isolating and debugging this module. 
 // You will need to set up a stem object and work from that.
-// Use the makefile_motModule to build this in isolation.
-// > make -f makefile_motModule
+// Use the makefile to build this in isolation.
+// > make motModule
 #ifdef aDEBUG_MOTMODULE
 
 #define aTESTWITHSTEM 1
