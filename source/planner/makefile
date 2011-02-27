@@ -23,29 +23,47 @@
 #      4 in the acroname download (aUtil, aIO, aStem, and aUI).
 
 
+OS := $(shell uname)
 PREFIX = ../
 APP = MotionPlanner
 CC = g++
-CFLAGS = -DaUNIX -DaDEBUG_H\
+CFLAGS = -DaUNIX
+ifeq ($(OS), Darwin)
+CFLAGS += -DaMACX
+endif
+CFLAGS += -DaDEBUG_H\
 	 -I$(PREFIX)acroname/aInclude \
 	 -I$(PREFIX)acroname/aSource \
 	 -I$(PREFIX)acroname/aSystem \
 	 -I$(PREFIX)acroname/aUser
-CFLAGS += -m32 -Werror
+CFLAGS += -m32 -Wall -Werror
 LFLAGS = -Wl,-rpath,.
 SRC = $(PREFIX)acroname/aSource
 BIN = $(PREFIX)acroname/aBinary
-LIBS = -lpthread -lcrypto -lssl \
-       -L/lib -L/usr/lib\
-       -L$(PREFIX)acroname/aBinary -laUtil -laIO -laMath -laStem
+LIBS = -lpthread -lcrypto -lssl
 
+ifeq ($(OS), Darwin)
+FRAMEWORKS = -F$(PREFIX)acroname/aBinary \
+			 -framework aUtil \
+			 -framework aIO \
+			 -framework aMath \
+			 -framework aStem
+else
+LIBS += -L/lib -L/usr/lib
+LIBS += -L$(PREFIX)acroname/aBinary -laUtil -laIO -laMath -laStem
+endif 
+
+ifeq ($(OS), Darwin)
+OBJ = macx_$(APP)_Data
+else
 OBJ = unix_$(APP)_Data
+endif
 
 OBJECTS = \
       $(OBJ)/planner.o \
       $(OBJ)/controller.o \
-	  $(OBJ)/motModule.o \
-	  $(OBJ)/locModule.o
+      $(OBJ)/motModule.o \
+      $(OBJ)/locModule.o
 
 
 .PHONY : app
@@ -55,7 +73,7 @@ $(OBJ) :
 	mkdir $(OBJ)
 
 $(BIN)/MotionPlanner : $(OBJ)/MotionPlanner.o $(OBJECTS)
-	$(CC) -g $(CFLAGS) $(LFLAGS) $^ $(LIBS) -o $@
+	$(CC) -g $(CFLAGS) $(LFLAGS) $^ $(LIBS) $(FRAMEWORKS) -o $@
 
 $(OBJ)/MotionPlanner.o : main.cpp
 	$(CC) -c $(CFLAGS) $< -o $@

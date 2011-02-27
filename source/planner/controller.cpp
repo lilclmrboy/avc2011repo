@@ -92,5 +92,7 @@ avcController::run(void) {
 	   	 // sleep a bit so we don't wail on the processor
 	    	aIO_MSSleep(m_ioRef, 2000, NULL);
     	} // end while
+	
+	return 0;
 }
 
