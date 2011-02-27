@@ -8,24 +8,62 @@
 #include "aStem.h"
 #include <vector>
 
+#ifdef aDEBUG_H
+	#define aDEBUG_PRINT(arg) printf(arg);fflush(stdout)
+#else 
+	#define aDEBUG_PRINT(arg)
+#endif
+
 using std::vector;
+
+/////////////////////////////////////////////////////////////////////////////
+// This holds the setpoint update.
+typedef struct avcControlVector{
+	short rSetPoint;
+	short lSetPoint;
+	avcControlVector(void) : rSetPoint(0), lSetPoint(0) {}
+	avcControlVector(short r, short l) : rSetPoint(r), lSetPoint(l) {}
+} avcControlVector;
+
+/////////////////////////////////////////////////////////////////////////////
 
 typedef struct avcForceVector {
   double x;
   double y;
+	avcForceVector(void) : x(0.0), y(0.0) {}
+	avcForceVector(double ux, double uy) : x(ux), y(uy) {}
 } avcForceVector;
 
+/////////////////////////////////////////////////////////////////////////////
+// The state vector is a robot global position, heading and speed	
 typedef struct avcStateVector {
-  double x;
-  double y;
-  double h; //heading
-  avcStateVector(void) : x(0.0), y(0.0), h(0.0) {}
-  avcStateVector(double newx, double newy, double newh) {
-	  x=newx;
-	  y=newy;
-	  h=newh;
-  }
+
+	//Longitude
+	double x;
+	//latitude
+	double y;
+	//heading degrees from magnetic north.
+	double h;
+	//speed
+	double s;
+
+	avcStateVector(void) :
+		x(0.0),
+		y(0.0),
+		h(0.0),
+		s(0.0)
+  {}
+	
+	avcStateVector(double la, double lo, 
+                 double he, double spd = 0.0) : 
+		x(lo),
+		y(la),
+		h(he),
+		s(spd)
+  {}	
+
 } avcStateVector;
+
 
 typedef struct avcWaypointVector {
 	avcStateVector state;

@@ -17,10 +17,16 @@ public:
 	  m_pStem(NULL),
 	  m_curGPSTimeSec(0) {};
 	~avcPosition(void) {};
-
+	
+	//We need a valid link to the stem network here. 
+	//We'll ask for current GPS coordinates, and a timestamp.
 	aErr init(acpStem* Stem);
-
-	avcStateVector getPosition(const avcForceVector& Control);
+	
+	//does an EKF state update.
+	void updateState(const avcControlVector& control);
+	
+	//return the current robot position.
+	avcStateVector getPosition(void) { return m_curPos; }
 
 private:
 	acpStem* m_pStem;
