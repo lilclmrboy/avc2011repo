@@ -22,7 +22,7 @@
 #   4. We link against the crypto an ssl libraries as well as 
 #      4 in the acroname download (aUtil, aIO, aStem, and aUI).
 
-
+OS := $(shell uname)
 PREFIX = ../
 APP = motModuleTest
 CC = g++
@@ -36,13 +36,20 @@ LFLAGS = -Wl,-rpath,.
 SRC = $(PREFIX)acroname/aSource
 BIN = $(PREFIX)acroname/aBinary
 LIBS = -lpthread -lcrypto -lssl
+
+ifeq ($(OS), Darwin)
 FRAMEWORKS = -F$(PREFIX)acroname/aBinary \
 			 -framework aUtil \
 			 -framework aIO \
 			 -framework aMath \
 			 -framework aStem
+endif			 
 
+ifeq ($(OS), Darwin)
+OBJ = macx_$(APP)_Data
+else
 OBJ = unix_$(APP)_Data
+endif
 
 OBJECTS = $(OBJ)/controller.o \
 	  $(OBJ)/planner.o \

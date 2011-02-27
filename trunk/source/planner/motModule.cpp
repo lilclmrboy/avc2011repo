@@ -17,31 +17,38 @@ bool bDebugHeader = true;
 #endif
 #endif
 
-#define sgn(x) (x > 0.0) ? 1.0 : ((x < 0.0) ? -1.0 : 0.0)
+// Not sure why this doesn't work. But, it doesn't.
+//#define sgn(x) (x > 0.0001) ? 1.0 : ((x < 0.0001) ? -1.0 : 0.0)
 
 ///////////////////////////////////////////////////////////////////////////
-double sigmoid(double x);
+// Sigmoid function
+// Added a tolerance around 0 since it seems that passing the result of 
+// atan2 was giving us some trouble. Is this a hack? Am I clueless?
+// Probably. 
+double sgn(double x);
 
-double sigmoid (double x) {
-	
+double sgn(double x) 
+{
+
 	if (x > 0.0001)
 		return 1.0;
-		
+	
 	if (x < 0.0001)
 		return -1.0;
 	
-	return 0;
-
+	return 0.0;
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// Constructor for the function
 avcMotion::avcMotion() :
   m_pStem(NULL),
   m_setpointMax(aMOTOR_SETPOINT_MAX)
 {
 	
-	// set up all the setpoint holders
-	for (int m = 0; m < 2; m++) {
+	// set up all the setpoint place holders
+	for (int m = 0; m < aMOTOR_NUM; m++) {
 		
 		m_setpoint[m] = 0;
 		m_setpointLast[m] = 0;
@@ -56,14 +63,20 @@ avcMotion::avcMotion() :
 aErr
 avcMotion::init(acpStem *pStem) {
 	
+	// Grab the pointer to the Stem. 
 	m_pStem = pStem;
+	
+	// Make sure we prime the enable motion control polling via the scrachpad.
+	// For now, we will assume that the TEA monitor is either enabled via
+	// bootstap VM or called by VM_RUN
+	m_pStem->PAD_IO(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE, 1);
 	
 	return aErrNone;
 	
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Given a new goal vector, update the each motor setpoint
+// Given a new goal Force vector, update the each motor setpoint
 
 aErr
 avcMotion::updateControl(const avcForceVector& potential) 
@@ -98,8 +111,8 @@ avcMotion::updateControl(const avcForceVector& potential)
 	delta = atan2(potential.y, potential.x);
 	
 	// Straight from the research paper
-	t = (cos(delta) * cos(delta)) * sigmoid(cos(delta));
-	r = (sin(delta) * sin(delta)) * sigmoid(sin(delta));
+	t = (cos(delta) * cos(delta)) * sgn(cos(delta));
+	r = (sin(delta) * sin(delta)) * sgn(sin(delta));
 	
 	// Use the magnitude to scale the velocity
 	v[aMOTOR_LEFT] = magnitude * (t - r);
@@ -123,7 +136,9 @@ avcMotion::updateControl(const avcForceVector& potential)
 			
 		}
 		
-		// Store the last setpoint reading for next time
+		// Store the last setpoint reading for next time with hopes of 
+		// reducing the number of times we send commands to the lower 
+		// control system.
 		m_setpointLast[m] = m_setpoint[m];
 		
 		
@@ -160,6 +175,7 @@ avcMotion::updateControl(const avcForceVector& potential)
 // This section is for isolating and debugging this module. 
 // You will need to set up a stem object and work from that.
 // Use the makefile_motModule to build this in isolation.
+// > make -f makefile_motModule
 #ifdef aDEBUG_MOTMODULE
 
 #define aTESTWITHSTEM 1
@@ -170,7 +186,7 @@ int doTests(acpStem *pStem);
 int doTests(acpStem *pStem) {
 	
 	avcMotion motion;
-	avcForceVector Uresult = {0, 0};
+	avcForceVector Uresult;
 	aErr e = aErrNone;
 	
 	printf("---------------------------------------------------------\n");
@@ -204,7 +220,7 @@ int doTests(acpStem *pStem) {
 	
 	///////////////////////////////////////////////////
 	// Check the Ux range
-#if 0	
+#if 1
 	printf("Ux component within range test...\n");
 	
 	Uresult.x = -1.0;
@@ -254,30 +270,42 @@ int doTests(acpStem *pStem) {
 #endif
 	
 	///////////////////////////////////////////////////
-	// Check with the IR rangers. 
+	// Check with the IR rangers using the Stem interaction. 
+	// Requires that the gGPMonitor VM is running
+#if 0	
 	
 	Uresult.x = 0.0;
 	Uresult.y = 0.0;
+	
+	// Bascially, set the motors to off. Just using the code we wrote.
 	e = motion.updateControl(Uresult);
 	
 	// Read the IR Repulsive force
 	int i = 0;
 	short x = 0;
 	short y = 0;
+	
+	// Sure, 50 times seems like enough tests...
 	while (i < 50) {
 		
+		// Any reason to NOT add a 2 byte read from Scratchpad into the 
+		// the C++ acpStem?
 		x = (pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX)) << 8;
 		x |= pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX + 1);
 		
 		y = (pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY)) << 8;
 		y |= pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY + 1);
 		
-		printf("x = %d \t y = %d\n", x, y);
+		Uresult.x = (double) x / 32768.0;
+		Uresult.y = (double) y / 32768.0;
 		
-		pStem->sleep(250);
+		e = motion.updateControl(Uresult);
+				
+		pStem->sleep(500);
 		
 		i++;
 	}
+#endif 
 	
 	// Everything is all good from here. let's go home.
 	return 0;
@@ -285,7 +313,7 @@ int doTests(acpStem *pStem) {
 }
 
 ////////////////////////////////////////
-// main testing routine
+// main testing routine for motModule 
 int 
 main(int argc, 
      const char* argv[]) 
@@ -331,10 +359,8 @@ main(int argc,
 	
 	printf("\n");
 
-#if aTESTWITHSTEM	
 	// Bail if no stem. What's the point little man?
 	if (timeout == 10) { return 1; }
-#endif	
 	
 	//////////////////////////////////
 	// Begin the real actual testing
@@ -345,7 +371,7 @@ main(int argc,
 	aIO_MSSleep(ioRef, 1000, NULL);
 	
 	//////////////////////////////////
-	// Clean up and get outta here
+	// Clean up and get outta here. Run Forrest, RUN!!!
 	aSettingFile_Destroy(ioRef, settings, NULL);
 	aIO_ReleaseLibRef(ioRef, NULL);
 	

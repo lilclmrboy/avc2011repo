@@ -30,6 +30,10 @@ avcPlanner::~avcPlanner(void) {}
 avcForceVector 
 avcPlanner::getMotivation(const avcStateVector pos,
 			  const avcForceVector repulse) {
+	
+	avcForceVector result;
+	
+	return result;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -60,6 +64,7 @@ avcPlanner::insertMapPoint(const avcStateVector newPosition) {
 		waypoints.push_back(newWaypoint);
 	}
 
+	return aErrNone;
 	
 }
 
@@ -75,6 +80,8 @@ avcPlanner::checkForPassedWayPoints(void) {
 	//		(corners should be 45˚ headings)
 	// b) ^ or V towards waypoint heading within some distance
 	// c) simple distance from waypoint (circle)
+	
+	return aErrNone;
 
 }
 
