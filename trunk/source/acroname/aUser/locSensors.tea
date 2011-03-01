@@ -1,0 +1,121 @@
+/* ************************************************************************** */
+/* GPS and Compass polling thread */
+
+#include "avc2011.tea"
+#include "aDSGPMu.tea"
+#include <aCompass.tea>
+
+/* ************************************************************************** */
+void main(char callingProcID)
+{
+
+	int minutes = 0;
+	int prevSec = 0;
+	int sec = 0;
+	int latDeg = 0;
+	int latMin = 0;
+	int latFrac = 0;
+	int lonDeg = 0;
+	int lonMin = 0;
+	int lonFrac = 0;
+  int speed = 0;
+	int speedFrac =0;
+	int heading = 0;
+	int headingFrac = 0;
+	char baud = 0;
+
+#ifdef aDEBUG
+	aCore_Sleep(5000);
+	aPrint_String("locSensors launched.\n");
+#endif
+
+	while(1) {
+	
+		// During each round we gather the time, and position information.
+		// We set the IIC baudrate appropriately, and set it back when we're finished.		
+		// 1.) See if we have a GPS lock.
+		// 2.) Get and form the timestamp.
+		// 3.) Get and form the latitude and longitude.
+		// 4.) See if we're movning.
+		// 5.) If we're moving get the GPS heading, and speed.
+		// 6.) Get the Compass heading.
+		if (aPad_ReadChar(aSPAD_GP2_LOC_PROCESS_ENABLE)) {
+						
+			//Grab current baudrate for the IIC bus. And then set the 
+			//baudrate to 400Khz for the GPS.
+			baud = aCore_Inportc(aPortIICBaud);
+      aCore_Outportc(aPortIICBaud, IIC_400Khz);
+			
+			if (!aGPM_GetGPSQuality(GPS_MODULE))
+				continue;
+
+			//Grab minutes in the day UTC.
+			minutes = aGPM_GetHours(GPS_MODULE) * 60 + aGPM_GetMinutes(GPS_MODULE);
+			sec = aGPM_GetSeconds(GPS_MODULE);
+	
+			if (prevSec != sec) {
+			
+				latDeg = aGPM_GetLatitudeDegrees(GPS_MODULE);
+				latMin = aGPM_GetLatitudeMinutes(GPS_MODULE);
+				latFrac = aGPM_GetLatitudeFrac(GPS_MODULE);
+				lonDeg = aGPM_GetLongitudeDegrees(GPS_MODULE);
+				lonMin = aGPM_GetLongitudeMinutes(GPS_MODULE);
+				lonFrac = aGPM_GetLongitudeFrac(GPS_MODULE);
+				
+				// In kilometers per hour.
+				speed = aGPM_GetSpeed(GPS_MODULE);
+				speedFrac = aGPM_GetSpeedFrac(GPS_MODULE);
+				heading = aGPM_GetMagHeading(GPS_MODULE);
+				headingFrac = aGPM_GetMagHeadingFrac(GPS_MODULE);
+
+				aPad_WriteChar(aSPAD_GP2_GPS_ISACTIVE, aGPM_GetGPSQuality(GPS_MODULE));
+				aPad_WriteInt(aSPAD_GP2_GPS_MIN, minutes);
+				aPad_WriteInt(aSPAD_GP2_GPS_SEC, sec);
+				aPad_WriteInt(aSPAD_GP2_GPS_LAT, latDeg);
+				aPad_WriteInt(aSPAD_GP2_GPS_LAT+2, latMin);
+				aPad_WriteInt(aSPAD_GP2_GPS_LAT+4, latFrac);
+        aPad_WriteInt(aSPAD_GP2_GPS_LON, latDeg);
+				aPad_WriteInt(aSPAD_GP2_GPS_LON+2, latMin);
+				aPad_WriteInt(aSPAD_GP2_GPS_LON+4, latFrac);
+				aPad_WriteInt(aSPAD_GP2_GPS_SPD, speed);
+				aPad_WriteInt(aSPAD_GP2_GPS_SPD+2, speedFrac);
+				aPad_WriteInt(aSPAD_GP2_GPS_HD, heading);
+				aPad_WriteInt(aSPAD_GP2_GPS_HD+2, headingFrac);
+				aPad_WriteInt(aSPAD_GP2_CMPS_HD, aCompass_ReadInt());
+	
+#ifdef aDEBUG_LOC_SENSORS
+				aPrint_String("GPS Timestamp (sec): ");
+				aPrint_IntDec(sec);
+				aPrint_Char('\n');
+				aCore_Sleep(2000);
+				aPrint_String("GPS Latitude (deg, min, frac):");
+				aPrint_IntDec(latDeg);
+				aCore_Sleep(2000);				
+				aPrint_String(", ");
+				aPrint_IntDec(latMin);
+				aPrint_String(", ");
+				aCore_Sleep(2000);				
+				aPrint_IntDec(latFrac);
+				aPrint_Char('\n');
+				aCore_Sleep(2000);
+				aPrint_String("GPS speed (speed):");
+				aPrint_IntDec(speed);
+				aPrint_Char('.');
+				aPrint_IntDec(speedFrac);
+				aCore_Sleep(2000);				
+#endif
+
+				prevSec = sec;
+			} // end if new second.
+					  
+			// restore entry IIC speed   			
+			aCore_Outportc(aPortIICBaud, baud);
+		
+		} // end if reading values
+			
+		// We don't want to swamp the processor
+		aCore_Sleep(aSLICE);
+		
+	} // end of while loop
+	
+} // end of main
