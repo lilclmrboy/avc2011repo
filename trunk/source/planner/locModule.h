@@ -33,6 +33,13 @@ private:
 	int m_curGPSTimeSec;
 	avcStateVector m_curPos;	
 	int getGPSTimeSec(void);
+	bool getGPSQuality(void);
+	//longitude and latitude are in degrees...
+	//Boulder is pretty close to -105 degrees longitude, and 40 degrees latitude.
+	//We're using double precision number here so we'll compact minutes into 
+	//fractional degrees.
+	double getGPSLongitude(void);
+	double getGPSLatitude(void);
 	
 };
 
