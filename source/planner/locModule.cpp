@@ -20,7 +20,7 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 	  */
 		int timeout = 0;
 		bool haveGPS = false;
-		while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
+		while (!((getGPSQuality()==0)? false:true) && timeout < aGPS_LOCK_STEPS) {
 			aIO_MSSleep(m_ioRef, 1000, NULL);
 			++timeout;
 		}
@@ -28,7 +28,7 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		if (haveGPS) {
 			//Lets get a lat, lon, and heading... from compass. We shouldn't
 			//be moving yet.
-			
+		
 			m_curPos.x = getGPSLongitude();						
 			m_curPos.y = getGPSLatitude();
 			//We shouldn't have moved yet, so we get the heading from the 
@@ -39,8 +39,7 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 
 			//We grabbed a potentially noisy set of sensor readings here,
 			//so lets initialize our Probability matrices to the initial 
-			//variance parameters for x, y and headings.
-			
+			//variance parameters for x, y and headings. 	
 	
     } //else the default initilization of the state vector
 			//and probability matrix is zero'd.
@@ -48,6 +47,10 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		//We should always be able to get a timestamp from the GPS unit.
 		//even without the required number of satellites.		
 		m_curGPSTimeSec = getGPSTimeSec();
+
+    //Lets initialize the encoders to zero.
+		m_pStem->MO_ENC32(aMOTO_MODULE, aMOTOR_RIGHT, 0);
+		m_pStem->MO_ENC32(aMOTO_MODULE, aMOTOR_LEFT, 0);
 
 		return aErrNone;
 	} else {
@@ -151,6 +154,14 @@ avcPosition::getCMPSHeading(void) {
   tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_CMPS_HD+1);
 	retVal = ((double) tmp)/10.0;
 	return retVal;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+int 
+avcPosition::getEncoderValue(unsigned char motor) {
+  //We could do more here to check for encoder wrap.
+  return m_pStem->MO_ENC32(aMOTO_MODULE, motor);
 }
 
 
