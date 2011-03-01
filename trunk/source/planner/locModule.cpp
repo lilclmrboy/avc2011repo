@@ -1,10 +1,16 @@
 #include "locModule.h"
 
+//We'll wait up to 30 seconds for a GPS lock on initialization.
+#define aGPS_LOCK_STEPS 30
 ////////////////////////////////////////////////////////////////////////////
 aErr
-avcPosition::init(acpStem* pStem) {
+avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 
 	m_pStem = pStem;
+	m_settings = settings;
+
+	//first we'll grab some settings from the settings file.
+	
 
 	if (m_pStem && m_pStem->isConnected()) {
 		/*lets do some initialization. First we need to find out
@@ -12,14 +18,37 @@ avcPosition::init(acpStem* pStem) {
 		* our starting position from the GPS position information
 		* else we'll assume we're at the 0,0,0 position.	
 	  */
-		if (getGPSQuality()) {
+		int timeout = 0;
+		bool haveGPS = false;
+		while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
+			aIO_MSSleep(m_ioRef, 1000, NULL);
+			++timeout;
+		}
+
+		if (haveGPS) {
 			//Lets get a lat, lon, and heading... from compass. We shouldn't
 			//be moving yet.
-									
+			
+			m_curPos.x = getGPSLongitude();						
+			m_curPos.y = getGPSLatitude();
+			//We shouldn't have moved yet, so we get the heading from the 
+			//compass instead of the GPS, we only want to get the compass
+			//while outside to reduce the potential confound of a prevailing
+			//non-earth magnetic field.
+			m_curPos.h = getCMPSHeading();
 
+			//We grabbed a potentially noisy set of sensor readings here,
+			//so lets initialize our Probability matrices to the initial 
+			//variance parameters for x, y and headings.
+			
+	
+    } //else the default initilization of the state vector
+			//and probability matrix is zero'd.
 
+		//We should always be able to get a timestamp from the GPS unit.
+		//even without the required number of satellites.		
+		m_curGPSTimeSec = getGPSTimeSec();
 
-    } //else the default initilization of the state vector is zero'd.
 		return aErrNone;
 	} else {
 		return aErrConnection;
@@ -75,12 +104,19 @@ avcPosition::getGPSQuality(void) {
 /////////////////////////////////////////////////////////////////////////////
 
 double 
-avcPosition::getLongitude(void)
+avcPosition::getGPSLongitude(void)
 {
 	double retVal = 0.0;
-	int tmp = 0;
-	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_MIN) << 8; 
-  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_MIN+1);
+	short tmp = 0;
+	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON) << 8; 
+  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+1);
+	retVal = (double) tmp;
+	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+2) << 8; 
+  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+3);
+	retVal += ((double) tmp)/60.0;
+	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+4) << 8; 
+  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+5);
+	retVal += ((double) tmp)/10000.0;
 
 	return retVal;
 }
@@ -88,13 +124,32 @@ avcPosition::getLongitude(void)
 /////////////////////////////////////////////////////////////////////////////
 
 double 
-avcPosition::getLatitude(void)
+avcPosition::getGPSLatitude(void)
 {
 	double retVal = 0.0;
+	short tmp = 0;
+	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT) << 8; 
+  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+1);
+	retVal = (double) tmp;
+	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+2) << 8; 
+  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+3);
+	retVal += ((double) tmp)/60.0;
+	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+4) << 8; 
+  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+5);
+	retVal += ((double) tmp)/10000.0;
 
-	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_MIN) << 8; 
-  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_MIN+1);
+	return retVal;
+}
 
+/////////////////////////////////////////////////////////////////////////////
+
+double
+avcPosition::getCMPSHeading(void) {
+	double retVal = 0.0;
+	short tmp = 0;
+	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_CMPS_HD) << 8; 
+  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_CMPS_HD+1);
+	retVal = ((double) tmp)/10.0;
 	return retVal;
 }
 
