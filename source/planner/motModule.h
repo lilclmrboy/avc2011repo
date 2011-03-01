@@ -7,19 +7,17 @@
 #ifndef _motModule_H_
 #define _motModule_H_
 
-#include <stdio.h>
-#include "avc2011Structs.h"
-#include "avc2011Defs.tea"
+#include "avc2011.h"
 
 class avcMotion {
 
 public:
 	avcMotion(void);
-	~avcMotion(void){}
+	~avcMotion(void);
 	
 	// Must call this first before doing any updates. Failure to do so will
 	// cause all calls on updateControl to return an error.
-	aErr init(acpStem *pStem);
+	aErr init(acpStem *pStem, aSettingFileRef settings);
 	
 	// Updates the wheel velocity setpoints with a desired
 	// force vector. 
@@ -32,7 +30,14 @@ public:
 	
 	
 private: 
+	
+	aIOLib m_ioRef;
+	
+	// Our controller owns this too. We'll let them delete this.
 	acpStem *m_pStem;
+	
+	//Our controller owns this we'll let them delete.	
+	aSettingFileRef m_settings;
 	
 	short m_setpointMax;
 	short m_setpoint[aMOTOR_NUM];

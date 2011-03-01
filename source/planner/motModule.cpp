@@ -2,7 +2,6 @@
 // Filename: motModule.cpp
 
 #include "motModule.h"
-#include <math.h>
 
 #ifdef aDEBUG_MOTMODULE
 bool bDebugHeader = true;
@@ -35,8 +34,12 @@ double sgn(double x)
 // Constructor for the function
 avcMotion::avcMotion() :
   m_pStem(NULL),
+  m_settings(NULL),
   m_setpointMax(aMOTOR_SETPOINT_MAX)
+  
 {
+	
+	aErr e = aErrNone;
 	
 	// set up all the setpoint place holders
 	for (int m = 0; m < aMOTOR_NUM; m++) {
@@ -46,23 +49,62 @@ avcMotion::avcMotion() :
 		
 	}
 	
+	// Create a aIO reference to manipulate settings file reference
+	if(aIO_GetLibRef(&m_ioRef, &e)) 
+		throw acpException(e, "Getting aIOLib reference");
+	
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Destructor for the function
+avcMotion::~avcMotion() 
+{
+	
+	aErr e = aErrNone;
+	
+	if (aSettingFile_Destroy(m_ioRef, m_settings, &e))
+		throw acpException(e, "unable to destroy settings");
+	
+	if (aIO_ReleaseLibRef(m_ioRef, &e))
+		throw acpException(e, "unable to destroy settings");
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // Get the Stem object and initialize any thing else that we need to.
 
 aErr
-avcMotion::init(acpStem *pStem) {
+avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
+	
+	aErr e = aErrNone;
 	
 	// Grab the pointer to the Stem. 
 	m_pStem = pStem;
 	
+	// Grab the pointer to the settings
+	m_settings = settings;
+	
+	// Read motion module specific settings from the settings file
+	// reference. Remember, this can get created from a configuration 
+	// file, OR as command line input arguments. 
+	int setpoint;
+	aSettingFile_GetInt(m_ioRef, m_settings, 
+											aKEY_VELOCITY_SETPOINT_MAX,
+											&setpoint,
+											aMOTOR_SETPOINT_MAX,
+											&e);
+	
+	// Copy this into our member variable. Our setpoint is bounded by a 
+	// 2 byte value. Short is enough. Likely even transition to an 
+	// unsigned char since we are not likely to go past 200. 
+	m_setpointMax = (short) setpoint;
+											
 	// Make sure we prime the enable motion control polling via the scrachpad.
 	// For now, we will assume that the TEA monitor is either enabled via
 	// bootstap VM or called by VM_RUN
 	m_pStem->PAD_IO(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE, 1);
 	
-	return aErrNone;
+	return e;
 	
 }
 
@@ -101,7 +143,7 @@ avcMotion::updateControl(const avcForceVector& potential)
 	magnitude = sqrt(potential.x * potential.x + potential.y * potential.y);
 	delta = atan2(potential.y, potential.x);
 	
-	// Straight from the research paper
+	// Straight from the research paper. With some minor adjustments
 	t = (cos(delta) * cos(delta)) * sgn(cos(delta));
 	r = (sin(delta) * sin(delta)) * sgn(sin(delta));
 	
@@ -172,9 +214,9 @@ avcMotion::updateControl(const avcForceVector& potential)
 #define aTESTWITHSTEM 1
 
 ////////////////////////////////////////
-int doTests(acpStem *pStem);
+int doTests(acpStem *pStem, aSettingFileRef settings);
 
-int doTests(acpStem *pStem) {
+int doTests(acpStem *pStem, aSettingFileRef settings) {
 	
 	avcMotion motion;
 	avcForceVector Uresult;
@@ -196,7 +238,7 @@ int doTests(acpStem *pStem) {
 	
 	///////////////////////////////////////////////////
 	// Initialize the stem object for the rest of the tests
-	e = motion.init(pStem);
+	e = motion.init(pStem, settings);
 	
 	// Check the upper x range
 	printf("Force X component to large test...\n");
@@ -357,7 +399,7 @@ main(int argc,
 	// Begin the real actual testing
 	// We are connected to the stem now, we can beat on the motion control 
 	// module. Ya!!!
-	doTests(&stem);
+	doTests(&stem, settings);
 
 	aIO_MSSleep(ioRef, 1000, NULL);
 	

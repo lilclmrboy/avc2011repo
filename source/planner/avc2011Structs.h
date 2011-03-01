@@ -5,14 +5,6 @@
 //
 #ifndef _avc2011Structs_H_
 #define _avc2011Structs_H_
-#include "aStem.h"
-#include <vector>
-#include <stdarg.h>
-#ifdef aDEBUG_H
-	#define aDEBUG_PRINT(arg, ... ) printf(arg, ##__VA_ARGS__);fflush(stdout)
-#else 
-	#define aDEBUG_PRINT(arg)
-#endif
 
 using std::vector;
 
