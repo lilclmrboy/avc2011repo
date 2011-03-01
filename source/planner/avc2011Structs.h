@@ -7,9 +7,9 @@
 #define _avc2011Structs_H_
 #include "aStem.h"
 #include <vector>
-
+#include <stdarg.h>
 #ifdef aDEBUG_H
-	#define aDEBUG_PRINT(arg) printf(arg);fflush(stdout)
+	#define aDEBUG_PRINT(arg, ... ) printf(arg, ##__VA_ARGS__);fflush(stdout)
 #else 
 	#define aDEBUG_PRINT(arg)
 #endif
@@ -44,22 +44,31 @@ typedef struct avcStateVector {
 	double y;
 	//heading degrees from magnetic north.
 	double h;
-	//speed
-	double s;
+	//velocity in x direction
+	double vx;
+	//velocity in y direction
+	double vy;
+	//angular velocity.
+	double vw;
 
 	avcStateVector(void) :
 		x(0.0),
 		y(0.0),
 		h(0.0),
-		s(0.0)
+		vx(0.0),
+		vy(0.0),
+		vw(0.0)
   {}
 	
 	avcStateVector(double la, double lo, 
-                 double he, double spd = 0.0) : 
+                 double he, double sx = 0.0,
+								 double sy = 0.0, double sw = 0.0) : 
 		x(lo),
 		y(la),
 		h(he),
-		s(spd)
+		vx(sx),
+		vy(sy),
+	  vw(sw)
   {}	
 
 } avcStateVector;
