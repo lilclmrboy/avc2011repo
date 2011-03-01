@@ -15,7 +15,9 @@ public:
 	avcPosition(void) : 
 	  m_pStem(NULL),
 		m_ioRef(NULL),
-		m_curGPSTimeSec(0), 
+		m_curGPSTimeSec(0),
+		m_rEncoder(0),
+		m_lEncoder(0), 
 		m_settings(NULL)
 	{	
 		aErr e;
@@ -46,6 +48,8 @@ private:
 	aIOLib m_ioRef;
 	int m_curGPSTimeSec;
 	avcStateVector m_curPos;
+	unsigned int m_rEncoder;
+	unsigned int m_lEncoder;
 	
 	//Our controller owns this we'll let them delete.	
 	aSettingFileRef m_settings;
@@ -59,6 +63,7 @@ private:
 	double getGPSLongitude(void);
 	double getGPSLatitude(void);
 	double getCMPSHeading(void);
+	int getEncoderValue(unsigned char motor);
 	
 };
 
