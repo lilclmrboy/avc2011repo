@@ -43,9 +43,13 @@ void main(char callingProcID)
 						
 			//Grab current baudrate for the IIC bus. And then set the 
 			//baudrate to 400Khz for the GPS.
-			baud = aCore_Inportc(aPortIICBaud);
-      aCore_Outportc(aPortIICBaud, IIC_400Khz);
-			
+			//We're settting the system IIC baudrate to 400Khz,
+			//Any other system speed will require shifting the baudrate			
+			//baud = aCore_Inportc(aPortIICBaud);
+      //aCore_Outportc(aPortIICBaud, IIC_400Khz);
+						
+
+
 			if (!aGPM_GetGPSQuality(GPS_MODULE))
 				continue;
 
@@ -108,8 +112,8 @@ void main(char callingProcID)
 				prevSec = sec;
 			} // end if new second.
 					  
-			// restore entry IIC speed   			
-			aCore_Outportc(aPortIICBaud, baud);
+			// restore entry IIC speed -- only needed if system baudrate is not 400khz  			
+			//aCore_Outportc(aPortIICBaud, baud);
 		
 		} // end if reading values
 			
