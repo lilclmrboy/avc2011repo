@@ -7,8 +7,7 @@
 #ifndef _locModule_H_
 #define _locModule_H_
 
-#include "avc2011Structs.h"
-#include "avc2011Defs.tea"
+#include "avc2011.h"
 
 class avcPosition 
 {

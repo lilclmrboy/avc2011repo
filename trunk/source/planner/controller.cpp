@@ -60,7 +60,7 @@ avcController::init(const int argc, const char* argv[]) {
 		aDEBUG_PRINT("done\n");
 	
 		// Don't forget to init the modules :)
-		e = m_mot.init(&m_stem);
+		e = m_mot.init(&m_stem, m_settings);
 		e = m_pos.init(&m_stem, m_settings);
 	}
 	return e;
