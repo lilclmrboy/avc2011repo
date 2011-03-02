@@ -63,6 +63,7 @@ OBJECTS = \
       $(OBJ)/planner.o \
       $(OBJ)/controller.o \
       $(OBJ)/motModule.o \
+			$(OBJ)/logger.o \
       $(OBJ)/locModule.o
 
 
@@ -84,11 +85,18 @@ $(OBJ)/%.o : %.cpp %.h
 .PHONY : motModuleTest
 motModuleTest : $(OBJ)
 	$(CC) -c $(CFLAGS) -DaDEBUG_MOTMODULE motModule.cpp -o $(OBJ)/motModule.o
-	$(CC) -g $(CFLAGS) -DaDEBUG_MOTMODULE $(LFLAGS) $(OBJ)/motModule.o $(LIBS) $(FRAMEWORKS) -o motModuleTest
+	$(CC) -g $(CFLAGS) -DaDEBUG_MOTMODULE $(LFLAGS) $(OBJ)/motModule.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/motModuleTest
+
+.PHONY : loggerTest
+loggerTest : $(OBJ)
+	$(CC) -c $(CFLAGS) -DaDEBUG_LOGGER logger.cpp -o $(OBJ)/logger.o
+	$(CC) -g $(CFLAGS) -DaDEBUG_LOGGER $(LFLAGS) $(OBJ)/logger.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/loggerTest
+
 
 .PHONY : clean
 clean :
 	rm -rf $(OBJ)
 	rm -f $(BIN)/$(APP)
 	rm -f $(BIN)/motModuleTest
+	rm -f $(BIN)/loggerTest
 	
