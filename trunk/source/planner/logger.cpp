@@ -39,7 +39,7 @@ logger::~logger(void)
 
 ///////////////////////////////////////////////////////////////////////////
 // Grabs the system time and formats as a string
-const char *
+acpString
 logger::getTime(void) {
 	
 	char buffer[80];
@@ -51,7 +51,6 @@ logger::getTime(void) {
 	time(&m_rawtime);
   m_pTimeinfo = localtime (&m_rawtime);
   strftime (buffer, 80, "%x-%X", m_pTimeinfo);
-	
 	// Safe and friendly copy
 	info = buffer;
 	
@@ -75,7 +74,7 @@ logger::append(const char * info, aLogType type /* = LogAll */)
 			case LogConsole:
 				
 				// Write the string out. We might want a different format 
-				fprintf(m_pConsole, "LOG (%s): %s\n", getTime(), info);
+				fprintf(m_pConsole, "LOG (%s): %s\n", (const char*) getTime(), info);
 				
 				break;
 				
@@ -83,7 +82,7 @@ logger::append(const char * info, aLogType type /* = LogAll */)
 				
 				// Check to make sure file is not NOT created
 				if (m_pLogTxt)
-					fprintf(m_pLogTxt, "LOG (%s): %s\n", getTime(), info);
+					fprintf(m_pLogTxt, "LOG (%s): %s\n", (const char*) getTime(), info);
 				
 				break;
 				
@@ -119,7 +118,7 @@ logger::append(const avcStateVector& statevector, aLogType type /* = LogAll */)
 								"Heading: %2.2f "
 								"Vx: %2.2f Vy: %2.2f Vw: %2.2f"
 								"\n", 
-								getTime(), 
+								(const char*) getTime(), 
 								statevector.x,
 								statevector.y,
 								statevector.h,
@@ -139,7 +138,7 @@ logger::append(const avcStateVector& statevector, aLogType type /* = LogAll */)
 									"Heading: %2.2f "
 									"Vx: %2.2f Vy: %2.2f Vw: %2.2f"
 									"\n", 
-									getTime(), 
+									(const char*) getTime(), 
 									statevector.x,
 									statevector.y,
 									statevector.h,
@@ -178,7 +177,7 @@ logger::append(const avcForceVector& potential, aLogType type /* = LogAll */)
 				fprintf(m_pConsole, "LOG (%s): "
 								"Ux: %2.2f Uy: %2.2f"
 								"\n", 
-								getTime(), 
+								(const char*) getTime(), 
 								potential.x,
 								potential.y);
 				
@@ -192,7 +191,7 @@ logger::append(const avcForceVector& potential, aLogType type /* = LogAll */)
 					fprintf(m_pLogTxt, "LOG (%s): "
 									"Ux: %2.2f Uy: %2.2f"
 									"\n", 
-									getTime(), 
+									(const char*) getTime(), 
 									potential.x,
 									potential.y);
 				break;

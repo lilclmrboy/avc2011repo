@@ -8,7 +8,7 @@
  */
 #include "mat_math.h"
 #include <cassert>
-
+#include <stdio.h>
 
 int main(int argc, char *argv[])
 {
