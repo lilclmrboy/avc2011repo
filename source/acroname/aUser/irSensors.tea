@@ -16,6 +16,27 @@
 #define IR_RIGHT_ANGLE_COSINE 86
 #define IR_RIGHT_ANGLE_SINE -50
 
+#define IR_NUMBER_RANGERS 2
+
+/*
+  when IR_NUMBER_RANGERS == 2
+	
+  32767 / IR_NUMBER_RANGERS = 16383
+	16383 / 512 = 31
+	
+	therefore,
+	
+	divider = (32767 / IR_NUMBER_RANGERS ) / 512
+	
+	simplifying,
+	
+	divider = (0x7FFF >> 9) / IR_NUMBER_RANGERS
+	
+	making it, 
+	
+	result = a2d * ((0x7FFF >> 9) / IR_NUMBER_RANGERS)
+*/
+
 /* ************************************************************************** */
 /* Computes a scalar that is equal to the distance
  * Capped at 1000
@@ -30,6 +51,7 @@ int gp2dxx_magnitude(char index) {
 	reading = aA2D_ReadInt(index);
 	
 	// Read the result and scale it down
+	// The Sharp IR rangers at most output 2.5V, which is an A2D reading of 512. 
 	result = reading << 5;
 
 	if (result > 0x4000) result = 0x4000;
