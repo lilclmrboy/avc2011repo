@@ -10,6 +10,7 @@
 #include "mat_math.h"
 #include "string.h"
 #include "math.h"
+#include <stdio.h>
 
 Matrix::Matrix(const Matrix& m) {
   m_rows = m.m_rows;

@@ -5,7 +5,7 @@
 #define _logger_H_
 
 #include "avc2011.h"
-
+#include <time.h>
 // We can add more to this as we see needed
 enum aLogType {
 	LogConsole = 1,
@@ -35,7 +35,7 @@ private:
 	struct tm *m_pTimeinfo;
 	
 	// Gets a string that is based on the system time.
-	const char * getTime(void);
+	acpString getTime(void);
 	
 };
 

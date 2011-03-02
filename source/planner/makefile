@@ -63,9 +63,9 @@ OBJECTS = \
       $(OBJ)/planner.o \
       $(OBJ)/controller.o \
       $(OBJ)/motModule.o \
-			$(OBJ)/logger.o \
-      $(OBJ)/locModule.o
-
+	$(OBJ)/logger.o \
+      $(OBJ)/locModule.o \
+	$(OBJ)/mat_math.o
 
 .PHONY : app
 app : $(OBJ) $(BIN)/$(APP)
@@ -92,6 +92,12 @@ loggerTest : $(OBJ)
 	$(CC) -c $(CFLAGS) -DaDEBUG_LOGGER logger.cpp -o $(OBJ)/logger.o
 	$(CC) -g $(CFLAGS) -DaDEBUG_LOGGER $(LFLAGS) $(OBJ)/logger.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/loggerTest
 
+.PHONY : MatrixTest
+MatrixTest : $(OBJ)/mat_math.o
+	$(CC) -c $(CFLAGS) matTest.cpp -o $(OBJ)/matTest.o
+	$(CC) -g $(CFLAGS)  $(LFLAGS) $(OBJ)/matTest.o $(OBJ)/mat_math.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/MatrixTest
+
+
 
 .PHONY : clean
 clean :
@@ -99,4 +105,4 @@ clean :
 	rm -f $(BIN)/$(APP)
 	rm -f $(BIN)/motModuleTest
 	rm -f $(BIN)/loggerTest
-	
+	rm -f $(BIN)/MatrixTest	
