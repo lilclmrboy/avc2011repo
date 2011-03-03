@@ -7,19 +7,40 @@
 ///////////////////////////////////////////////////////////////////////////
 // Class constructor
 logger::logger(void) :
-  m_pConsole(NULL),
-  m_pLogTxt(NULL)
+m_pConsole(NULL),
+m_pLogTxt(NULL), 
+m_ioRef(NULL),
+m_settings(NULL)
 {
-	// Let's write to STDOUT. We could make this just about anywhere if we want
-	m_pConsole = stdout;
-	
-	// Open and create a plain log file to write to
+	aErr e = aErrNone;
 	char outputfile[32];
-	sprintf(outputfile, "logger.log");
-	m_pLogTxt = fopen(outputfile,"a");
 	
 	if (m_pLogTxt == NULL)
 		aDEBUG_PRINT("Could not create %s file\n", outputfile);
+	
+	// Create a aIO reference to manipulate settings file reference
+	if(aIO_GetLibRef(&m_ioRef, &e)) 
+		throw acpException(e, "Getting aIOLib reference");
+	
+	// Read from the SettingsFileRef to see if we should change things for our
+	// logger. 
+	// We need to first call the create settings file reference function
+	// Then grab what we want out of it
+	// OR, we should pass it in. I like that a bit more. 
+	//	int setpoint;
+	//	aSettingFile_GetInt(m_ioRef, m_settings, 
+	//											aKEY_VELOCITY_SETPOINT_MAX,
+	//											&setpoint,
+	//											aMOTOR_SETPOINT_MAX,
+	//											&e);
+	
+	// Let's write to STDOUT. We could make this just about anywhere if we want
+	// Like STDERR, etc
+	m_pConsole = stdout;
+	
+	// Open and create a plain log file to write to
+	sprintf(outputfile, "logger.log");
+	m_pLogTxt = fopen(outputfile,"a");
 	
 }
 
@@ -27,6 +48,7 @@ logger::logger(void) :
 // Class constructor
 logger::~logger(void)
 {
+	aErr e = aErrNone;
 	
 	/* Exit and close up our documents */
   if (m_pConsole)
@@ -34,6 +56,13 @@ logger::~logger(void)
 	
 	if (m_pLogTxt)
     fclose(m_pLogTxt); // Close the general log file 
+	
+	/* Clean up input settings */
+	if (aSettingFile_Destroy(m_ioRef, m_settings, &e))
+		throw acpException(e, "unable to destroy settings");
+	
+	if (aIO_ReleaseLibRef(m_ioRef, &e))
+		throw acpException(e, "unable to destroy settings");
 	
 }
 
@@ -46,7 +75,7 @@ logger::getTime(void) {
 	
 	// cheater. this gets rid of some memory issues
 	acpString info;
-
+	
 	// Standard textbook get the time stuff
 	time(&m_rawtime);
   m_pTimeinfo = localtime (&m_rawtime);
@@ -60,7 +89,7 @@ logger::getTime(void) {
 ///////////////////////////////////////////////////////////////////////////
 // Append a general comment to the log output
 void
-logger::append(const char * info, aLogType type /* = LogAll */)
+logger::appendString(const char * info, aLogType type /* = LogAll */)
 {	
 	
 	int i = type;
@@ -69,8 +98,9 @@ logger::append(const char * info, aLogType type /* = LogAll */)
 	do {
 		
 		// Depending on whom we write to, we might do different stuff
+		// We could so some fancy things, or not here. 
 		switch (i) {
-
+				
 			case LogConsole:
 				
 				// Write the string out. We might want a different format 
@@ -97,65 +127,50 @@ logger::append(const char * info, aLogType type /* = LogAll */)
 	
 }
 
+
+///////////////////////////////////////////////////////////////////////////
+// Append a general comment to the log output
+void
+logger::append(const char * info, aLogType type /* = LogAll */)
+{	
+	
+	// Write the data out
+	appendString(info, type);
+	
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Append a vector to the log output
+// We build up the information and pass it to our private function 
+// that handles the writing. 
 void
 logger::append(const avcStateVector& statevector, aLogType type /* = LogAll */)
 {
 	
-	int i = type;
-	bool bLogAll = (type == LogAll) ? true : false;
+	char buffer[100];
 	
-	do {
-				
-		// Depending on whom we write to, we might do different stuff
-		switch (i) {
-			case LogConsole:
-				
-				// Write the string out. We might want a different format 
-				fprintf(m_pConsole, "LOG (%s): "
-								"Longitude: %2.2f Latitude: %2.2f "
-								"Heading: %2.2f "
-								"Vx: %2.2f Vy: %2.2f Vw: %2.2f"
-								"\n", 
-								(const char*) getTime(), 
-								statevector.x,
-								statevector.y,
-								statevector.h,
-								statevector.vx,
-								statevector.vy,
-								statevector.vw);
-				
-				break;
-				
-			case LogText:
-				
-				// Check to make sure file is not NOT created
-				if (m_pLogTxt)
-					// Write the string out. We might want a different format 
-					fprintf(m_pLogTxt, "LOG (%s): "
-									"Longitude: %2.2f Latitude: %2.2f "
-									"Heading: %2.2f "
-									"Vx: %2.2f Vy: %2.2f Vw: %2.2f"
-									"\n", 
-									(const char*) getTime(), 
-									statevector.x,
-									statevector.y,
-									statevector.h,
-									statevector.vx,
-									statevector.vy,
-									statevector.vw);
-				break;
-				
-			default:
-				break;
-		}
-		
-		// Decrement the counter
-		i--;
-		
-	} while (bLogAll && (i > 0));
-
+	switch (type) {
+		case LogAll:
+		case LogConsole:
+		case LogText:
+			sprintf(buffer,
+							"Longitude: %2.2f Latitude: %2.2f Heading: %2.2f "
+							"Vx: %2.2f Vy: %2.2f Vw: %2.2f",
+							statevector.x,
+							statevector.y,
+							statevector.h,
+							statevector.vx,
+							statevector.vy,
+							statevector.vw);
+			
+			break;
+		default:
+			break;
+	}
+	
+	// Write the data out
+	appendString(buffer, type);
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -164,46 +179,24 @@ void
 logger::append(const avcForceVector& potential, aLogType type /* = LogAll */)
 {
 	
-	int i = type;
-	bool bLogAll = (type == LogAll) ? true : false;
+	char buffer[100];
 	
-	do {
-		
-		// Depending on whom we write to, we might do different stuff
-		switch (i) {
-			case LogConsole:
-				
-				// Write the string out. We might want a different format 
-				fprintf(m_pConsole, "LOG (%s): "
-								"Ux: %2.2f Uy: %2.2f"
-								"\n", 
-								(const char*) getTime(), 
-								potential.x,
-								potential.y);
-				
-				break;
-				
-			case LogText:
-				
-				// Check to make sure file is not NOT created
-				if (m_pLogTxt)
-					// Write the string out. We might want a different format 
-					fprintf(m_pLogTxt, "LOG (%s): "
-									"Ux: %2.2f Uy: %2.2f"
-									"\n", 
-									(const char*) getTime(), 
-									potential.x,
-									potential.y);
-				break;
-				
-			default:
-				break;
-		}
-		
-		// Decrement the counter
-		i--;
-		
-	} while (bLogAll && (i > 0));
+	switch (type) {
+		case LogAll:
+		case LogConsole:
+		case LogText:
+			sprintf(buffer,
+							"Ux: %2.2f Uy: %2.2f",
+							potential.x,
+							potential.y);
+			
+			break;
+		default:
+			break;
+	}
+	
+	// Write the data out
+	appendString(buffer, type);
 	
 }
 
@@ -232,9 +225,9 @@ main(int argc,
 		Uresult.y = -1*i;
 		
 		log.append(Uresult);
-
+		
 	}
-
+	
 	return 0;
 	
 }
