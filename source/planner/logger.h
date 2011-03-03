@@ -34,8 +34,15 @@ private:
 	time_t m_rawtime;
 	struct tm *m_pTimeinfo;
 	
+	//Our controller owns this we'll let them delete.
+	aIOLib m_ioRef;
+	aSettingFileRef m_settings;
+	
 	// Gets a string that is based on the system time.
 	acpString getTime(void);
+	
+	// Writes a formatted string to somewhere
+	void appendString(const char * info, aLogType type = LogAll);
 	
 };
 
