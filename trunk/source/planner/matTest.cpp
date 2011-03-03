@@ -26,9 +26,9 @@ int main(int argc, char *argv[])
   assert(b(1,1) == 3);
 
 	//Insert into a non existant row.
-	bool exept = false;
+  bool exept = false;
   try {
-    Matrix b(2,1)= 3;
+		b(2,1)= 3;
   }
   catch (ArrayOutOfBounds err) {
     exept = true;
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	//Insert into a non existant column.
 	exept = false;
   try {
-    Matrix b(1,2)= 3;
+  	b(1,2)= 3;
   }
   catch (ArrayOutOfBounds err) {
     exept = true;
@@ -165,7 +165,8 @@ int main(int argc, char *argv[])
     exept = true;
   }
   assert(exept);
-  
+ 
+	//Bounds testing rows and columns 
   exept = false;
   try {
     g = f(6,1);
@@ -184,6 +185,7 @@ int main(int argc, char *argv[])
   }
   assert(exept);
   
+	//Testing invertable condition on non-square matrix.
   exept = false;
   try {
     g = f.invert();
@@ -197,7 +199,7 @@ int main(int argc, char *argv[])
   assert(g.numCols() == 2 && g.numRows() == 2);
   
   assert(g(1,1) == 1 && g(2,1) == -1);
-  
+  //Testing invertability.
   d = a.invert();
   printMatrix(d);
   
@@ -208,17 +210,32 @@ int main(int argc, char *argv[])
   
   Matrix l(2,3);
   
-  
+  //testing appending to matrix.
   l.push(g);
   l.push(g);
   printMatrix(l);
   
   printMatrix(d * h);
   
+	//vector arithmetic.
   assert( (h + h) == i );
   assert( (i - h) == h );
   assert( (h * 2) == i );
   assert( (2 * h) == i );
   
   assert( Vector(h).subVector(1,2) == Vector(h).resize(2) );
+
+	//Invertable 6D matrix.
+	Matrix J(6,6);
+	J(1,1) = 4; J(1,2) = 2; J(1,3) = 4; J(1,4) = 3; J(1,5) = 3; J(1,6) = 1;
+	J(2,1) = 2; J(2,2) = 2; J(2,3) = 2; J(2,4) = 3; J(2,5) = 3; J(2,6) = 1;
+	J(3,1) = 4; J(3,2) = 2; J(3,3) = 3; J(3,4) = 1; J(3,5) = 4; J(3,6) = 1;
+	J(4,1) = 3; J(4,2) = 3; J(4,3) = 1; J(4,4) = 2; J(4,5) = 4; J(4,6) = 1;
+	J(5,1) = 3; J(5,2) = 3; J(5,3) = 4; J(5,4) = 4; J(5,5) = 3; J(5,6) = 1;
+	J(6,1) = 1; J(6,2) = 1; J(6,3) = 1; J(6,4) = 1; J(6,5) = 1; J(6,6) = 1;
+
+	J = J.invert();
+
+	printMatrix(J); 	
+
 }
