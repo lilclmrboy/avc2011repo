@@ -7,10 +7,10 @@
 ///////////////////////////////////////////////////////////////////////////
 // Class constructor
 logger::logger(void) :
-m_pConsole(NULL),
-m_pLogTxt(NULL), 
-m_ioRef(NULL),
-m_settings(NULL)
+  m_pConsole(NULL),
+  m_pLogTxt(NULL), 
+  m_ioRef(NULL),
+  m_settings(NULL)
 {
 	aErr e = aErrNone;
 	char outputfile[32];
@@ -39,8 +39,37 @@ m_settings(NULL)
 	m_pConsole = stdout;
 	
 	// Open and create a plain log file to write to
-	sprintf(outputfile, "logger.log");
-	m_pLogTxt = fopen(outputfile,"a");
+	// String should be grabbed from the settings file reference
+	m_LogTextFileName = "logger.log";
+	m_pLogTxt = fopen((const char *) m_LogTextFileName,"a");
+	
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Class constructor
+logger::logger(aSettingFileRef settings) :
+  m_pConsole(NULL),
+  m_pLogTxt(NULL), 
+  m_ioRef(NULL),
+  m_settings(settings)
+{
+	aErr e = aErrNone;
+	char outputfile[32];
+	
+	if (m_pLogTxt == NULL)
+		aDEBUG_PRINT("Could not create %s file\n", outputfile);
+	
+	// Create a aIO reference to manipulate settings file reference
+	if(aIO_GetLibRef(&m_ioRef, &e)) 
+		throw acpException(e, "Getting aIOLib reference");
+	
+	// Let's write to STDOUT. We could make this just about anywhere if we want
+	// Like STDERR, etc
+	m_pConsole = stdout;
+	
+	// Open and create a plain log file to write to
+	m_LogTextFileName = "logger.log";
+	m_pLogTxt = fopen((const char *) m_LogTextFileName,"a");
 	
 }
 
@@ -58,7 +87,7 @@ logger::~logger(void)
     fclose(m_pLogTxt); // Close the general log file 
 	
 	/* Clean up input settings */
-	if (aSettingFile_Destroy(m_ioRef, m_settings, &e))
+	if (m_settings && aSettingFile_Destroy(m_ioRef, m_settings, &e))
 		throw acpException(e, "unable to destroy settings");
 	
 	if (aIO_ReleaseLibRef(m_ioRef, &e))
@@ -200,6 +229,25 @@ logger::append(const avcForceVector& potential, aLogType type /* = LogAll */)
 	
 }
 
+
+///////////////////////////////////////////////////////////////////////////
+// Clears the current log file out
+aErr
+logger::emptyLog(void)
+{
+	
+	aDEBUG_PRINT("Clearing out \"%s\" log file.\n", (const char *) m_LogTextFileName);
+	
+	if (m_pLogTxt)
+    fclose(m_pLogTxt); // Close the general log file 
+	
+	// Re-open the log file with the flag to create an empty file
+		m_pLogTxt = fopen((const char *) m_LogTextFileName,"w");
+	
+	return aErrNone;
+	
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // This section is for isolating and debugging this module. 
 #ifdef aDEBUG_LOGGER
@@ -227,6 +275,10 @@ main(int argc,
 		log.append(Uresult);
 		
 	}
+	
+	log.emptyLog();
+	
+	log.append("Second logging session started");
 	
 	return 0;
 	
