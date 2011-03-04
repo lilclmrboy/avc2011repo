@@ -29,4 +29,11 @@
 // This takes an integer value (recommended 0-200 range)
 #define aKEY_VELOCITY_SETPOINT_MAX "setpoint_max"
 
+// This is the default output file for text based logging
+#define aLOGGER_CONFIG "logger.config"
+
+// This is the default output file for text based logging
+#define aKEY_LOGGER_FILENAME "logfile"
+#define aLOGGER_FILENAME "logger.log"
+
 #endif //_avc2011_H_

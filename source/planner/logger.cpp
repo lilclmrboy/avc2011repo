@@ -27,12 +27,6 @@ logger::logger(void) :
 	// We need to first call the create settings file reference function
 	// Then grab what we want out of it
 	// OR, we should pass it in. I like that a bit more. 
-	//	int setpoint;
-	//	aSettingFile_GetInt(m_ioRef, m_settings, 
-	//											aKEY_VELOCITY_SETPOINT_MAX,
-	//											&setpoint,
-	//											aMOTOR_SETPOINT_MAX,
-	//											&e);
 	
 	// Let's write to STDOUT. We could make this just about anywhere if we want
 	// Like STDERR, etc
@@ -40,7 +34,22 @@ logger::logger(void) :
 	
 	// Open and create a plain log file to write to
 	// String should be grabbed from the settings file reference
-	m_LogTextFileName = "logger.log";
+	aSettingFile_Create(m_ioRef,
+											32,
+											aLOGGER_CONFIG,
+											&m_settings,
+											&e);
+	
+	// Grab the log file name from settings
+	char* pLogFile;
+	aSettingFile_GetString(m_ioRef,
+												 m_settings,
+												 aKEY_LOGGER_FILENAME, 
+												 &pLogFile,
+												 aLOGGER_FILENAME,
+												 &e);
+	
+	m_LogTextFileName = pLogFile;
 	m_pLogTxt = fopen((const char *) m_LogTextFileName,"a");
 	
 }
