@@ -36,4 +36,23 @@
 #define aKEY_LOGGER_FILENAME "logfile"
 #define aLOGGER_FILENAME "logger.log"
 
+// Physical dimension keys, and default values.
+#define aKEY_WHEEL_RADIUS "wheel_radius"
+#define aWHEEL_RADIUS 0.0762 /* radius of wheel in meters (6 inches) */
+
+#define aKEY_WHEEL_TRACK "wheel_track"
+#define aWHEEL_TRACK 0.18224 /* distance in meters between contact point of wheel. */
+
+#define aKEY_ENCTICK_PER_REV "encoder_ticks"
+#define aENCTICKS	1024
+
+// degree of latitude per meter at 40 degrees latitude.
+#define aKEY_LAT_DEG_PER_METER "lat_per_meter"
+#define aLAT_PER_METER 0.00000900620125
+
+// degree of Longitude per meter
+#define aKEY_LON_DEG_PER_METER "lon_per_meter"
+#define aLON_PER_METER 0.000011710448481
+
+
 #endif //_avc2011_H_

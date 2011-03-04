@@ -1,5 +1,6 @@
 #include "locModule.h"
 
+
 //We'll wait up to 30 seconds for a GPS lock on initialization.
 #define aGPS_LOCK_STEPS 30
 ////////////////////////////////////////////////////////////////////////////
@@ -20,7 +21,7 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 	  */
 		int timeout = 0;
 		bool haveGPS = false;
-		while (!((getGPSQuality()==0)? false:true) && timeout < aGPS_LOCK_STEPS) {
+		while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
 			aIO_MSSleep(m_ioRef, 1000, NULL);
 			++timeout;
 		}
@@ -35,11 +36,7 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 			//compass instead of the GPS, we only want to get the compass
 			//while outside to reduce the potential confound of a prevailing
 			//non-earth magnetic field.
-			m_curPos.h = getCMPSHeading();
-
-			//We grabbed a potentially noisy set of sensor readings here,
-			//so lets initialize our Probability matrices to the initial 
-			//variance parameters for x, y and headings. 	
+			m_curPos.h = getCMPSHeading(); 	
 	
     } //else the default initilization of the state vector
 			//and probability matrix is zero'd.
@@ -64,16 +61,44 @@ void
 avcPosition::updateState(const avcControlVector& control) {
 	
 	//First we must do an estimation step, given the previous position
-  //and the current control information.
+  //and the current control information. Lets do this in meters, and then
+	//convert to lat, lon.
+	/*
+	* x(k+1) = { cos(theta)fVel + x(k) } + vx(k)
+	*	y(k+1) = { sin(theta)fVel + y(k) } + vy(k)
+	* theta(k+1) = { dTheta + theta } + vtheta(k)
+	* vx(k+1) = { cos(theta)fdist/T } + vVx(k)
+	* vy(k+1) = { sin(theta)fdist/T } + vVy(k)
+	* vtheta(k+1) = { dTheta/T }
+	*/
 	
+	//Get the new encoder readings.
+	//int curEncR = getEncoderValue(aMOTOR_RIGHT);
+	//int curEncL = getEncoderValue(aMOTOR_LEFT);
+	
+	//convert those into distance traveled each wheel.
+	//double dWheelR = (curEncR - m_rEncoder)/ m_ticksPerRev * m_wheelCf;
+	//double dWheelL = (curEncR - m_rEncoder)/ m_ticksPerRev * m_wheelCf; 
+
+	//The forward moving distance
+	//double fDist = dWheelR/2 + dWheelL/2; 	
+
+
 	//We really only want to use GPS information if enough time has passed.
 	int curSec = getGPSTimeSec();
+	double curLat = 0.0;
+	double curLon = 0.0;
 	if (curSec != m_curGPSTimeSec) {
 		//Grab current GPS and compass settings, otherwise we'll rely on 
 		//a Kalman update with encoder values only.
+		curLat = getGPSLatitude();
+		curLon = getGPSLongitude();
+	
+		printf("Current GPS (lat, lon, seconds): %3.12f, %2.12f, %d\n", curLat, curLon, curSec);
+		m_curGPSTimeSec = curSec;
 	}
 
-	printf("Current GPS seconds in the day: %d\n", curSec);
+	
 
 }
 
@@ -109,6 +134,8 @@ avcPosition::getGPSQuality(void) {
 double 
 avcPosition::getGPSLongitude(void)
 {
+
+	//We're in the western hemisphere, so we'll have a negative longitude.
 	double retVal = 0.0;
 	short tmp = 0;
 	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON) << 8; 
@@ -119,9 +146,9 @@ avcPosition::getGPSLongitude(void)
 	retVal += ((double) tmp)/60.0;
 	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+4) << 8; 
   tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+5);
-	retVal += ((double) tmp)/10000.0;
-
-	return retVal;
+	retVal += ((double) tmp)/600000.0;
+	
+	return retVal * -1.0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -139,7 +166,7 @@ avcPosition::getGPSLatitude(void)
 	retVal += ((double) tmp)/60.0;
 	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+4) << 8; 
   tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+5);
-	retVal += ((double) tmp)/10000.0;
+	retVal += ((double) tmp)/600000.0;
 
 	return retVal;
 }
