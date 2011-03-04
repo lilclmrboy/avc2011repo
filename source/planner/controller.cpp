@@ -1,7 +1,10 @@
 #include "controller.h"
 #define aSTEM_CONN_TIMEOUT 10
 
-avcController::avcController(void) {
+avcController::avcController(void) : 
+	m_settings(NULL),
+	m_ioRef(NULL) 
+{
 	aErr e;
 
 	if(aIO_GetLibRef(&m_ioRef, &e)) 
@@ -12,10 +15,10 @@ avcController::avcController(void) {
 
 avcController::~avcController(void) {
 	aErr e;
-	if (aSettingFile_Destroy(m_ioRef, m_settings, &e))
+	if (m_settings && aSettingFile_Destroy(m_ioRef, m_settings, &e))
       		throw acpException(e, "unable to destroy settings");
-	if (aIO_ReleaseLibRef(m_ioRef, &e))
-      		throw acpException(e, "unable to destroy settings");
+	if (m_ioRef && aIO_ReleaseLibRef(m_ioRef, &e))
+      		throw acpException(e, "unable to destroy ioLib");
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -92,7 +95,7 @@ avcController::run(void) {
 		//pos = m_pos.getPosition(ir);
 
 	   	 // sleep a bit so we don't wail on the processor
-	    	aIO_MSSleep(m_ioRef, 2000, NULL);
+	    	//aIO_MSSleep(m_ioRef, 2000, NULL);
     	} // end while
 	
 	return 0;

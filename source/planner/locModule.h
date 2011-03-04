@@ -8,6 +8,7 @@
 #define _locModule_H_
 
 #include "avc2011.h"
+#include "mat_math.h"
 
 class avcPosition 
 {
@@ -16,8 +17,13 @@ public:
 	  m_pStem(NULL),
 		m_ioRef(NULL),
 		m_curGPSTimeSec(0),
+		m_P(6,6),
 		m_rEncoder(0),
-		m_lEncoder(0), 
+		m_lEncoder(0),
+		m_wheelRd(0.07626),
+		m_wheelCf(0.479),
+		m_wheelTrk(0.15),
+		m_ticksPerRev(1024), 
 		m_settings(NULL)
 	{	
 		aErr e;
@@ -48,9 +54,17 @@ private:
 	aIOLib m_ioRef;
 	int m_curGPSTimeSec;
 	avcStateVector m_curPos;
+	// probability matrix for state vector.	
+	Matrix m_P;	
 	unsigned int m_rEncoder;
 	unsigned int m_lEncoder;
-	
+	double m_wheelRd; //wheel radius	
+	double m_wheelCf; //wheel circumference
+	double m_wheelTrk; //wheel track, or dist between contact points.
+	int m_ticksPerRev;
+
+		
+
 	//Our controller owns this we'll let them delete.	
 	aSettingFileRef m_settings;
 	
