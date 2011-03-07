@@ -211,8 +211,6 @@ avcMotion::updateControl(const avcForceVector& potential)
 // > make motModule
 #ifdef aDEBUG_MOTMODULE
 
-#define aTESTWITHSTEM 1
-
 ////////////////////////////////////////
 int doTests(acpStem *pStem, aSettingFileRef settings);
 

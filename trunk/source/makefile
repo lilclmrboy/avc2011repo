@@ -27,3 +27,12 @@ clean :
 	make -C acroname/aBinary clean
 	make -C planner clean
 
+.PHONY : acroclean
+acroclean : 
+	tar -tf acroname_$(TAROS).tgz | find -type f -exec ls {}
+	#rm -Rfv acroname/aDocumentation
+	#rm -rdv acroname/aBinary/aIO.framework/
+	#rm -rfv acroname/aBinary/aMoto/
+	#rm -rfv acroname/aBinary/aSymonym/
+	
+	
