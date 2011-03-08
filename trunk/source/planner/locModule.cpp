@@ -1,5 +1,5 @@
 #include "locModule.h"
-
+#include <sys/time.h>
 
 //We'll wait up to 30 seconds for a GPS lock on initialization.
 #define aGPS_LOCK_STEPS 30
@@ -60,9 +60,19 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 void 
 avcPosition::updateState(const avcControlVector& control) {
 	
+	Vector state(6);
+	state(1) = m_curPos.x;
+	state(2) = m_curPos.y;
+	state(3) = m_curPos.h;
+	//Grab the clock.
+	long int curClock = clock();
+	long tmElapsed = (curClock - m_curClock) * 1000 / CLOCKS_PER_SEC;
+
 	//First we must do an estimation step, given the previous position
   //and the current control information. Lets do this in meters, and then
 	//convert to lat, lon.
+	// We should be doing this step quickly enough that we can treat the movement
+	// as linear.
 	/*
 	* x(k+1) = { cos(theta)fVel + x(k) } + vx(k)
 	*	y(k+1) = { sin(theta)fVel + y(k) } + vy(k)
@@ -73,16 +83,21 @@ avcPosition::updateState(const avcControlVector& control) {
 	*/
 	
 	//Get the new encoder readings.
-	//int curEncR = getEncoderValue(aMOTOR_RIGHT);
-	//int curEncL = getEncoderValue(aMOTOR_LEFT);
+	int curEncR = getEncoderValue(aMOTOR_RIGHT);
+	int curEncL = getEncoderValue(aMOTOR_LEFT);
 	
 	//convert those into distance traveled each wheel.
-	//double dWheelR = (curEncR - m_rEncoder)/ m_ticksPerRev * m_wheelCf;
-	//double dWheelL = (curEncR - m_rEncoder)/ m_ticksPerRev * m_wheelCf; 
+	double dWheelR = (curEncR - m_rEncoder)/ m_ticksPerRev;
+	double dWheelL = (curEncR - m_rEncoder)/ m_ticksPerRev; 
 
 	//The forward moving distance
-	//double fDist = dWheelR/2 + dWheelL/2; 	
+	double fDist = dWheelR*m_wheelRd/2 + dWheelL*m_wheelRd/2; 	
 
+	//The rotational difference
+	double fRot = dWheelR*m_wheelRd/m_wheelTrk - dWheelL*m_wheelRd/m_wheelTrk;
+	
+
+	
 
 	//We really only want to use GPS information if enough time has passed.
 	int curSec = getGPSTimeSec();
@@ -98,8 +113,7 @@ avcPosition::updateState(const avcControlVector& control) {
 		m_curGPSTimeSec = curSec;
 	}
 
-	
-
+	m_curClock = clock();
 }
 
 /////////////////////////////////////////////////////////////////////////////
