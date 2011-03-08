@@ -52,7 +52,11 @@ public:
 private:
 	acpStem* m_pStem;
 	aIOLib m_ioRef;
+	//We'll use this time reading to get GPS updates.	
 	int m_curGPSTimeSec;
+	//Millisecond timing for motion update.
+	long int m_curClock;
+	
 	avcStateVector m_curPos;
 	// probability matrix for state vector.	
 	Matrix m_P;	
@@ -61,7 +65,7 @@ private:
 	double m_wheelRd; //wheel radius	
 	double m_wheelCf; //wheel circumference
 	double m_wheelTrk; //wheel track, or dist between contact points.
-	int m_ticksPerRev;
+	int m_ticksPerRev; //encoder ticks per revolution.
 
 		
 
