@@ -82,9 +82,7 @@ avcController::run(void) {
 		//First do the localization step. Lets get relevant GPS
    	//info from the unit, and compass heading. Along with 
    	//the previous state and control vector.
-		avcControlVector control(m_mot.getSetpointMotor(aMOTOR_RIGHT),
-														 m_mot.getSetpointMotor(aMOTOR_LEFT)); 
-		m_pos.updateState(control);			        
+		m_pos.updateState();			        
 		
 		// motion planning step	
     avcForceVector ir;

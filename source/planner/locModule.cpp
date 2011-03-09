@@ -3,6 +3,8 @@
 
 //We'll wait up to 30 seconds for a GPS lock on initialization.
 #define aGPS_LOCK_STEPS 30
+#define DEG_TO_RAD (aPI/180)
+#define RAD_TO_DEG (180/aPI)
 ////////////////////////////////////////////////////////////////////////////
 aErr
 avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
@@ -58,12 +60,8 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 /////////////////////////////////////////////////////////////////////////////
 
 void 
-avcPosition::updateState(const avcControlVector& control) {
+avcPosition::updateState() {
 	
-	Vector state(6);
-	state(1) = m_curPos.x;
-	state(2) = m_curPos.y;
-	state(3) = m_curPos.h;
 	//Grab the clock.
 	long int curClock = clock();
 	long tmElapsed = (curClock - m_curClock) * 1000 / CLOCKS_PER_SEC;
@@ -88,7 +86,7 @@ avcPosition::updateState(const avcControlVector& control) {
 	
 	//convert those into distance traveled each wheel.
 	double dWheelR = (curEncR - m_rEncoder)/ m_ticksPerRev;
-	double dWheelL = (curEncR - m_rEncoder)/ m_ticksPerRev; 
+	double dWheelL = (curEncL - m_rEncoder)/ m_ticksPerRev; 
 
 	//The forward moving distance
 	double fDist = dWheelR*m_wheelRd/2 + dWheelL*m_wheelRd/2; 	
@@ -96,9 +94,15 @@ avcPosition::updateState(const avcControlVector& control) {
 	//The rotational difference
 	double fRot = dWheelR*m_wheelRd/m_wheelTrk - dWheelL*m_wheelRd/m_wheelTrk;
 	
-
+	Vector state(6);
+	state(1) = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER + m_curPos.x;
+	state(2) = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER + m_curPos.y;
+	state(3) = m_curPos.h + (fRot * RAD_TO_DEG);
+	state(4) = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER / tmElapsed;
+	state(5) = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER / tmElapsed;
+	state(6) = fRot * RAD_TO_DEG;
 	
-
+	//EKF from here on out.
 	//We really only want to use GPS information if enough time has passed.
 	int curSec = getGPSTimeSec();
 	double curLat = 0.0;
@@ -112,6 +116,14 @@ avcPosition::updateState(const avcControlVector& control) {
 		printf("Current GPS (lat, lon, seconds): %3.12f, %2.12f, %d\n", curLat, curLon, curSec);
 		m_curGPSTimeSec = curSec;
 	}
+
+	//Localization is done. Update the current robot state.
+	m_curPos.x = state(1);
+	m_curPos.y = state(2);
+	m_curPos.h = state(3);
+	m_curPos.vx = state(4);
+	m_curPos.vy = state(5);
+	m_curPos.vw = state(6);
 
 	m_curClock = clock();
 }
