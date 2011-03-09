@@ -44,7 +44,7 @@ public:
 	aErr init(acpStem* Stem, aSettingFileRef setting);
 	
 	//does an EKF state update.
-	void updateState(const avcControlVector& control);
+	void updateState(void);
 	
 	//return the current robot position.
 	avcStateVector getPosition(void) { return m_curPos; }
