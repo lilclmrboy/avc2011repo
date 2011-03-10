@@ -8,12 +8,16 @@
 // and the overall goal. It outputs the atractive force vector based 
 //on these inputs.
 #include "avc2011.h"
+#include "logger.h"
 
 class avcPlanner {
 
 public:
 	avcPlanner(void);
 	~avcPlanner(void);
+	
+	// initializes the planner with settings file
+	aErr init(aIOLib ioRef, aSettingFileRef settings);
 
 	//The main operation, we'll take some inputs, and product a unit
 	//vector output.
@@ -27,12 +31,23 @@ public:
 	aErr insertMapPoint(const avcStateVector newPosition);
 
 private:
-	std::vector<avcWaypointVector> waypoints;
+	std::vector<avcWaypointVector> m_waypoints; //map of waypoint to navigate
+	double m_repulseVectorWeight; // weighting factor between sensors and goal
+	unsigned int m_normalizeMotivationVector; // flag to normalize motivation
+	logger m_logger;
 	
 	// used by getMotivation to check for and update passed waypoints
 	aErr checkForPassedWayPoints(void);
 	
 	// used by planner functions to get the index of the first unpassed waypoint
 	int getFirstUnpassedWayPoint(void);
+	
+	// computes a vector between two state vectors
+	aErr vectorBetweenStates(const avcStateVector& state1,
+							 const avcStateVector& state2,
+							 avcForceVector *pGoalForceVec);
+	
+	// normalized a force vector to unit length
+	void normalizeForceVector ( avcForceVector *pForceVector);
 
 };
