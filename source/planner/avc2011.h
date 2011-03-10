@@ -28,6 +28,8 @@
 // Key values for settings file references
 // This takes an integer value (recommended 0-200 range)
 #define aKEY_VELOCITY_SETPOINT_MAX "setpoint_max"
+#define aKEY_REPULSE_WEIGHT "repulse_weight" //float
+
 
 // This is the default output file for text based logging
 #define aLOGGER_CONFIG "logger.config"
@@ -54,5 +56,7 @@
 #define aKEY_LON_DEG_PER_METER "lon_per_meter"
 #define aLON_PER_METER 0.000011710448481
 
+
+// 
 
 #endif //_avc2011_H_
