@@ -29,6 +29,10 @@
 // This takes an integer value (recommended 0-200 range)
 #define aKEY_VELOCITY_SETPOINT_MAX "setpoint_max"
 #define aKEY_REPULSE_WEIGHT "repulse_weight" //float
+#define aKEY_NORMALIZE_MOTIVATION_VECTOR "normalize_motivation" //flag
+#define aKEY_MAX_UNPASSED_DISTANCE "maxUnPassedDistanceToWaypoint" //float meters
+#define aKEY_MIN_UNPASSED_DISTANCE "minUnPassedDistanceToWaypoint" //float meters
+#define aKEY_UNPASSED_SLICE_ZETA "unpassedZeta" //float degrees
 
 
 // This is the default output file for text based logging
