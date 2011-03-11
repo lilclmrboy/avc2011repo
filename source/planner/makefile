@@ -38,6 +38,9 @@ CFLAGS += -DaDEBUG_H\
 	 -I$(PREFIX)acroname/aUser
 CFLAGS += -m32 -Wall -Werror
 LFLAGS = -Wl,-rpath,.
+LFLAGS += -Wl,-rpath,@loader_path/. 
+LFLAGS += -Wl,-rpath,@loader_path/../cgi-bin/ 
+LFLAGS += -Wl,-rpath,@loader_path/../$(ACRONAME)/aBinary
 SRC = $(PREFIX)acroname/aSource
 BIN = $(PREFIX)acroname/aBinary
 LIBS = -lpthread -lcrypto -lssl
