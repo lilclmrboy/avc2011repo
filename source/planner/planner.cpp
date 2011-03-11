@@ -232,7 +232,11 @@ avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 	
 	//check input parameter
 	if (!pForceVector) {
-		m_logger.append("__class__::__function__ : force vector is NULL.",
+		
+		acpString info;
+		info.format("%s::%s : force vector is NULL.", __func__, __func__);
+		
+		m_logger.append((const char *) info,
 						LogAll);
 		return;
 	}
@@ -242,8 +246,12 @@ avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 	
 	//check for near zero vectors and return a 0 length vector
 	if (mag < 10e-8) {
-		m_logger.append("__class__::__function__ : truncting near zero\
-						magnitude vector.", LogAll);
+		
+		acpString info;
+		info.format("%s::%s : truncting near zero\
+								magnitude vector.", __func__, __func__);
+		
+		m_logger.append((const char *) info, LogAll);
 		pForceVector->x = 0.0;
 		pForceVector->y = 0.0;
 	}
@@ -254,6 +262,24 @@ avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 }
 
 
-		
+///////////////////////////////////////////////////////////////////////////
+// This section is for isolating and debugging this module. 
+#ifdef aDEBUG_PLANNER
+
+////////////////////////////////////////
+// main testing routine for logger 
+int 
+main(int argc, 
+     const char* argv[]) 
+{
+	avcPlanner planner;
+	
+	planner.normalizeForceVector(NULL);
+	
+	return 0;
+	
+}
+
+#endif		
 	
 	

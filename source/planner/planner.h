@@ -30,6 +30,10 @@ public:
 	// should be used by camera/laser system to add "bonus" waypoints
 	aErr insertMapPoint(const avcStateVector newPosition);
 
+	
+	// normalized a force vector to unit length
+	void normalizeForceVector ( avcForceVector *pForceVector);
+	
 private:
 	std::vector<avcWaypointVector> m_waypoints; //map of waypoint to navigate
 	double m_repulseVectorWeight; // weighting factor between sensors and goal
@@ -47,7 +51,6 @@ private:
 							 const avcStateVector& state2,
 							 avcForceVector *pGoalForceVec);
 	
-	// normalized a force vector to unit length
-	void normalizeForceVector ( avcForceVector *pForceVector);
+
 
 };
