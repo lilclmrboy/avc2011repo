@@ -21,36 +21,49 @@ public:
 
 	//The main operation, we'll take some inputs, and product a unit
 	//vector output.
-	avcForceVector getMotivation(const avcStateVector pos, 	
-				     const avcForceVector repulse);
+	avcForceVector getMotivation(const avcStateVector& pos, 	
+				     const avcForceVector& repulse);
 	
 
 	// inserts waypoints into the map of waypoints
 	// new points are inserted as the next unpassed waypoint
 	// should be used by camera/laser system to add "bonus" waypoints
 	aErr insertMapPoint(const avcStateVector newPosition);
-
-	
-	// normalized a force vector to unit length
-	void normalizeForceVector ( avcForceVector *pForceVector);
+#ifdef aDEBUG_PLANNER
+	friend int main(int, const char**);
+#endif
 	
 private:
 	std::vector<avcWaypointVector> m_waypoints; //map of waypoint to navigate
-	double m_repulseVectorWeight; // weighting factor between sensors and goal
+	float m_repulseVectorWeight; // weighting factor between sensors and goal
 	unsigned int m_normalizeMotivationVector; // flag to normalize motivation
+
+	// used to define a dount and slice for passing waypoints
+	float m_unpassedZetaSliceDeg;
+	float m_minUnPassedDistanceToWaypoint;
+	float m_maxUnPassedDistanceToWaypoint;
+
 	logger m_logger;
 	
 	// used by getMotivation to check for and update passed waypoints
-	aErr checkForPassedWayPoints(void);
+	aErr checkForPassedWayPoints(const avcStateVector& pos);
 	
 	// used by planner functions to get the index of the first unpassed waypoint
 	int getFirstUnpassedWayPoint(void);
 	
-	// computes a vector between two state vectors
-	aErr vectorBetweenStates(const avcStateVector& state1,
+	// computes a unitless force vector between two state vectors
+	aErr calcForceVectorBetweenStates(const avcStateVector& state1,
 							 const avcStateVector& state2,
 							 avcForceVector *pGoalForceVec);
+	// computes a dimensional vector between two states in absolute plane
+	aErr calcPolarVectorBetweenStates (const avcStateVector& state1,
+								  const avcStateVector& state2,
+								  double *r, double *theta);
 	
-
+	// normalized a force vector to unit length
+	aErr normalizeForceVector ( avcForceVector *pForceVector);
+	
+	// convenience function to unwrap angles to 0-360
+	double unwrapAngleDeg(double phi);
 
 };

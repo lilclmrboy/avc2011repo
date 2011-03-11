@@ -52,21 +52,48 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 
 	int normalizeMotivationVector = 0;
 	aSettingFile_GetInt (ioRef, settings,
-						   aKEY_REPULSE_WEIGHT,
+						   aKEY_NORMALIZE_MOTIVATION_VECTOR,
 						   &normalizeMotivationVector,
 						   0,
 						   &e);
 	// Copy flag to member variable.
 	m_normalizeMotivationVector = normalizeMotivationVector;
-
+	
+	float maxUnPassedDistanceToWaypoint = 0;
+	aSettingFile_GetFloat (ioRef, settings,
+						 aKEY_MAX_UNPASSED_DISTANCE,
+						 &maxUnPassedDistanceToWaypoint,
+						 10,
+						 &e);
+	// Copy flag to member variable.
+	m_maxUnPassedDistanceToWaypoint = maxUnPassedDistanceToWaypoint;
+	
+	float minUnPassedDistanceToWaypoint = 0;
+	aSettingFile_GetFloat (ioRef, settings,
+						 aKEY_MIN_UNPASSED_DISTANCE,
+						 &minUnPassedDistanceToWaypoint,
+						 1,
+						 &e);
+	// Copy flag to member variable.
+	m_minUnPassedDistanceToWaypoint = minUnPassedDistanceToWaypoint;
+	
+	float unpassedZetaSliceDeg = 0;
+	aSettingFile_GetFloat (ioRef, settings,
+						   aKEY_UNPASSED_SLICE_ZETA,
+						   &unpassedZetaSliceDeg,
+						   90,
+						   &e);
+	// Copy flag to member variable.
+	m_unpassedZetaSliceDeg = unpassedZetaSliceDeg;
+	
 	return e;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 avcForceVector 
-avcPlanner::getMotivation(const avcStateVector pos,
-			  const avcForceVector repulse) {
+avcPlanner::getMotivation(const avcStateVector& pos,
+			  const avcForceVector& repulse) {
 	
 	avcForceVector motivationVector, goal;
 	avcWaypointVector nextUnpassedWaypoint;
@@ -75,16 +102,13 @@ avcPlanner::getMotivation(const avcStateVector pos,
 	// this could pontentially mark an added bonus waypoint as passed before
 	// we attempt to drive to it. This seems to be the right behavior, since we
 	// don't want to drive far off course to get to a bonus waypoint
-	checkForPassedWayPoints();
-	
-	
-	
+	G_CHK_ERR(checkForPassedWayPoints(pos), "Checking for passed waypoints");
 	
 	try {
 		//get the next unpassed waypoint
 		nextUnpassedWaypoint = m_waypoints[getFirstUnpassedWayPoint()];
 		// calculate a vector between the current position to the next waypoint
-		vectorBetweenStates (pos,
+		calcForceVectorBetweenStates (pos,
 							 m_waypoints[getFirstUnpassedWayPoint()].state,
 							 &goal);
 	}
@@ -92,9 +116,8 @@ avcPlanner::getMotivation(const avcStateVector pos,
 		// probably couldn't find any unpassed waypoints. We might have
 		// completed the map.
 		// set the goal vector to 0,0 so we just look for sensor inputs
-		m_logger.append("__class__::__function__ : Error while looking for \
-						unpassed waypoints\n\t\t\
-						Goal vector will be 0,0.", LogAll);
+		LOG_ERROR("Error while getting first unpassed waypoint\n\t\t\
+				  Goal vector will be 0,0.");
 		goal.x = 0.0;
 		goal.y = 0.0;
 	}
@@ -137,9 +160,8 @@ avcPlanner::insertMapPoint(const avcStateVector newPosition) {
 	}
 	catch (int &e) {
 		// log error for inserting new point
-		m_logger.append("__class__::__function__ : Insering new waypoint\
-						failed.\n\t\t\
-						Adding new waypoint at end of map.", LogAll);
+		LOG_ERROR("Insering new waypoint failed.\n\t\t\
+				  Adding new waypoint at end of map.");
 		m_waypoints.push_back(newWaypoint);
 		return aErrUnknown;
 	}
@@ -150,15 +172,65 @@ avcPlanner::insertMapPoint(const avcStateVector newPosition) {
 /////////////////////////////////////////////////////////////////////////////
 
 aErr
-avcPlanner::checkForPassedWayPoints(void) {
+avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 	// compare current position to unpassed waypoints to determine if
 	// points should be marked as passed
 	
-	// TODO: options:
+	// options:
 	// a) has bot passed line perpendicular to waypoint heading
 	//		(corners should be 45˚ headings)
 	// b) ^ or V towards waypoint heading within some distance
 	// c) simple distance from waypoint (circle)
+	
+	// TODO: option b (^ or V to waypoint)
+	// find next unpassed waypoint
+	int firstUnpassedWaypoint = getFirstUnpassedWayPoint();
+	if (-1 == firstUnpassedWaypoint) {
+		// all waypoints have already been marked as passed or the map is empty
+		// nothing to see here.
+		return aErrNone;
+	}
+	
+	// compute a dimensional vector between the current position and
+	// the next waypoint
+	double distanceToWaypoint = 0.0, thetaRad = 0.0, thetaDeg=0.0;
+	calcPolarVectorBetweenStates(pos, m_waypoints[firstUnpassedWaypoint].state,
+							&distanceToWaypoint, &thetaRad);
+	// convert to degrees and unwrap
+	thetaDeg = unwrapAngleDeg(thetaRad * RAD_TO_DEG);
+		
+	// if we are within a minimum distance to the waypoint, mark it as passed; recurse
+	if (distanceToWaypoint <= m_minUnPassedDistanceToWaypoint) {
+		LOG_INFO("Passed waypoint minUnPassedDistance");
+		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
+		checkForPassedWayPoints(pos);
+		return aErrNone;
+	}
+	
+	// if we are more than a max distance to the waypoint -> not passed; return
+	if (distanceToWaypoint > m_maxUnPassedDistanceToWaypoint) {
+		LOG_INFO("Not in donut");
+		return aErrNone;
+	}
+	
+	// (we are in the donut of doubt)
+	// if the heading to the waypoint is outside ±(180˚-zeta) of waypoint heading -> passed
+	double maxTheta=0.0, minTheta=0.0;
+	maxTheta = unwrapAngleDeg(m_waypoints[firstUnpassedWaypoint].state.h + 180 +
+						   m_unpassedZetaSliceDeg/2.0);
+	minTheta = unwrapAngleDeg(m_waypoints[firstUnpassedWaypoint].state.h + 180 - 
+						   m_unpassedZetaSliceDeg/2.0);
+	if (thetaDeg > maxTheta || thetaDeg < minTheta) {
+		LOG_INFO("Passed waypoint in donut outside of slice");
+		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
+		checkForPassedWayPoints(pos);
+		return aErrNone;
+	}
+	// not passed
+	else {
+		LOG_INFO("In donut slice");
+		return aErrNone;
+	}
 	
 	return aErrNone;
 
@@ -166,11 +238,53 @@ avcPlanner::checkForPassedWayPoints(void) {
 
 /////////////////////////////////////////////////////////////////////////////
 
+aErr
+avcPlanner::calcPolarVectorBetweenStates(const avcStateVector& state1, 
+										 const avcStateVector& state2,
+										 double *distanceToWaypoint,
+										 double *thetaRad) {
+
+	double x=0.0, y=0.0;
+	
+	// check pointer arguments
+	CHECK_ARG_RETURN(distanceToWaypoint);
+	CHECK_ARG_RETURN(thetaRad);
+	
+	double dLon = (state2.x - state1.x) * DEG_TO_RAD;
+	double dLat = (state2.y - state1.y) * DEG_TO_RAD;
+	const double earthRadiusKM = 6371.0;
+
+	
+	// calculate the heading from state1 to state2
+	y = sin( dLon) * cos(state2.y * DEG_TO_RAD);
+	x = cos(state1.y * DEG_TO_RAD) * sin(state2.y * DEG_TO_RAD) - 
+	sin(state1.y * DEG_TO_RAD) * cos(state2.y * DEG_TO_RAD) * cos( dLon );
+	*thetaRad = atan2(y, x);
+	
+	
+	// calculate the distance between state1 and state2
+	/*
+	var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1.toRad()) *
+	 Math.cos(lat2.toRad()) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+	var d = R * c;
+	 */
+	double a, c;
+	a = sin(dLat/2) * sin(dLat/2) + cos(state1.y * DEG_TO_RAD) *
+		cos(state2.y * DEG_TO_RAD) * sin(dLon/2) * sin(dLon/2);
+	c = 2.0 * atan2(sqrt(a), sqrt(1-a));
+	*distanceToWaypoint = earthRadiusKM * c;
+	
+	return aErrNone;
+}
+	
+
+
 int
 avcPlanner::getFirstUnpassedWayPoint(void) {
 	for (int i = 0; i < (int) m_waypoints.size(); i++) {
 		if(0 == m_waypoints[i].waypointPassed)
-			return (int) i;
+			return i;
 	}
 	
 	return -1;
@@ -179,7 +293,7 @@ avcPlanner::getFirstUnpassedWayPoint(void) {
 /////////////////////////////////////////////////////////////////////////////
 
 aErr
-avcPlanner::vectorBetweenStates(const avcStateVector& state1, const avcStateVector& state2, 
+avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avcStateVector& state2, 
 					avcForceVector *pGoalForceVec) {
 	// compute a goal heading from state1 to state2 in absolute coordinates
 	// normally state1 is the current state; state2 is to desired next state
@@ -194,10 +308,7 @@ avcPlanner::vectorBetweenStates(const avcStateVector& state1, const avcStateVect
 	double x=0.0, y=0.0, headingToNextStateRad=0.0, goalHeading=0.0;
 	
 	// check the force vector pointer validity
-	if (!pGoalForceVec) {
-		m_logger.append("__class__::__function__ : goal vector is NULL.", LogAll);
-		return aErrParam;
-	}
+	CHECK_ARG_RETURN(pGoalForceVec);
 	
 	y = sin( (state2.x - state1.x) * DEG_TO_RAD ) * cos(state2.y * DEG_TO_RAD);
 	x = cos(state1.y * DEG_TO_RAD) * sin(state2.y * DEG_TO_RAD) - 
@@ -217,7 +328,7 @@ avcPlanner::vectorBetweenStates(const avcStateVector& state1, const avcStateVect
 	pGoalForceVec->x = cos(goalHeading);
 	pGoalForceVec->y = sin(goalHeading);
 	
-	//normalize the force vector
+	//normalize the force vector (this shouldn't really be needed here)
 	normalizeForceVector(pGoalForceVec);
 	
 	return aErrNone;
@@ -226,32 +337,21 @@ avcPlanner::vectorBetweenStates(const avcStateVector& state1, const avcStateVect
 
 /////////////////////////////////////////////////////////////////////////////
 
-void
+aErr
 avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 	// normalizes force vector to unit length
 	
 	//check input parameter
-	if (!pForceVector) {
-		
-		acpString info;
-		info.format("%s::%s : force vector is NULL.", __func__, __func__);
-		
-		m_logger.append((const char *) info,
-						LogAll);
-		return;
-	}
+	CHECK_ARG_RETURN(pForceVector);
 	
 	//calculate the vector magnitude
-	double mag = sqrt( pow(pForceVector->x, 2) + pow(pForceVector->y, 2) );
+	double mag = sqrt( (pForceVector->x * pForceVector->x) +
+					   (pForceVector->y * pForceVector->y) );
 	
 	//check for near zero vectors and return a 0 length vector
 	if (mag < 10e-8) {
 		
-		acpString info;
-		info.format("%s::%s : truncting near zero\
-								magnitude vector.", __func__, __func__);
-		
-		m_logger.append((const char *) info, LogAll);
+		LOG_INFO("Truncating near zero magnitude vector.");
 		pForceVector->x = 0.0;
 		pForceVector->y = 0.0;
 	}
@@ -259,9 +359,16 @@ avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 		pForceVector->x = pForceVector->x/mag;
 		pForceVector->y = pForceVector->y/mag;
 	}
+	
+	return aErrNone;
 }
 
+/////////////////////////////////////////////////////////////////////////////
 
+double
+avcPlanner::unwrapAngleDeg(double phi){
+	return fmod((phi+360.0), 360.0);
+}
 ///////////////////////////////////////////////////////////////////////////
 // This section is for isolating and debugging this module. 
 #ifdef aDEBUG_PLANNER

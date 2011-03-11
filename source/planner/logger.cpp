@@ -4,6 +4,7 @@
 
 #include "logger.h"
 
+
 ///////////////////////////////////////////////////////////////////////////
 // Class constructor
 logger::logger(void) :
@@ -13,10 +14,9 @@ logger::logger(void) :
   m_settings(NULL)
 {
 	aErr e = aErrNone;
-	char outputfile[32];
 	
 	if (m_pLogTxt == NULL)
-		aDEBUG_PRINT("Could not create %s file\n", outputfile);
+		aDEBUG_PRINT("Log file doesn't exist\n");
 	
 	// Create a aIO reference to manipulate settings file reference
 	if(aIO_GetLibRef(&m_ioRef, &e)) 
@@ -258,8 +258,65 @@ logger::emptyLog(void)
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// printf style logging interface for errors
+// errors will always use "LogAll" style
+void
+logger::logError(const char *fmt, ...)
+{
+	
+	char *Buf = NULL;//[4096];
+	char *insert_buff = NULL;
+	int buff_size;
+	va_list args;
+		
+	va_start(args, fmt);
+	buff_size = 10000;//(strlen (args) + 100 < 4096) ? 4096 : strlen(args) + 100;
+	Buf = (char*) calloc (buff_size, sizeof(char));
+	insert_buff = (char*) calloc (buff_size, sizeof(char));
+	vsprintf(Buf, fmt, args);
+	va_end(args);
+	sprintf(insert_buff, "ERROR - %s", Buf);
+	
+	appendString(insert_buff, LogAll);
+
+	free (Buf);
+	free (insert_buff);
+	
+}
+
+///////////////////////////////////////////////////////////////////////////
+// printf style logging interface for info
+// uses "LogAll" style
+void
+logger::logInfo(const char *fmt, ...)
+{
+	
+	char *Buf = NULL;//[4096];
+	char *insert_buff = NULL;
+	int buff_size;
+	va_list args;
+	
+	va_start(args, fmt);
+	buff_size = 10000;//(strlen (args) + 100 < 4096) ? 4096 : strlen(args) + 100;
+	Buf = (char*) calloc (buff_size, sizeof(char));
+	insert_buff = (char*) calloc (buff_size, sizeof(char));
+	vsprintf(Buf, fmt, args);
+	va_end(args);
+	sprintf(insert_buff, "INFO - %s", Buf);
+	
+	appendString(insert_buff, LogAll);
+	
+	free (Buf);
+	free (insert_buff);
+	
+}
+
+
+///////////////////////////////////////////////////////////////////////////
 // This section is for isolating and debugging this module. 
 #ifdef aDEBUG_LOGGER
+
+int testMacros(int state);
 
 ////////////////////////////////////////
 // main testing routine for logger 
@@ -289,8 +346,109 @@ main(int argc,
 	
 	log.append("Second logging session started");
 	
+	log.logError("%s:%s: Testing logError()", __FILE__, __PRETTY_FUNCTION__);
+	log.logInfo("%s:%s: Testing logInfo()", __FILE__, __PRETTY_FUNCTION__);
+	
+	testMacros(-1);
+
+	log.append("\n\nTesting G_CHK_ERR_RETURN(aErrNone)");
+	if(testMacros(0) == -1){
+		log.append("Pass: G_CHK_ERR_RETURN(aErrNone)");
+	}
+	else {
+		log.append("Fail: G_CHK_ERR_RETURN(aErrNone)");
+	}
+	
+	log.append("\n\nTesting G_CHK_ERR_RETURN(aErrUnknown)");
+	if(testMacros(1) == aErrUnknown){
+		log.append("Pass: G_CHK_ERR_RETURN(aErrUnknown)");
+	}
+	else {
+		log.append("Fail: G_CHK_ERR_RETURN(aErrUnknown) didn't return aErrUnknown");
+	}
+
+	
+	log.append("\n\nTesting G_CHK_ERR(aErrNone)");
+	if(testMacros(2) == -1)
+		log.append("Pass: G_CHK_ERR(aErrNone)");
+	else {
+		log.append("Fail: G_CHK_ERR(aErrNone) returned (it shouldn't)");
+	}
+
+
+	log.append("\n\nTesting G_CHK_ERR(aErrUnknown)");
+	if(testMacros(3) == -1)
+		log.append("Pass: G_CHK_ERR(aErrUnknown)");
+	else 
+		log.append("Fail: G_CHK_ERR(aErrUnknown) returned (it shouldn't)");
+		
+	log.append("\n\nTesting CHECK_ARG()");
+	if(testMacros(4) == aErrParam)
+		log.append("Pass: Testing CHECK_ARG()");
+	else
+		log.append("Fail: Testing CHECK_ARG()");
+	
+	log.append("\n\nTesting CHECK_ARG_RETURN()");
+	if(testMacros(5) == -1)
+		log.append("Fail: CHECK_ARG_RETURN()");
+	else
+		log.append("Pass: CHECK_ARG_RETURN()");
+	
+	log.append("\n\nTesting RETURN_ERROR()");
+	if(testMacros(6) == 1)
+		log.append("Pass RETURN_ERROR()");
+	else
+		log.append("Fail RETURN_ERROR()");
+	
+	
 	return 0;
 	
 }
+
+int testMacros(int state){
+	int *p=NULL;
+	aErr status = aErrNone;
+
+	static logger m_logger;
+	
+	switch (state) {
+		case 0:
+			G_CHK_ERR_RETURN(aErrNone);
+			return -1;
+			break;
+		case 1:
+
+			G_CHK_ERR_RETURN(aErrUnknown);
+			m_logger.append("Fail: CHECK_ARG_RETURN(aErrUnknown) didn't return");
+			return 0;
+			break;
+		case 2:
+			G_CHK_ERR(aErrNone, "Fail: G_CHK_ERR(aErrNone,...)");
+			return -1;
+			break;
+		case 3:
+			G_CHK_ERR(aErrUnknown, "Pass: G_CHK_ERR(aErrUnknown,...)");
+			return -1;
+			break;
+		case 4:
+			CHECK_ARG(1);
+			CHECK_ARG(p);
+			return status;
+		case 5:
+			
+			CHECK_ARG_RETURN(1);
+			CHECK_ARG_RETURN(p);
+			return -1;
+		case 6:
+			RETURN_ERROR(1, "Testing RETURN_ERROR()");
+			return -1;
+			
+		default:
+			break;
+	}
+
+	return 0;
+}
+	
 
 #endif
