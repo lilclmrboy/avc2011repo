@@ -97,7 +97,10 @@ MatrixTest : $(OBJ)/mat_math.o
 	$(CC) -c $(CFLAGS) matTest.cpp -o $(OBJ)/matTest.o
 	$(CC) -g $(CFLAGS)  $(LFLAGS) $(OBJ)/matTest.o $(OBJ)/mat_math.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/MatrixTest
 
-
+.PHONY : plannerTest
+plannerTest : $(OBJ) $(OBJ)/logger.o
+	$(CC) -c $(CFLAGS) -DaDEBUG_PLANNER planner.cpp -o $(OBJ)/planner.o 
+	$(CC) -g $(CFLAGS) -DaDEBUG_PLANNER $(LFLAGS) $(OBJ)/logger.o $(OBJ)/planner.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/plannerTest
 
 .PHONY : clean
 clean :
@@ -106,3 +109,4 @@ clean :
 	rm -f $(BIN)/motModuleTest
 	rm -f $(BIN)/loggerTest
 	rm -f $(BIN)/MatrixTest	
+	rm -f $(BIN)/plannerTest	
