@@ -253,14 +253,21 @@ avcPlanner::calcPolarVectorBetweenStates(const avcStateVector& state1,
 	double dLon = (state2.x - state1.x) * DEG_TO_RAD;
 	double dLat = (state2.y - state1.y) * DEG_TO_RAD;
 	const double earthRadiusKM = 6371.0;
-
 	
 	// calculate the heading from state1 to state2
+	/*
+	 var y = Math.sin(dLon) * Math.cos(lat2);
+	 var x = Math.cos(lat1)*Math.sin(lat2) -
+	 Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+	 var brng = Math.atan2(y, x).toDeg();
+	 */
 	y = sin( dLon) * cos(state2.y * DEG_TO_RAD);
 	x = cos(state1.y * DEG_TO_RAD) * sin(state2.y * DEG_TO_RAD) - 
-	sin(state1.y * DEG_TO_RAD) * cos(state2.y * DEG_TO_RAD) * cos( dLon );
+		sin(state1.y * DEG_TO_RAD) * cos(state2.y * DEG_TO_RAD) * cos( dLon );
 	*thetaRad = atan2(y, x);
 	
+	//m_logger.logInfo("dLon, dLat: %.2e, %.2e", dLon, dLat);
+	//m_logger.logInfo("x, y: %.2e, %.2e", x, y);
 	
 	// calculate the distance between state1 and state2
 	/*
@@ -305,18 +312,13 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 		Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
 		var brng = Math.atan2(y, x).toDeg();
 	 */
-	double x=0.0, y=0.0, headingToNextStateRad=0.0, goalHeading=0.0;
+	double dist=0.0, headingToNextStateRad=0.0, goalHeading=0.0;
 	
 	// check the force vector pointer validity
 	CHECK_ARG_RETURN(pGoalForceVec);
 	
-	y = sin( (state2.x - state1.x) * DEG_TO_RAD ) * cos(state2.y * DEG_TO_RAD);
-	x = cos(state1.y * DEG_TO_RAD) * sin(state2.y * DEG_TO_RAD) - 
-		sin(state1.y * DEG_TO_RAD) * cos(state2.y * DEG_TO_RAD) *
-		cos( (state2.x - state1.x) * DEG_TO_RAD );
+	calcPolarVectorBetweenStates(state1, state2, &dist, &headingToNextStateRad);
 	
-	headingToNextStateRad = atan2(y, x);
-
 	// the vector difference between the goal heading
 	// and the current heading is the direction the "force" should applied
 	// in order to reach the next waypoint goal; this goal heading is a
@@ -347,7 +349,7 @@ avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 	//calculate the vector magnitude
 	double mag = sqrt( (pForceVector->x * pForceVector->x) +
 					   (pForceVector->y * pForceVector->y) );
-	
+		
 	//check for near zero vectors and return a 0 length vector
 	if (mag < 10e-8) {
 		
@@ -367,7 +369,9 @@ avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 
 double
 avcPlanner::unwrapAngleDeg(double phi){
-	return fmod((phi+360.0), 360.0);
+	double unwrapped = fmod((phi+360.0), 360.0);
+	unwrapped = unwrapped < 0 ? unwrapped+360.0 : unwrapped;
+	return unwrapped;
 }
 ///////////////////////////////////////////////////////////////////////////
 // This section is for isolating and debugging this module. 
@@ -380,8 +384,48 @@ main(int argc,
      const char* argv[]) 
 {
 	avcPlanner planner;
+	logger log;
 	
+	log.logInfo("\n\nTesting normalizing vectors");
+	avcForceVector tempVector1 = avcForceVector(1.1, 1.1);
+	log.append(tempVector1, LogAll);
+	planner.normalizeForceVector(&tempVector1);
+	log.append(tempVector1, LogAll);
+	
+	avcForceVector tempVector2 = avcForceVector(1.0e-12, 1.0e-12);
+	log.append(tempVector2);
+	planner.normalizeForceVector(&tempVector2);
+	log.append(tempVector2, LogAll);
+	
+	log.logInfo("Testing normalizing NULL force vector");
 	planner.normalizeForceVector(NULL);
+	
+	
+	log.logInfo("\n\nTesting unwrapAngleDeg()");
+	double angles[] = {-500, -270, -100, -90, 0, 70, 90, 135, 180, 200, 270, 300, 359, 360, 500};
+	for (unsigned int i=0; i<sizeof(angles)/sizeof(double); i++) {
+		log.logInfo("%.1f unwrapped is %.1f", angles[i], planner.unwrapAngleDeg(angles[i]));
+	}
+	
+	log.logInfo("\n\nTesting calcPolarVectorBetweenStates()");
+	double r, theta;
+	planner.calcPolarVectorBetweenStates(planner.m_waypoints[0].state, planner.m_waypoints[1].state, &r, &theta);
+	log.logInfo("R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+	planner.calcPolarVectorBetweenStates(planner.m_waypoints[3].state, planner.m_waypoints[4].state, &r, &theta);
+	log.logInfo("R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+	planner.calcPolarVectorBetweenStates(planner.m_waypoints[4].state, planner.m_waypoints[5].state, &r, &theta);
+	log.logInfo("R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+
+
+	
+	log.logInfo("\n\nTesting calcPolarVectorBetweenStates()");
+	planner.calcForceVectorBetweenStates(planner.m_waypoints[0].state, planner.m_waypoints[1].state, &tempVector1);
+	log.append(tempVector1, LogAll);
+	planner.calcForceVectorBetweenStates(planner.m_waypoints[3].state, planner.m_waypoints[4].state, &tempVector1);
+	log.append(tempVector1, LogAll);
+	planner.calcForceVectorBetweenStates(planner.m_waypoints[4].state, planner.m_waypoints[5].state, &tempVector1);
+	log.append(tempVector1, LogAll);
+
 	
 	return 0;
 	
