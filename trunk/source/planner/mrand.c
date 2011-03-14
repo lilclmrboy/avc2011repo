@@ -35,6 +35,24 @@
 #define m1     4294967087.0
 #define m2     4294944443.0
 
+/* Generate the next normal random variate */
+double normrand(void) {
+	double u1, u2i, v1, v2, w, y;
+	do {
+		u1 = mrand(50);
+		u2 = mrand(1050);
+
+		v1 = 2*u1 -1;
+		v2 = 2*u2 -1;
+		w = v1 + v2;
+	} while (w > 1.0);
+	
+	y = sqrt(-2.0 * ln(w)/w);
+	
+	return v1*y;
+
+}
+
 /* Generate the next random number. */
 
 double mrand(int stream)
