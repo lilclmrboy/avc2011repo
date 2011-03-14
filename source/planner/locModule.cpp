@@ -11,9 +11,24 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 
 	m_pStem = pStem;
 	m_settings = settings;
+	aErr e;
 
 	//first we'll grab some settings from the settings file.
-	
+	float fSetVar;
+	if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_RADIUS,  
+			&fSetVar, aWHEEL_RADIUS, &e)) 
+		throw acpException(e, "getting wheel radius from settings");
+	m_wheelRd = fSetVar;
+
+	if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_TRACK,  
+			&fSetVar, aWHEEL_TRACK, &e)) 
+		throw acpException(e, "getting wheel track from settings");
+	m_wheelTrk = fSetVar;
+
+	if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_ENCTICK_PER_REV,  
+			&fSetVar, aENCTICKS, &e)) 
+		throw acpException(e, "getting encoder ticks per rev from settings");	
+	m_ticksPerRev = fSetVar;
 
 	if (m_pStem && m_pStem->isConnected()) {
 		/*lets do some initialization. First we need to find out

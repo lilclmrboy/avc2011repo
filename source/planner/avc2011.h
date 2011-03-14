@@ -53,11 +53,9 @@
 #define aENCTICKS	1024
 
 // degree of latitude per meter at 40 degrees latitude.
-#define aKEY_LAT_DEG_PER_METER "lat_per_meter"
 #define aLAT_PER_METER 0.00000900620125
 
 // degree of Longitude per meter
-#define aKEY_LON_DEG_PER_METER "lon_per_meter"
 #define aLON_PER_METER 0.000011710448481
 
 
