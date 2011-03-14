@@ -128,7 +128,8 @@ avcPosition::updateState() {
 		curLat = getGPSLatitude();
 		curLon = getGPSLongitude();
 	
-		printf("Current GPS (lat, lon, seconds): %3.12f, %2.12f, %d\n", curLat, curLon, curSec);
+		printf("Current GPS (lat, lon, seconds): %3.12f, %2.12f, %d\n", 
+		       curLat, curLon, curSec);
 		m_curGPSTimeSec = curSec;
 	}
 
