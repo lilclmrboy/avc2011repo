@@ -225,6 +225,7 @@ avcPosition::getCMPSHeading(void) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+#ifndef aDEBUG_LOCMODULE
 
 int 
 avcPosition::getEncoderValue(unsigned char motor) {
@@ -232,4 +233,4 @@ avcPosition::getEncoderValue(unsigned char motor) {
   return m_pStem->MO_ENC32(aMOTO_MODULE, motor);
 }
 
-
+#endif
