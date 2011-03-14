@@ -35,7 +35,7 @@ aErr
 avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	
 	//initialize the logger
-	m_logger = logger::logger(settings);
+	m_logger = new logger(settings);
 	
 	aErr e = aErrNone;
 	
