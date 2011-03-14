@@ -90,6 +90,16 @@ motModuleTest : $(OBJ)
 	$(CC) -c $(CFLAGS) -DaDEBUG_MOTMODULE motModule.cpp -o $(OBJ)/motModule.o
 	$(CC) -g $(CFLAGS) -DaDEBUG_MOTMODULE $(LFLAGS) $(OBJ)/motModule.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/motModuleTest
 
+.PHONY : locModuleTest
+
+locModuleTest : $(OBJ) $(OBJ)/locMain.o $(OBJECTS)
+	$(CC) -g $(CFLAGS) -DaDEBUG_LOCMODULE $(LFLAGS) $(OBJ)/locMain.o $(OBJECTS) $(LIBS) $(FRAMEWORKS) -o $(BIN)/locModuleTest
+
+$(OBJ)/locMain.o : locMain.cpp
+	$(CC) -c $(CFLAGS) $< -o $@
+
+
+
 .PHONY : loggerTest
 loggerTest : $(OBJ)
 	$(CC) -c $(CFLAGS) -DaDEBUG_LOGGER logger.cpp -o $(OBJ)/logger.o
