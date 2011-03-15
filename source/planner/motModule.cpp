@@ -62,9 +62,6 @@ avcMotion::~avcMotion()
 	
 	aErr e = aErrNone;
 	
-	if (aSettingFile_Destroy(m_ioRef, m_settings, &e))
-		throw acpException(e, "unable to destroy settings");
-	
 	if (aIO_ReleaseLibRef(m_ioRef, &e))
 		throw acpException(e, "unable to destroy settings");
 	

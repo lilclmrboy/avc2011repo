@@ -17,6 +17,7 @@ public:
 	  m_pStem(NULL),
 		m_ioRef(NULL),
 		m_curGPSTimeSec(0),
+		m_curClock(0),		
 		m_P(6,6),
 		m_rEncoder(0),
 		m_lEncoder(0),
@@ -32,6 +33,27 @@ public:
       		throw acpException(e, "Getting aIOLib reference");						
 	};
 
+	avcPosition(avcStateVector vec) :
+		m_pStem(NULL),
+		m_ioRef(NULL),
+		m_curGPSTimeSec(0),
+		m_curClock(0),
+		m_curPos(vec),
+		m_P(6,6),
+		m_rEncoder(0),
+		m_lEncoder(0),
+		m_wheelRd(0.07626),
+		m_wheelCf(0.479),
+		m_wheelTrk(0.15),
+		m_ticksPerRev(1024),
+		m_settings(NULL)
+	{
+		aErr e;
+
+		if(aIO_GetLibRef(&m_ioRef, &e)) 
+      		throw acpException(e, "Getting aIOLib reference");	
+	}
+		
 	~avcPosition(void) 
 	{
 		aErr e;
