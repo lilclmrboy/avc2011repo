@@ -1,0 +1,63 @@
+(Code by Newfangled Wizard, 2/26/2011)
+(Program Posted for Aluminum )
+G0 G49 G40.1 G17
+G80 G50 G90 G98  
+G21 (mm)
+
+M3 
+X-15.8750  Y0.0000
+Z1.000 
+
+( *** drill hole pattern *** )
+
+M1 ( Insert Center Drill Bit )
+
+N90 G81 X-15.8750 Y0.0000  Z-0.2500  R1.0000  F60.00
+N91 G81 X-11.2253 Y11.2253
+N93 G81 X11.2253  Y11.2253
+N94 G81 X15.8750 Y0.0000
+N95 G81 X11.2253 Y-11.2253
+N97 G81 X-11.2253 Y-11.2253
+
+N98 G80
+
+M1 ( Insert Drill Bit )
+
+N90 G81 X-15.8750 Y0.0000  Z-3.2500  R1.0000  F60.00
+N91 G81 X-11.2253 Y11.2253
+N93 G81 X11.2253  Y11.2253
+N94 G81 X15.8750 Y0.0000
+N95 G81 X11.2253 Y-11.2253
+N97 G81 X-11.2253 Y-11.2253
+
+N98 G80
+
+N125 G0  Z1.0000 
+
+
+
+(***** Circular Groove/Cutout *****)
+
+M1 (***** Insert 5/32 End Mill *****)
+
+( circle radius = 19.05 )
+G90 G54 G00 X-19.00 Y25 ( start location)
+G01 Z-1.75 F40.0
+G41 Y19.05 D07 F45.0 (radius of circle )
+X0 F30.0
+G02 J-19.05 ( radius of circle )
+G01 X19 F45.0
+G40 Y25 F40.0 (exit location )
+z0.5
+
+( circle radius = 19.05 )
+G90 G54 G00 X-19.00 Y25 ( start location)
+G01 Z-3.25 F40.0
+G41 Y19.05 D07 F45.0 (radius of circle )
+X0 F30.0
+G02 J-19.05 ( radius of circle )
+G01 X19 F45.0
+G40 Y25 F40.0 (exit location )
+z0.5
+
+M30
