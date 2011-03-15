@@ -13,6 +13,9 @@
 #define GPS_MODULE (char) 0xD0
 #define CMPS_MODULE (char) 0xC0
 
+// Somewhere, we probably do this.
+#define LINK_BAUDRATE 38400
+
 //IIC bus speed index, and value for gps.  
 #define IIC_SPD_VAL_INDEX 3
 #define IIC_400Khz  1
@@ -84,6 +87,9 @@
 #define aIR_POLLING_GP2_SLOT 0
 #define aSONAR_POLLING_GP2_SLOT 1
 #define aLOC_POLLING_GP2_SLOT 2
+
+#define aGP2_DIG_IO_RC_LEFT 1
+#define aGP2_DIG_IO_RC_RIGHT 2
 
 /* ************************************************************************** */
 /* Information Specific to the Moto module */

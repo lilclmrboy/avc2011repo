@@ -84,6 +84,15 @@ void init() {
 	/* Set other non zero defaults */
 	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RAMPACC_TIME, aACCELRATION_TIME);
 	
+	
+// Enable digital polling for RC servo testing
+#ifdef aDEBUG
+
+	aDig_Config(aGP2_DIG_IO_RC_LEFT, ADIG_INPUT | ADIG_TMRWID);
+	aDig_Config(aGP2_DIG_IO_RC_RIGHT, ADIG_INPUT | ADIG_TMRWID); 
+
+#endif	
+	
 }
 
 /* ************************************************************************** */
@@ -91,7 +100,7 @@ void shutdown() {
 
 #ifdef aDEBUG	
 	aPrint_String("gMonitorGP shutdown.\n");
-	aCore_Sleep(500);
+	aCore_Sleep(1000);
 #endif
 
 	/* Disable IR sensor polling */
@@ -108,28 +117,28 @@ void shutdown() {
 
 #ifdef aDEBUG	
 	aPrint_String("irSensors shutdown.\n");
-	aCore_Sleep(500);
+	aCore_Sleep(1000);
 #endif
 	/* Clean up billy! */
 	aMulti_Kill(aIR_POLLING_GP2_PROCESS);
 	
 #ifdef aDEBUG	
 	aPrint_String("sonarSensors shutdown.\n");
-	aCore_Sleep(500);
+	aCore_Sleep(1000);
 #endif
 	/* Clean up billy! */
 	aMulti_Kill(aSONAR_POLLING_GP2_PROCESS);	
 
 #ifdef aDEBUG	
 	aPrint_String("locSensors shutdown.\n");
-	aCore_Sleep(500);
+	aCore_Sleep(1000);
 #endif
 	/* Clean up billy! */
 	aMulti_Kill(aLOC_POLLING_GP2_PROCESS);	
 
 #ifdef aDEBUG	
 	aPrint_String("motionUpdate shutdown.\n");
-	aCore_Sleep(2000);
+	aCore_Sleep(1000);
 #endif	
 	aBus_Multi_Kill(aMOTO_MODULE, aMOTION_UPDATING_MO_PROCESS);
 	
@@ -139,17 +148,40 @@ void shutdown() {
 }
 
 /* ************************************************************************** */
+int rcWindow(int value) {
+	int result = 0;
+	
+	// Neutral servo count should be off set to 0.
+	value = 11616 - value;
+	
+	// Put a bird, errr, a cap on it.
+	if (value > aMOTOR_SETPOINT_MAX)
+		value = aMOTOR_SETPOINT_MAX;
+	
+	if (value < -1*aMOTOR_SETPOINT_MAX)
+		value = -1*aMOTOR_SETPOINT_MAX;
+	
+	return result;
+
+}
+
+/* ************************************************************************** */
 void main()
 {
+
+	/* Values to measure the digital pulse timing */
+	int RCRight = 0;
+	int RCLeft = 0;
+	char bDebugInfo = 1;
 
 	/* Initailize the system */
 	init();
 
 #ifdef aDEBUG	
 	aPrint_String("gMonitorGP launched.\n");
-	aCore_Sleep(500);
+	aCore_Sleep(1000);
 	aPrint_String("Debugging enabled.\n");
-	aCore_Sleep(500);
+	aCore_Sleep(3000);
 #endif
 
 	/* Spawn the IR polling thread */
@@ -167,6 +199,33 @@ void main()
 	
 	// Do monitor relevant things. Bookkeeping, coordinating, etc. 
 	while (!aPad_ReadChar(aSPAD_GP2_GPMONITOR_SHUTDOWN)) {
+	
+	// Debugging for servo pulse measurement to use RC remote control over
+	// riding for motion testing. 
+#ifdef aDEBUG 
+
+	if (bDebugInfo) {
+		aCore_Sleep(10000);
+		aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,1);
+		
+		aPrint_String("RC remote monitor launched.\n");
+		aCore_Sleep(10000);
+		bDebugInfo = 0;
+	}
+	
+	// Read the pulse timer for the digital input pins
+	RCLeft = aDig_ReadTmr(aGP2_DIG_IO_RC_LEFT);
+	RCLeft = rcWindow(RCLeft);
+	
+	RCRight = aDig_ReadTmr(aGP2_DIG_IO_RC_RIGHT);
+	RCRight = rcWindow(RCRight);
+			
+	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_SETPOINT_RIGHT, RCRight);
+	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_SETPOINT_LEFT, RCLeft);
+	
+	aCore_Sleep(2000);
+
+#endif	
 	
 		/* stall for a timeslice */
 		aCore_Sleep(aSLICE);
