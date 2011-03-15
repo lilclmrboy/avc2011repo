@@ -64,6 +64,7 @@ public:
 	int run(void);
 
 private:
+	//The controller owns the settings, no other module should destroy them.
 	aSettingFileRef m_settings;
 	avcMotion m_mot;
 	avcPlanner m_planner;

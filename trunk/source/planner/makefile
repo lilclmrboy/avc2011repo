@@ -92,11 +92,14 @@ motModuleTest : $(OBJ)
 
 .PHONY : locModuleTest
 
-locModuleTest : $(OBJ) $(OBJ)/locMain.o $(OBJECTS)
-	$(CC) -g $(CFLAGS) -DaDEBUG_LOCMODULE $(LFLAGS) $(OBJ)/locMain.o $(OBJECTS) $(LIBS) $(FRAMEWORKS) -o $(BIN)/locModuleTest
+locModuleTest : $(OBJ) $(OBJ)/locMain.o $(OBJ)/locModule.o
+	$(CC) -g $(CFLAGS) -DaDEBUG_LOCMODULE $(LFLAGS) $(OBJ)/locMain.o $(OBJ)/locModule.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/locModuleTest
+
+$(OBJ)/locModule.o : locModule.cpp locModule.h
+	$(CC) -c $(CFLAGS) -DaDEBUG_LOCMODULE $< -o $@
 
 $(OBJ)/locMain.o : locMain.cpp
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) -DaDEBUG_LOCMODULE $< -o $@
 
 
 
@@ -123,3 +126,4 @@ clean :
 	rm -f $(BIN)/loggerTest
 	rm -f $(BIN)/MatrixTest	
 	rm -f $(BIN)/plannerTest	
+	rm -f $(BIN)/locModuleTest
