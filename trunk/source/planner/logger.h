@@ -17,22 +17,19 @@ enum aLogType {
 };
 
 ///////////////////////////////////////////////////////////////////////////
+// This is a singleton class.
+
 class logger {
 public:
-	
-	// Base class constructor. A local settings file is created and used 
-	// based on a "logger.conf" file that it default looks for. 
-	logger(void);
-	
-	// This allows most of the adjustable settings to be over ridden with
-	// a settings file reference. These can come from command line arguments, 
-	// another process, or a configuration file. More likely useful when 
-	// being integrated into the big fancy system. 
-	logger(aSettingFileRef settings);
-	
+
 	// General destructor. 
 	~logger(void);
 	
+	//We use this method to get a pointer to the logger.	
+	static logger* getInstance();	
+	void setLogLevel(int level);
+	int getLogLevel(void);	
+
 	// Append to an output log file. Depending on what and where, this
 	// might end up a bit different.
 	// Default is to output to STDIO
@@ -55,6 +52,14 @@ public:
 	
 private:
 	
+	// Base class constructor. We're going to rely on a log level,
+	// and check to see if a logfile named AVClog.log exists in the aUser
+	// folder. If it does then we'll log to the file.
+	logger(void);
+	logger(logger& const) {};
+	logger& operator=(logger& const) {};
+	
+
 	FILE *m_pConsole;
 	FILE *m_pLogTxt;
 	
