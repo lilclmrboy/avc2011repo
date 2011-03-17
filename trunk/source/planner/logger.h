@@ -11,9 +11,11 @@
 // Last enum shoud be LogAll
 // First enum should have a "1" as the starting number.
 enum aLogType {
-	LogInfo = 1,
-	LogError,
-	LogAll
+	RAW = 1,
+	DEBUG,
+	INFO,
+	NOTICE,	
+	ERROR
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -36,18 +38,11 @@ public:
 	// Append to an output log file. Depending on what and where, this
 	// might end up a bit different.
 	// Default is to output to STDIO
-	void append(const char* msg, aLogType type = LogInfo);
-	void append(const avcForceVector& potential, aLogType type = LogAll);
-	void append(const avcStateVector& statevector, aLogType type = LogAll);
+	void log(aLogType type = RAW, const char* fmt = "", ...);
+  void append(const char * msg, aLogType type = INFO);
+	void append(const avcForceVector& potential, aLogType type = INFO);
+	void append(const avcStateVector& statevector, aLogType type = INFO);
 
-	// printf style logging interface for errors
-	// goes to LogAll
-	void logError(const char *fmt, ...);
-
-	// printf style logging interface for info
-	// goes to LogAll
-	void logInfo(const char *fmt, ...);
-	
 private:
 	//static member variable.
 	static logger* m_pInstance;
@@ -70,57 +65,53 @@ private:
 	
 	// Gets a string that is based on the system time.
 	acpString getTime(void);
-	
-	// Writes a formatted string to somewhere
-	void appendString(const char * info, aLogType type = LogInfo);
-	
 };
 
 ///////////////////////////////////////////////////////////////////////////
 // All macros assume aUtil.h is included for error values and that
 // local logger class is m_logger
-#define LOG_INFO(desc)\
+#define LOG_INFO(logger, desc)\
 	{\
-	m_logger->logInfo ((char*)"%s:%s", __FILE__, __PRETTY_FUNCTION__);\
-	m_logger->logInfo ((char*)desc);\
+	logger->log (INFO, (char*)"%s:%s", __FILE__, __PRETTY_FUNCTION__);\
+	logger->log (INFO, (char*)desc);\
 	}
 
-#define LOG_ERROR(desc)\
+#define LOG_ERROR(logger, desc)\
 	{\
-	m_logger->logError ((char*)"%s:%s", __FILE__, __PRETTY_FUNCTION__);\
-	m_logger->logError ((char*)desc);\
+	logger->log (ERROR, (char*)"%s:%s", __FILE__, __PRETTY_FUNCTION__);\
+	logger->log (ERROR, (char*)desc);\
 	}
 
-#define RETURN_ERROR(a, desc)\
+#define RETURN_ERROR(logger, a, desc)\
 	{\
-	LOG_ERROR(desc);\
+	LOG_ERROR(logger, desc);\
 	return a;\
 	}
 
-#define G_CHK_ERR_RETURN(a)\
+#define G_CHK_ERR_RETURN(logger, a)\
 	if (a != aErrNone)\
 	{\
-		RETURN_ERROR (a, #a);\
+		RETURN_ERROR (logger, a, #a);\
 	}else
 
-#define G_CHK_ERR(a, desc)\
+#define G_CHK_ERR(logger, a, desc)\
 	if (a != aErrNone)\
 	{\
-		LOG_ERROR(desc);\
-		m_logger->logError ((char*)#a);\
+		LOG_ERROR(logger, desc);\
+		logger->log (ERROR, (char*)#a);\
 	}else
 
-#define CHECK_ARG_RETURN(a)\
+#define CHECK_ARG_RETURN(logger, a)\
 	if (!a)\
 	{\
-		RETURN_ERROR (aErrParam, "argument " #a " is NULL pointer");\
+		RETURN_ERROR (logger, aErrParam, "argument " #a " is NULL pointer");\
 	}else
 
 // Needs to have local aErr status
-#define CHECK_ARG(p)\
+#define CHECK_ARG(logger, p)\
 	if (!p)\
 	{\
-		LOG_ERROR("argument " #p " is NULL pointer");\
+		LOG_ERROR(logger, "argument " #p " is NULL pointer");\
 		status = aErrParam;\
 	}
 

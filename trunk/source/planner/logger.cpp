@@ -85,40 +85,45 @@ logger::getTime(void) {
 ///////////////////////////////////////////////////////////////////////////
 // Append a general comment to the log output
 void
-logger::appendString(const char * info, aLogType type /* = LogAll */)
+logger::log(aLogType type /* = RAW */, const char * fmt /* = "" */, ...)
 {	
+	// Depending on whom we write to, we might do different stuff
+	// We could so some fancy things, or not here.
+	va_list args;
+	va_start(args, fmt);
 	
-	int i = type;
-	bool bLogAll = (type == LogAll) ? true : false;
-	
-	do {
+	switch (type) {
 		
-		// Depending on whom we write to, we might do different stuff
-		// We could so some fancy things, or not here. 
-		switch (i) {
+		case DEBUG: {
+				fprintf(m_pInfo, "DEBUG(%s) - ", (const char*) getTime());
+				vfprintf(m_pInfo, fmt, args);
+				fprintf(m_pInfo, "\n");
+		} break;
+
+		case INFO: {	
+				fprintf(m_pInfo, "INFO(%s) - ", (const char*) getTime());
+				vfprintf(m_pInfo, fmt, args);
+				fprintf(m_pInfo, "\n");
+		}	break;
+
+		case NOTICE: {
+			fprintf(m_pError, "NOTICE(%s) - ", (const char*) getTime());
+			vfprintf(m_pError, fmt, args);
+			fprintf(m_pError, "\n");		
+		}	break;
 				
-			case LogInfo:
+		case ERROR: {
+		  fprintf(m_pError, "ERROR(%s) - ", (const char*) getTime());
+			vfprintf(m_pError, fmt, args);
+			fprintf(m_pError, "\n");	
+		}	break;
 				
-				// Write the string out. We might want a different format 
-				fprintf(m_pInfo, "LOG (%s): %s\n", (const char*) getTime(), info);
-				
-				break;
-				
-			case LogError:
-				
-				fprintf(m_pError, "LOG (%s): %s\n", (const char*) getTime(), info);
-				
-				break;
-				
-			default:
-				break;
-		}
+		default: {
+			vfprintf(m_pInfo, fmt, args);	
+		}	break;
+	}
 		
-		// Decrement the counter
-		i--;
-		
-	} while (bLogAll && (i > 0));
-	
+	va_end(args);
 }
 
 
@@ -129,7 +134,7 @@ logger::append(const char * msg, aLogType type /* = LogInfo */)
 {	
 	
 	// Write the data out
-	appendString(msg, type);
+	log(type, msg);
 	
 }
 
@@ -142,28 +147,19 @@ logger::append(const avcStateVector& statevector, aLogType type /* = LogAll */)
 {
 	
 	char buffer[100];
-	
-	switch (type) {
-		case LogAll:
-		case LogInfo:
-		case LogError:
-			sprintf(buffer,
-							"Longitude: %2.2f Latitude: %2.2f Heading: %2.2f "
-							"Vx: %2.2f Vy: %2.2f Vw: %2.2f",
-							statevector.x,
-							statevector.y,
-							statevector.h,
-							statevector.vx,
-							statevector.vy,
-							statevector.vw);
-			
-			break;
-		default:
-			break;
-	}
+
+	sprintf(buffer,
+				"Longitude: %2.2f Latitude: %2.2f Heading: %2.2f "
+				"Vx: %2.2f Vy: %2.2f Vw: %2.2f",
+				statevector.x,
+				statevector.y,
+				statevector.h,
+				statevector.vx,
+				statevector.vy,
+				statevector.vw);
 	
 	// Write the data out
-	appendString(buffer, type);
+	log(type, buffer);
 	
 }
 
@@ -175,79 +171,15 @@ logger::append(const avcForceVector& potential, aLogType type /* = LogAll */)
 	
 	char buffer[100];
 	
-	switch (type) {
-		case LogAll:
-		case LogInfo:
-		case LogError:
-			sprintf(buffer,
-							"Ux: %2.2f Uy: %2.2f",
-							potential.x,
-							potential.y);
+	sprintf(buffer,
+					"Ux: %2.2f Uy: %2.2f",
+					potential.x,
+					potential.y);
 			
-			break;
-		default:
-			break;
-	}
-	
 	// Write the data out
-	appendString(buffer, type);
+	log(type, buffer);
 	
 }
-
-///////////////////////////////////////////////////////////////////////////
-// printf style logging interface for errors
-// errors will always use "LogAll" style
-void
-logger::logError(const char *fmt, ...)
-{
-	
-	char *buff = NULL;
-
-	//char *insert_buff = NULL;
-	size_t buff_size;
-	va_list args;
-		
-	va_start(args, fmt);
-	buff_size = strlen(fmt) + 50;
-	buff = (char*) calloc (buff_size, sizeof(char));
-	//insert_buff = (char*) calloc (buff_size, sizeof(char));
-	sprintf(buff, "ERROR - %s\n", fmt);
-	
-	//appendString(insert_buff, LogAll);
-	vfprintf(m_pInfo, buff, args);
-	va_end(args);
-	free (buff);
-	//free (insert_buff);
-	
-}
-
-///////////////////////////////////////////////////////////////////////////
-// printf style logging interface for info
-// uses "LogAll" style
-void
-logger::logInfo(const char *fmt, ...)
-{
-	
-	char *Buf = NULL;//[4096];
-	char *insert_buff = NULL;
-	int buff_size;
-	va_list args;
-	
-	va_start(args, fmt);
-	buff_size = 10000;//(strlen (args) + 100 < 4096) ? 4096 : strlen(args) + 100;
-	Buf = (char*) calloc (buff_size, sizeof(char));
-	insert_buff = (char*) calloc (buff_size, sizeof(char));
-	vsprintf(Buf, fmt, args);
-	va_end(args);
-	sprintf(insert_buff, "INFO - %s", Buf);
-	
-	appendString(insert_buff, LogAll);
-	
-	free (Buf);
-	free (insert_buff);
-	
-}
-
 
 ///////////////////////////////////////////////////////////////////////////
 // This section is for isolating and debugging this module. 
@@ -262,33 +194,36 @@ main(int argc,
      const char* argv[]) 
 {
 	logger* log = logger::getInstance();
+	
+	log->log(INFO, "%s:%s Testing Info()", __FILE__, __PRETTY_FUNCTION__);
+
 	avcForceVector Uresult;
 	avcStateVector State;
 	
 	log->append("New logging session started");
-	log->append("hello little kitty", LogInfo);
-	log->append("This a bit of garble", LogError);
+	log->append("hello little kitty", INFO);
+	log->append("This a bit of garble", ERROR);
 	log->append(State);
 	
 	for (int i = 0; i < 10; i++) {
-		
+	
 		Uresult.x = i;
 		Uresult.y = -1*i;
-		
+	
 		log->append(Uresult);
-		
+	
 	}
 	
 	log->append("Second logging session started");
 	
-	log->logError("%s:%s: Testing logError()", __FILE__, __PRETTY_FUNCTION__);
-	log->logInfo("%s:%s: Testing logInfo()", __FILE__, __PRETTY_FUNCTION__);
+	log->log(ERROR, "%s:%s: Testing logError()", __FILE__, __PRETTY_FUNCTION__);
+	log->log(INFO, "%s:%s: Testing logInfo()", __FILE__, __PRETTY_FUNCTION__);
 	
 	testMacros(-1);
 
-	log->append("\n\nTesting G_CHK_ERR_RETURN(aErrNone)");
+	//log->append("\n\nTesting G_CHK_ERR_RETURN(aErrNone)");
 	if(testMacros(0) == -1){
-		log->append("Pass: G_CHK_ERR_RETURN(aErrNone)");
+		//log->append("Pass: G_CHK_ERR_RETURN(aErrNone)");
 	}
 	else {
 		log->append("Fail: G_CHK_ERR_RETURN(aErrNone)");
@@ -335,7 +270,6 @@ main(int argc,
 	else
 		log->append("Fail RETURN_ERROR()");
 	
-	
 	return 0;
 	
 }
@@ -348,34 +282,34 @@ int testMacros(int state){
 	
 	switch (state) {
 		case 0:
-			G_CHK_ERR_RETURN(aErrNone);
+			G_CHK_ERR_RETURN(m_logger, aErrNone);
 			return -1;
 			break;
 		case 1:
 
-			G_CHK_ERR_RETURN(aErrUnknown);
+			G_CHK_ERR_RETURN(m_logger, aErrUnknown);
 			m_logger->append("Fail: CHECK_ARG_RETURN(aErrUnknown) didn't return");
 			return 0;
 			break;
 		case 2:
-			G_CHK_ERR(aErrNone, "Fail: G_CHK_ERR(aErrNone,...)");
+			G_CHK_ERR(m_logger, aErrNone, "Fail: G_CHK_ERR(aErrNone,...)");
 			return -1;
 			break;
 		case 3:
-			G_CHK_ERR(aErrUnknown, "Pass: G_CHK_ERR(aErrUnknown,...)");
+			G_CHK_ERR(m_logger, aErrUnknown, "Pass: G_CHK_ERR(aErrUnknown,...)");
 			return -1;
 			break;
 		case 4:
-			CHECK_ARG(1);
-			CHECK_ARG(p);
+			CHECK_ARG(m_logger, 1);
+			CHECK_ARG(m_logger, p);
 			return status;
 		case 5:
 			
-			CHECK_ARG_RETURN(1);
-			CHECK_ARG_RETURN(p);
+			CHECK_ARG_RETURN(m_logger, 1);
+			CHECK_ARG_RETURN(m_logger, p);
 			return -1;
 		case 6:
-			RETURN_ERROR(1, "Testing RETURN_ERROR()");
+			RETURN_ERROR(m_logger, 1, "Testing RETURN_ERROR()");
 			return -1;
 			
 		default:
