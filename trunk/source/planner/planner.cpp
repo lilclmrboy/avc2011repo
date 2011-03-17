@@ -35,7 +35,7 @@ aErr
 avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	
 	//initialize the logger
-	m_logger = new logger(settings);
+	m_logger = logger::getInstance();
 	
 	aErr e = aErrNone;
 	
@@ -102,7 +102,7 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 	// this could pontentially mark an added bonus waypoint as passed before
 	// we attempt to drive to it. This seems to be the right behavior, since we
 	// don't want to drive far off course to get to a bonus waypoint
-	G_CHK_ERR(checkForPassedWayPoints(pos), "Checking for passed waypoints");
+	G_CHK_ERR(m_logger, checkForPassedWayPoints(pos), "Checking for passed waypoints");
 	
 	try {
 		//get the next unpassed waypoint
@@ -116,7 +116,7 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 		// probably couldn't find any unpassed waypoints. We might have
 		// completed the map.
 		// set the goal vector to 0,0 so we just look for sensor inputs
-		LOG_ERROR("Error while getting first unpassed waypoint\n\t\t\
+		LOG_ERROR(m_logger, "Error while getting first unpassed waypoint\n\t\t\
 				  Goal vector will be 0,0.");
 		goal.x = 0.0;
 		goal.y = 0.0;
@@ -160,7 +160,7 @@ avcPlanner::insertMapPoint(const avcStateVector newPosition) {
 	}
 	catch (int &e) {
 		// log error for inserting new point
-		LOG_ERROR("Insering new waypoint failed.\n\t\t\
+		LOG_ERROR(m_logger, "Insering new waypoint failed.\n\t\t\
 				  Adding new waypoint at end of map.");
 		m_waypoints.push_back(newWaypoint);
 		return aErrUnknown;
@@ -201,7 +201,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		
 	// if we are within a minimum distance to the waypoint, mark it as passed; recurse
 	if (distanceToWaypoint <= m_minUnPassedDistanceToWaypoint) {
-		LOG_INFO("Passed waypoint minUnPassedDistance");
+		LOG_INFO(m_logger, "Passed waypoint minUnPassedDistance");
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
 		checkForPassedWayPoints(pos);
 		return aErrNone;
@@ -209,7 +209,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 	
 	// if we are more than a max distance to the waypoint -> not passed; return
 	if (distanceToWaypoint > m_maxUnPassedDistanceToWaypoint) {
-		LOG_INFO("Not in donut");
+		LOG_INFO(m_logger, "Not in donut");
 		return aErrNone;
 	}
 	
@@ -221,14 +221,14 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 	minTheta = unwrapAngleDeg(m_waypoints[firstUnpassedWaypoint].state.h + 180 - 
 						   m_unpassedZetaSliceDeg/2.0);
 	if (thetaDeg > maxTheta || thetaDeg < minTheta) {
-		LOG_INFO("Passed waypoint in donut outside of slice");
+		LOG_INFO(m_logger, "Passed waypoint in donut outside of slice");
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
 		checkForPassedWayPoints(pos);
 		return aErrNone;
 	}
 	// not passed
 	else {
-		LOG_INFO("In donut slice");
+		LOG_INFO(m_logger, "In donut slice");
 		return aErrNone;
 	}
 	
@@ -247,8 +247,8 @@ avcPlanner::calcPolarVectorBetweenStates(const avcStateVector& state1,
 	double x=0.0, y=0.0;
 	
 	// check pointer arguments
-	CHECK_ARG_RETURN(distanceToWaypoint);
-	CHECK_ARG_RETURN(thetaRad);
+	CHECK_ARG_RETURN(m_logger, distanceToWaypoint);
+	CHECK_ARG_RETURN(m_logger, thetaRad);
 	
 	double dLon = (state2.x - state1.x) * DEG_TO_RAD;
 	double dLat = (state2.y - state1.y) * DEG_TO_RAD;
@@ -315,7 +315,7 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	double dist=0.0, headingToNextStateRad=0.0, goalHeading=0.0;
 	
 	// check the force vector pointer validity
-	CHECK_ARG_RETURN(pGoalForceVec);
+	CHECK_ARG_RETURN(m_logger, pGoalForceVec);
 	
 	calcPolarVectorBetweenStates(state1, state2, &dist, &headingToNextStateRad);
 	
@@ -344,7 +344,7 @@ avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 	// normalizes force vector to unit length
 	
 	//check input parameter
-	CHECK_ARG_RETURN(pForceVector);
+	CHECK_ARG_RETURN(m_logger, pForceVector);
 	
 	//calculate the vector magnitude
 	double mag = sqrt( (pForceVector->x * pForceVector->x) +
@@ -353,7 +353,7 @@ avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 	//check for near zero vectors and return a 0 length vector
 	if (mag < 10e-8) {
 		
-		LOG_INFO("Truncating near zero magnitude vector.");
+		LOG_INFO(m_logger, "Truncating near zero magnitude vector.");
 		pForceVector->x = 0.0;
 		pForceVector->y = 0.0;
 	}
@@ -384,47 +384,47 @@ main(int argc,
      const char* argv[]) 
 {
 	avcPlanner planner;
-	logger log;
+	logger* log = logger::getInstance();
 	
-	log.logInfo("\n\nTesting normalizing vectors");
+	log->log(INFO, "\n\nTesting normalizing vectors");
 	avcForceVector tempVector1 = avcForceVector(1.1, 1.1);
-	log.append(tempVector1, LogAll);
+	log->append(tempVector1, INFO);
 	planner.normalizeForceVector(&tempVector1);
-	log.append(tempVector1, LogAll);
+	log->append(tempVector1, INFO);
 	
 	avcForceVector tempVector2 = avcForceVector(1.0e-12, 1.0e-12);
-	log.append(tempVector2);
+	log->append(tempVector2);
 	planner.normalizeForceVector(&tempVector2);
-	log.append(tempVector2, LogAll);
+	log->append(tempVector2, INFO);
 	
-	log.logInfo("Testing normalizing NULL force vector");
+	log->log(INFO, "Testing normalizing NULL force vector");
 	planner.normalizeForceVector(NULL);
 	
 	
-	log.logInfo("\n\nTesting unwrapAngleDeg()");
+	log->log(INFO, "\n\nTesting unwrapAngleDeg()");
 	double angles[] = {-500, -270, -100, -90, 0, 70, 90, 135, 180, 200, 270, 300, 359, 360, 500};
 	for (unsigned int i=0; i<sizeof(angles)/sizeof(double); i++) {
-		log.logInfo("%.1f unwrapped is %.1f", angles[i], planner.unwrapAngleDeg(angles[i]));
+		log->log(INFO, "%.1f unwrapped is %.1f", angles[i], planner.unwrapAngleDeg(angles[i]));
 	}
 	
-	log.logInfo("\n\nTesting calcPolarVectorBetweenStates()");
+	log->log(INFO, "\n\nTesting calcPolarVectorBetweenStates()");
 	double r, theta;
 	planner.calcPolarVectorBetweenStates(planner.m_waypoints[0].state, planner.m_waypoints[1].state, &r, &theta);
-	log.logInfo("R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+	log->log(INFO, "R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
 	planner.calcPolarVectorBetweenStates(planner.m_waypoints[3].state, planner.m_waypoints[4].state, &r, &theta);
-	log.logInfo("R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+	log->log(INFO, "R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
 	planner.calcPolarVectorBetweenStates(planner.m_waypoints[4].state, planner.m_waypoints[5].state, &r, &theta);
-	log.logInfo("R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+	log->log(INFO, "R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
 
 
 	
-	log.logInfo("\n\nTesting calcPolarVectorBetweenStates()");
+	log->log(INFO, "\n\nTesting calcPolarVectorBetweenStates()");
 	planner.calcForceVectorBetweenStates(planner.m_waypoints[0].state, planner.m_waypoints[1].state, &tempVector1);
-	log.append(tempVector1, LogAll);
+	log->append(tempVector1, INFO);
 	planner.calcForceVectorBetweenStates(planner.m_waypoints[3].state, planner.m_waypoints[4].state, &tempVector1);
-	log.append(tempVector1, LogAll);
+	log->append(tempVector1, INFO);
 	planner.calcForceVectorBetweenStates(planner.m_waypoints[4].state, planner.m_waypoints[5].state, &tempVector1);
-	log.append(tempVector1, LogAll);
+	log->append(tempVector1, INFO);
 
 	
 	return 0;

@@ -43,7 +43,7 @@ private:
 	float m_minUnPassedDistanceToWaypoint;
 	float m_maxUnPassedDistanceToWaypoint;
 
-	logger m_logger;
+	logger* m_logger;
 	
 	// used by getMotivation to check for and update passed waypoints
 	aErr checkForPassedWayPoints(const avcStateVector& pos);
