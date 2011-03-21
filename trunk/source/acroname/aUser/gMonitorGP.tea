@@ -3,6 +3,50 @@
 
 #include "avc2011.tea"
 
+int read_ch1() { 
+  int val=0; 
+    asm { 
+      /* configure digital IO pin as */ 
+      /* pulse width timer for high pulse input */ 
+      pushlb 25 
+      popbm aPortDigital+ aGP2_DIG_IO_RC_LEFT*aPortDigitalBlockSize+ aOffsetDigitalConfig 
+      /* take pulse measurement */ 
+      pushms aPortDigital+ aGP2_DIG_IO_RC_LEFT*aPortDigitalBlockSize+ aOffsetDigitalPTime 
+      popss 2 
+     } 
+   return val; 
+} 
+
+int read_ch3() { 
+  int val=0; 
+    asm { 
+      /* configure digital IO pin as */ 
+      /* pulse width timer for high pulse input */ 
+      pushlb 25 
+      popbm aPortDigital+ aGP2_DIG_IO_RC_RIGHT*aPortDigitalBlockSize+ aOffsetDigitalConfig 
+      /* take pulse measurement */ 
+      pushms aPortDigital+ aGP2_DIG_IO_RC_RIGHT*aPortDigitalBlockSize+ aOffsetDigitalPTime 
+      popss 2 
+     } 
+   return val; 
+}
+
+int read_ch5() { 
+  int val=0; 
+    asm { 
+      /* configure digital IO pin as */ 
+      /* pulse width timer for high pulse input */ 
+      pushlb 25 
+      popbm aPortDigital+ aGP2_DIG_IO_RC_ENABLE*aPortDigitalBlockSize+ aOffsetDigitalConfig 
+      /* take pulse measurement */ 
+      pushms aPortDigital+ aGP2_DIG_IO_RC_ENABLE*aPortDigitalBlockSize+ aOffsetDigitalPTime 
+      popss 2 
+     } 
+   return val; 
+}
+
+
+
 /* ************************************************************************** */
 /* on entry, the stack looks like this:
  *  0    5    cModule
@@ -155,11 +199,8 @@ int rcWindow(int value) {
 	result = (value - 948) * 100 / 134;
 	
 	// Put a bird, errr, a cap on it.
-	if (result > aMOTOR_SETPOINT_MAX)
-		result = aMOTOR_SETPOINT_MAX;
-	
-	if (result < -1*aMOTOR_SETPOINT_MAX)
-		result = -1*aMOTOR_SETPOINT_MAX;
+	if (result < 30 && result > -30)
+		result = 0;
 	
 	return result;
 
@@ -213,11 +254,11 @@ void main()
 		bDebugInfo = 0;
 	}
 
-	if (aDig_ReadTmr(aGP2_DIG_IO_RC_ENABLE) > 800) { 	
+	if (read_ch5() > 800) { 	
 		// Read the pulse timer for the digital input pins
-		RCLeft = aDig_ReadTmr(aGP2_DIG_IO_RC_LEFT);
+		RCLeft = read_ch1();
 		RCLeft = rcWindow(RCLeft);
-		RCRight = aDig_ReadTmr(aGP2_DIG_IO_RC_RIGHT);
+		RCRight = read_ch3();
 		RCRight = rcWindow(RCRight);
 	} else {
 		RCLeft = 0;
