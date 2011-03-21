@@ -152,14 +152,14 @@ int rcWindow(int value) {
 	int result = 0;
 	
 	// Neutral servo count should be off set to 0.
-	value = 11616 - value;
+	result = (value - 948) * 100 / 134;
 	
 	// Put a bird, errr, a cap on it.
-	if (value > aMOTOR_SETPOINT_MAX)
-		value = aMOTOR_SETPOINT_MAX;
+	if (result > aMOTOR_SETPOINT_MAX)
+		result = aMOTOR_SETPOINT_MAX;
 	
-	if (value < -1*aMOTOR_SETPOINT_MAX)
-		value = -1*aMOTOR_SETPOINT_MAX;
+	if (result < -1*aMOTOR_SETPOINT_MAX)
+		result = -1*aMOTOR_SETPOINT_MAX;
 	
 	return result;
 
@@ -212,17 +212,26 @@ void main()
 		aCore_Sleep(10000);
 		bDebugInfo = 0;
 	}
-	
-	// Read the pulse timer for the digital input pins
-	RCLeft = aDig_ReadTmr(aGP2_DIG_IO_RC_LEFT);
-	RCLeft = rcWindow(RCLeft);
-	
-	RCRight = aDig_ReadTmr(aGP2_DIG_IO_RC_RIGHT);
-	RCRight = rcWindow(RCRight);
-			
+
+	if (aDig_ReadTmr(aGP2_DIG_IO_RC_ENABLE) > 800) { 	
+		// Read the pulse timer for the digital input pins
+		RCLeft = aDig_ReadTmr(aGP2_DIG_IO_RC_LEFT);
+		RCLeft = rcWindow(RCLeft);
+		RCRight = aDig_ReadTmr(aGP2_DIG_IO_RC_RIGHT);
+		RCRight = rcWindow(RCRight);
+	} else {
+		RCLeft = 0;
+		RCRight = 0;
+	}
+
 	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_SETPOINT_RIGHT, RCRight);
 	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_SETPOINT_LEFT, RCLeft);
 	
+	aPrint_IntDec(RCLeft);
+	aPrint_Char(',');
+	aPrint_IntDec(RCRight);	
+	aPrint_Char('\n');
+
 	aCore_Sleep(2000);
 
 #endif	
