@@ -2,51 +2,7 @@
 /* GP 2.0 monitoring file */
 
 #include "avc2011.tea"
-
-int read_ch1() { 
-  int val=0; 
-    asm { 
-      /* configure digital IO pin as */ 
-      /* pulse width timer for high pulse input */ 
-      pushlb 25 
-      popbm aPortDigital+ aGP2_DIG_IO_RC_LEFT*aPortDigitalBlockSize+ aOffsetDigitalConfig 
-      /* take pulse measurement */ 
-      pushms aPortDigital+ aGP2_DIG_IO_RC_LEFT*aPortDigitalBlockSize+ aOffsetDigitalPTime 
-      popss 2 
-     } 
-   return val; 
-} 
-
-int read_ch3() { 
-  int val=0; 
-    asm { 
-      /* configure digital IO pin as */ 
-      /* pulse width timer for high pulse input */ 
-      pushlb 25 
-      popbm aPortDigital+ aGP2_DIG_IO_RC_RIGHT*aPortDigitalBlockSize+ aOffsetDigitalConfig 
-      /* take pulse measurement */ 
-      pushms aPortDigital+ aGP2_DIG_IO_RC_RIGHT*aPortDigitalBlockSize+ aOffsetDigitalPTime 
-      popss 2 
-     } 
-   return val; 
-}
-
-int read_ch5() { 
-  int val=0; 
-    asm { 
-      /* configure digital IO pin as */ 
-      /* pulse width timer for high pulse input */ 
-      pushlb 25 
-      popbm aPortDigital+ aGP2_DIG_IO_RC_ENABLE*aPortDigitalBlockSize+ aOffsetDigitalConfig 
-      /* take pulse measurement */ 
-      pushms aPortDigital+ aGP2_DIG_IO_RC_ENABLE*aPortDigitalBlockSize+ aOffsetDigitalPTime 
-      popss 2 
-     } 
-   return val; 
-}
-
-
-
+#include "rc.tea"
 /* ************************************************************************** */
 /* on entry, the stack looks like this:
  *  0    5    cModule
@@ -130,12 +86,12 @@ void init() {
 	
 	
 // Enable digital polling for RC servo testing
-#ifdef aDEBUG
+//#ifdef aDEBUG
 
-	aDig_Config(aGP2_DIG_IO_RC_LEFT, ADIG_INPUT | ADIG_TMRWID);
-	aDig_Config(aGP2_DIG_IO_RC_RIGHT, ADIG_INPUT | ADIG_TMRWID); 
+//	aDig_Config(aGP2_DIG_IO_RC_LEFT, ADIG_INPUT | ADIG_TMRWID);
+//	aDig_Config(aGP2_DIG_IO_RC_RIGHT, ADIG_INPUT | ADIG_TMRWID); 
 
-#endif	
+//#endif	
 	
 }
 
@@ -192,21 +148,6 @@ void shutdown() {
 }
 
 /* ************************************************************************** */
-int rcWindow(int value) {
-	int result = 0;
-	
-	// Neutral servo count should be off set to 0.
-	result = (value - 948) * 100 / 134;
-	
-	// Put a bird, errr, a cap on it.
-	if (result < 30 && result > -30)
-		result = 0;
-	
-	return result;
-
-}
-
-/* ************************************************************************** */
 void main()
 {
 
@@ -232,7 +173,7 @@ void main()
 	//aMulti_Spawn(aSONAR_POLLING_GP2_SLOT, aSONAR_POLLING_GP2_PROCESS);
 
 	/* Spawn the IR polling thread */
-	aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
+	//aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
 	
 	/* Spawn the motion updating thread */
 	// Write a aBus_Multi_Spawn function. Add this to the aBus library
@@ -254,13 +195,16 @@ void main()
 		bDebugInfo = 0;
 	}
 
-	if (read_ch5() > 800) { 	
+	if (read_RCEnable() > 800) { 	
+	  //aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,0);
 		// Read the pulse timer for the digital input pins
-		RCLeft = read_ch1();
+		RCLeft = read_LeftRC();
 		RCLeft = rcWindow(RCLeft);
-		RCRight = read_ch3();
+		RCRight = read_RightRC();
 		RCRight = rcWindow(RCRight);
+		
 	} else {
+	  //aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,1);
 		RCLeft = 0;
 		RCRight = 0;
 	}
