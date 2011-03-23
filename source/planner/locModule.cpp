@@ -11,8 +11,10 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 
 	m_pStem = pStem;
 	m_settings = settings;
+	m_logger = logger::getInstance();	
+	m_logger->openInfoLogFile("GPS.log");
 	aErr e;
-
+	
 	//first we'll grab some settings from the settings file.
 	float fSetVar;
 	if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_RADIUS,  
@@ -128,8 +130,9 @@ avcPosition::updateState() {
 		curLat = getGPSLatitude();
 		curLon = getGPSLongitude();
 	
-		printf("Current GPS (lat, lon, seconds): %3.12f, %2.12f, %d\n", 
-		       curLat, curLon, curSec);
+		m_logger->log(RAW, "<trkpt lat=\"%3.12f\" lon=\"%2.12f\">\n" 
+									"\t<time>2011-3-17T%d:%d:%dZ</time>\n</trkpt>\n", 
+		       curLat, curLon, curSec/3600, (curSec%3600)/60, curSec%60);
 		m_curGPSTimeSec = curSec;
 	}
 
@@ -226,12 +229,9 @@ avcPosition::getCMPSHeading(void) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-#ifndef aDEBUG_LOCMODULE
-
 int 
 avcPosition::getEncoderValue(unsigned char motor) {
   //We could do more here to check for encoder wrap.
   return m_pStem->MO_ENC32(aMOTO_MODULE, motor);
 }
 
-#endif
