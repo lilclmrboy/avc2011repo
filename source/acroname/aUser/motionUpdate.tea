@@ -42,9 +42,6 @@ void main(char callingProcID)
 	aMotion_RampEnable(aMOTOR_RIGHT, 1);
 
 	while(1) {
-	
-		// Check with the scratchpad to see if we should be doing some updates
-		if (aPad_ReadInt(aSPAD_MO_MOTION_PROCESS_ENABLE)) {
 		
 			newRightSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_RIGHT);
 			newLeftSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_LEFT);
@@ -72,8 +69,6 @@ void main(char callingProcID)
 #endif
 				
 			} // end if for grabbing and setting setpoints
-		
-		} // end if performing motion updates
 		
 		// We don't want to swamp the processor
 		aCore_Sleep(aTIMESLICE);

@@ -53,9 +53,6 @@ void init() {
 
 	/* Configure scratchpad values */
 	aPad_WriteChar(aSPAD_GP2_GPMONITOR_SHUTDOWN,0);
-	aPad_WriteChar(aSPAD_GP2_IR_PROCESS_ENABLE,0);
-	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,0);
-	aPad_WriteChar(aSPAD_GP2_SONAR_PROCESS_ENABLE,0);
 
 	/* Zero out other placehoder readings */
 	aPad_WriteInt(aSPAD_GP2_REPULSIVE_UX,0);
@@ -79,7 +76,6 @@ void init() {
   aPad_WriteInt(aSPAD_GP2_ACC_Y, 0);
   aPad_WriteInt(aSPAD_GP2_ACC_Z, 0);
 
-	
 	/* Set other non zero defaults */
 	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RAMPACC_TIME, aACCELRATION_TIME);	
 	
@@ -92,15 +88,6 @@ void shutdown() {
 	aPrint_String("gMonitorGP shutdown.\n");
 	aCore_Sleep(1000);
 #endif
-
-	/* Disable IR sensor polling */
-	//aPad_WriteChar(aSPAD_GP2_IR_PROCESS_ENABLE, 0);
-	
-	/* Disable sonar sensor polling */
-	//aPad_WriteChar(aSPAD_GP2_SONAR_PROCESS_ENABLE, 0);
-
-	/* Disable motion updating thread */
-	//aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,0);
 
 #ifdef aDEBUG	
 	aPrint_String("irSensors shutdown.\n");
