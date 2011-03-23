@@ -39,7 +39,6 @@ void main(char callingProcID)
 		// 4.) See if we're movning.
 		// 5.) If we're moving get the GPS heading, and speed.
 		// 6.) Get the Compass heading.
-		if (aPad_ReadChar(aSPAD_GP2_LOC_PROCESS_ENABLE)) {
 						
 			//Grab current baudrate for the IIC bus. And then set the 
 			//baudrate to 400Khz for the GPS.
@@ -114,11 +113,9 @@ void main(char callingProcID)
 					  
 			// restore entry IIC speed -- only needed if system baudrate is not 400khz  			
 			//aCore_Outportc(aPortIICBaud, baud);
-		
-		} // end if reading values
 			
-		// We don't want to swamp the processor
-		aCore_Sleep(aSLICE);
+		// We don't want to swamp the processor, sleep for a second
+		aCore_Sleep(10000);
 		
 	} // end of while loop
 	

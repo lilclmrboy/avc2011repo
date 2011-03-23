@@ -43,7 +43,7 @@ void main(char callingProcID)
 		// 2.) Calculate the X and Y force component
 		// 3.) Aggregate all the X and Y forces
 		// 4.) Write X and Y result to scratchpad
-		if (aPad_ReadChar(aSPAD_GP2_SONAR_PROCESS_ENABLE)) {
+		//if (aPad_ReadChar(aSPAD_GP2_SONAR_PROCESS_ENABLE)) {
 		
 			// Walk through the sensors. we set the id here so we can 
 			// scale the code very easily.
@@ -106,7 +106,7 @@ void main(char callingProcID)
 			// Move to the next sensor id value
 			id++;
 		
-		} // end if reading values
+		//} // end if reading values
 		
 		// We don't want to swamp the processor
 		aCore_Sleep(aSLICE);
