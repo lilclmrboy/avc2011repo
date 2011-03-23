@@ -78,7 +78,20 @@ void init() {
 
 	/* Set other non zero defaults */
 	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RAMPACC_TIME, aACCELRATION_TIME);	
+	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 0);
+	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_RIGHT, 0);
+	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_LEFT, 0);
 	
+}
+
+/* ************************************************************************** */
+void aPrintf(string s)
+{
+	#ifdef aDEBUG	
+		aPrint_String(s);
+		aPrint_Char('\n');
+		aCore_Sleep(1000);
+	#endif
 }
 
 /* ************************************************************************** */
@@ -158,18 +171,15 @@ void main()
 	while (!aPad_ReadChar(aSPAD_GP2_GPMONITOR_SHUTDOWN)) {
 	
 	// Debugging for servo pulse measurement to use RC remote control over
-	// riding for motion testing. 
-#ifdef aDEBUG 
-
+	// riding for motion testing.	
 	if (bDebugInfo) {
-		aCore_Sleep(10000);
-		//aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,1);
-		
+		aCore_Sleep(10000);		
 		aPrint_String("RC remote monitor launched.\n");
 		aCore_Sleep(10000);
 		bDebugInfo = 0;
 	}
 
+	// RC remote manual over ride
 	if (read_RCEnable() > 800) { 	
 		// Read the pulse timer for the digital input pins
 		RCLeft = read_LeftRC();
@@ -177,22 +187,20 @@ void main()
 		RCRight = read_RightRC();
 		RCRight = rcWindow(RCRight);
 		
+		aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 1);
+		
 	} else {
+	
 		RCLeft = 0;
 		RCRight = 0;
+		aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 0);
+		
 	}
 
-	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_SETPOINT_RIGHT, RCRight);
-	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_SETPOINT_LEFT, RCLeft);
-	
-	aPrint_IntDec(RCLeft);
-	aPrint_Char(',');
-	aPrint_IntDec(RCRight);	
-	aPrint_Char('\n');
+		// Update the scratchpad on the moto
+		aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_RIGHT, RCRight);
+		aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_LEFT, RCLeft);
 
-	aCore_Sleep(2000);
-
-#endif	
 	
 		/* stall for a timeslice */
 		aCore_Sleep(aSLICE);

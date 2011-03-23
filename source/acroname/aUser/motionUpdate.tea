@@ -42,10 +42,20 @@ void main(char callingProcID)
 	aMotion_RampEnable(aMOTOR_RIGHT, 1);
 
 	while(1) {
+	
+			// If RC override is enabled, then 
+			//   grab setpoints from RC scratchpad
+			// else
+			//   grab motion setpoints from planner scratchpad
+			if (aPad_ReadInt(aSPAD_MO_MOTION_RCENABLE)) {
+				newRightSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_RCSET_RIGHT);
+				newLeftSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_RCSET_LEFT);
+			}
+			else {
+				newRightSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_RIGHT);
+				newLeftSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_LEFT);
+			}
 		
-			newRightSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_RIGHT);
-			newLeftSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_LEFT);
-
 			aMotion_SetRampAccStepTime(aMOTOR_LEFT, accTimeLeft);
 			aMotion_SetRampAccStepTime(aMOTOR_RIGHT, accTimeRight);
 				
