@@ -95,11 +95,6 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
 	// 2 byte value. Short is enough. Likely even transition to an 
 	// unsigned char since we are not likely to go past 200. 
 	m_setpointMax = (short) setpoint;
-											
-	// Make sure we prime the enable motion control polling via the scrachpad.
-	// For now, we will assume that the TEA monitor is either enabled via
-	// bootstap VM or called by VM_RUN
-	m_pStem->PAD_IO(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE, 1);
 	
 	return e;
 	

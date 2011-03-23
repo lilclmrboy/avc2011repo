@@ -17,6 +17,7 @@
 // Project specific headers
 #include "avc2011Structs.h"
 #include "avc2011Defs.tea"
+#include "logger.h"
 
 // Utilites
 #ifdef aDEBUG_H

@@ -74,6 +74,7 @@ public:
 private:
 	acpStem* m_pStem;
 	aIOLib m_ioRef;
+	logger* m_logger;
 	//We'll use this time reading to get GPS updates.	
 	int m_curGPSTimeSec;
 	//Millisecond timing for motion update.

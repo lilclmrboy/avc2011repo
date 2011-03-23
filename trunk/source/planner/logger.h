@@ -8,7 +8,6 @@
 #include <time.h>
 
 // We can add more to this as we see needed
-// Last enum shoud be LogAll
 // First enum should have a "1" as the starting number.
 enum aLogType {
 	RAW = 1,
@@ -37,7 +36,9 @@ public:
 
 	// Append to an output log file. Depending on what and where, this
 	// might end up a bit different.
-	// Default is to output to STDIO
+	// Default is to output to STDOUT, STDERR, and the default format
+	// is raw... meaning nothing is appended.
+
 	void log(aLogType type = RAW, const char* fmt = "", ...);
   void append(const char * msg, aLogType type = INFO);
 	void append(const avcForceVector& potential, aLogType type = INFO);

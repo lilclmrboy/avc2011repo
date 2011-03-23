@@ -50,7 +50,7 @@ logger::openLogFile(const char* filename) {
 void 
 logger::openInfoLogFile(const char* filename) {
 	// we reopen ... 	
-	freopen(filename, "w", m_pInfo);
+	m_pInfo = fopen(filename, "w");
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -97,29 +97,29 @@ logger::log(aLogType type /* = RAW */, const char * fmt /* = "" */, ...)
 		case DEBUG: {
 				fprintf(m_pInfo, "DEBUG(%s) - ", (const char*) getTime());
 				vfprintf(m_pInfo, fmt, args);
-				fprintf(m_pInfo, "\n");
+				fprintf(m_pInfo, "\n");fflush(m_pInfo);
 		} break;
 
 		case INFO: {	
 				fprintf(m_pInfo, "INFO(%s) - ", (const char*) getTime());
 				vfprintf(m_pInfo, fmt, args);
-				fprintf(m_pInfo, "\n");
+				fprintf(m_pInfo, "\n");fflush(m_pInfo);
 		}	break;
 
 		case NOTICE: {
 			fprintf(m_pError, "NOTICE(%s) - ", (const char*) getTime());
 			vfprintf(m_pError, fmt, args);
-			fprintf(m_pError, "\n");		
+			fprintf(m_pError, "\n");fflush(m_pError);		
 		}	break;
 				
 		case ERROR: {
 		  fprintf(m_pError, "ERROR(%s) - ", (const char*) getTime());
 			vfprintf(m_pError, fmt, args);
-			fprintf(m_pError, "\n");	
+			fprintf(m_pError, "\n");fflush(m_pError);
 		}	break;
 				
 		default: {
-			vfprintf(m_pInfo, fmt, args);	
+			vfprintf(m_pInfo, fmt, args);fflush(m_pInfo);	
 		}	break;
 	}
 		
