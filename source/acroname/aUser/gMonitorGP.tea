@@ -56,7 +56,6 @@ void init() {
 	aPad_WriteChar(aSPAD_GP2_IR_PROCESS_ENABLE,0);
 	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,0);
 	aPad_WriteChar(aSPAD_GP2_SONAR_PROCESS_ENABLE,0);
-	aPad_WriteChar(aSPAD_GP2_LOC_PROCESS_ENABLE, 0);
 
 	/* Zero out other placehoder readings */
 	aPad_WriteInt(aSPAD_GP2_REPULSIVE_UX,0);
@@ -82,16 +81,7 @@ void init() {
 
 	
 	/* Set other non zero defaults */
-	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RAMPACC_TIME, aACCELRATION_TIME);
-	
-	
-// Enable digital polling for RC servo testing
-//#ifdef aDEBUG
-
-//	aDig_Config(aGP2_DIG_IO_RC_LEFT, ADIG_INPUT | ADIG_TMRWID);
-//	aDig_Config(aGP2_DIG_IO_RC_RIGHT, ADIG_INPUT | ADIG_TMRWID); 
-
-//#endif	
+	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RAMPACC_TIME, aACCELRATION_TIME);	
 	
 }
 
@@ -104,16 +94,13 @@ void shutdown() {
 #endif
 
 	/* Disable IR sensor polling */
-	aPad_WriteChar(aSPAD_GP2_IR_PROCESS_ENABLE, 0);
+	//aPad_WriteChar(aSPAD_GP2_IR_PROCESS_ENABLE, 0);
 	
 	/* Disable sonar sensor polling */
-	aPad_WriteChar(aSPAD_GP2_SONAR_PROCESS_ENABLE, 0);
-
-	/* Disable Location sensor polling */
-	aPad_WriteChar(aSPAD_GP2_LOC_PROCESS_ENABLE, 0);
+	//aPad_WriteChar(aSPAD_GP2_SONAR_PROCESS_ENABLE, 0);
 
 	/* Disable motion updating thread */
-	aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,0);
+	//aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,0);
 
 #ifdef aDEBUG	
 	aPrint_String("irSensors shutdown.\n");
@@ -173,11 +160,12 @@ void main()
 	//aMulti_Spawn(aSONAR_POLLING_GP2_SLOT, aSONAR_POLLING_GP2_PROCESS);
 
 	/* Spawn the IR polling thread */
-	//aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
+	aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
 	
 	/* Spawn the motion updating thread */
 	// Write a aBus_Multi_Spawn function. Add this to the aBus library
-	aBus_Multi_Spawn(aMOTO_MODULE, aMOTION_UPDATING_MO_SLOT, aMOTION_UPDATING_MO_PROCESS);\
+	aBus_Multi_Spawn(aMOTO_MODULE, aMOTION_UPDATING_MO_SLOT,
+										aMOTION_UPDATING_MO_PROCESS);
 	
 	// Do monitor relevant things. Bookkeeping, coordinating, etc. 
 	while (!aPad_ReadChar(aSPAD_GP2_GPMONITOR_SHUTDOWN)) {
@@ -188,15 +176,14 @@ void main()
 
 	if (bDebugInfo) {
 		aCore_Sleep(10000);
-		aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,1);
+		//aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,1);
 		
 		aPrint_String("RC remote monitor launched.\n");
 		aCore_Sleep(10000);
-		bDebugInfo = 0;
+		//bDebugInfo = 0;
 	}
 
 	if (read_RCEnable() > 800) { 	
-	  //aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,0);
 		// Read the pulse timer for the digital input pins
 		RCLeft = read_LeftRC();
 		RCLeft = rcWindow(RCLeft);
@@ -204,7 +191,6 @@ void main()
 		RCRight = rcWindow(RCRight);
 		
 	} else {
-	  //aBus_WritePadChar(aMOTO_MODULE, aSPAD_MO_MOTION_PROCESS_ENABLE,1);
 		RCLeft = 0;
 		RCRight = 0;
 	}
