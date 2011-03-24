@@ -3,47 +3,6 @@
 
 #include "avc2011.tea"
 #include "rc.tea"
-/* ************************************************************************** */
-/* on entry, the stack looks like this:
- *  0    5    cModule
- *  1    4    fileID
- *  2    3    ProcID
- *  3    2    retaddrh
- *  4    1    retaddrl
- */
-void aBus_Multi_Spawn(char cModule, char fileID, char ProcID)
-{
-  asm
-  {
-    /* run fileID in VM[ProcID] with calling ProcID as input */
-    pushsb  5            /* the module */
-    pushlb	5            /* the number of bytes in the command */
-    pushlb	cmdVM_RUN
-    pushlb	7            /* RUNCTRL */
-    pushsb	8            /* FileID, was 8 */
-    pushsb	8            /* ProcID, was 8 */
-    pushmb	aPortProcID  /* calling ProcID, was aPortProcID */
-    pushlb	7            /* We are sending 7 bytes to the popcmd */
-    popcmd
-    pushlb	20           /* let process start */
-    popbm	aPortVMTimer
-  }
-}
-
-/* ************************************************************************** */
-/* on entry, the stack looks like this:
- *  0    4    cModule
- *  1    3    ProcID
- *  2    2    retaddrh
- *  3    1    retaddrl
- */
-void aBus_Multi_Kill(char cModule, char ProcID)
-{
-#ifdef aDEBUG	
-	aPrint_String("  WARNING: aBus_Multi_Kill NOT IMPLEMENTED.\n");
-	aCore_Sleep(5000);
-#endif
-}
 
 
 /* ************************************************************************** */
@@ -85,51 +44,27 @@ void init() {
 }
 
 /* ************************************************************************** */
-void aPrintf(string s)
-{
-	#ifdef aDEBUG	
-		aPrint_String(s);
-		aPrint_Char('\n');
-		aCore_Sleep(1000);
-	#endif
-}
-
-/* ************************************************************************** */
 void shutdown() {
 
-#ifdef aDEBUG	
-	aPrint_String("gMonitorGP shutdown.\n");
-	aCore_Sleep(1000);
-#endif
+	aPrint_Debug("gMonitorGP shutdown");
 
-#ifdef aDEBUG	
-	aPrint_String("irSensors shutdown.\n");
-	aCore_Sleep(1000);
-#endif
 	/* Clean up billy! */
+	aPrint_Debug("irSensors shutdown");
 	aMulti_Kill(aIR_POLLING_GP2_PROCESS);
 	
-#ifdef aDEBUG	
-	aPrint_String("sonarSensors shutdown.\n");
-	aCore_Sleep(1000);
-#endif
 	/* Clean up billy! */
+	aPrint_Debug("sonarSensors shutdown");
 	aMulti_Kill(aSONAR_POLLING_GP2_PROCESS);	
 
-#ifdef aDEBUG	
-	aPrint_String("locSensors shutdown.\n");
-	aCore_Sleep(1000);
-#endif
 	/* Clean up billy! */
+	aPrint_Debug("locSensors shutdown");
 	aMulti_Kill(aLOC_POLLING_GP2_PROCESS);	
 
-#ifdef aDEBUG	
-	aPrint_String("motionUpdate shutdown.\n");
-	aCore_Sleep(1000);
-#endif	
+	/* Clean up billy! */
+	aPrint_Debug("motionUpdate shutdown");
 	aBus_Multi_Kill(aMOTO_MODULE, aMOTION_UPDATING_MO_PROCESS);
 	
-	/* stall for a second */
+	/* stall for a second to let all the op codes return */
   aCore_Sleep(1000);
 	
 }
@@ -141,25 +76,22 @@ void main()
 	/* Values to measure the digital pulse timing */
 	int RCRight = 0;
 	int RCLeft = 0;
+	int RCRightLast = 0;
+	int RCLeftLast = 0;
+	
 	char bDebugInfo = 1;
+	char bRCModeEnabled = 0;
+	char bRCModeDisabled = 0;
 
 	/* Initailize the system */
 	init();
 
-#ifdef aDEBUG	
-	aPrint_String("gMonitorGP launched.\n");
-	aCore_Sleep(1000);
-	aPrint_String("Debugging enabled.\n");
-	aCore_Sleep(3000);
-#endif
+	aPrint_Debug("gMonitorGP launched");
 
 	/* Spawn the IR polling thread */
 	//aMulti_Spawn(aIR_POLLING_GP2_SLOT, aIR_POLLING_GP2_PROCESS);
 
-	/* Spawn the Sonar polling thread */
-	//aMulti_Spawn(aSONAR_POLLING_GP2_SLOT, aSONAR_POLLING_GP2_PROCESS);
-
-	/* Spawn the IR polling thread */
+	/* Spawn the location polling thread */
 	aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
 	
 	/* Spawn the motion updating thread */
@@ -170,38 +102,57 @@ void main()
 	// Do monitor relevant things. Bookkeeping, coordinating, etc. 
 	while (!aPad_ReadChar(aSPAD_GP2_GPMONITOR_SHUTDOWN)) {
 	
-	// Debugging for servo pulse measurement to use RC remote control over
-	// riding for motion testing.	
-	if (bDebugInfo) {
-		aCore_Sleep(10000);		
-		aPrint_String("RC remote monitor launched.\n");
-		aCore_Sleep(10000);
-		bDebugInfo = 0;
-	}
+		// Debugging for servo pulse measurement to use RC remote control over
+		// riding for motion testing.	
+		if (bDebugInfo) {
+			aPrint_Debug("RC remote monitor launched.");
+			bDebugInfo = 0;
+		}
 
-	// RC remote manual over ride
-	if (read_RCEnable() > 800) { 	
-		// Read the pulse timer for the digital input pins
-		RCLeft = read_LeftRC();
-		RCLeft = rcWindow(RCLeft);
-		RCRight = read_RightRC();
-		RCRight = rcWindow(RCRight);
+		// RC remote manual over ride
+		if (read_RCEnable() > aRC_ENABLE_THRESHOLD) {
 		
-		aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 1);
+			// Read the pulse timer for the digital input pins
+			RCLeft = read_LeftRC();
+			RCLeft = rcWindow(RCLeft);
+			RCRight = read_RightRC();
+			RCRight = rcWindow(RCRight);
+			
+			// Enable the RC over ride on the Moto module
+			// This should reduce the number of scratchpad writes to the Moto
+			if (!bRCModeEnabled) {
+				aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 1);
+				bRCModeEnabled = 1;
+				bRCModeDisabled = 0;
+			}
+			
+		} else {
 		
-	} else {
-	
-		RCLeft = 0;
-		RCRight = 0;
-		aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 0);
-		
-	}
+			RCLeft = 0;
+			RCRight = 0;
+			
+			// Disable the RC over ride on the Moto module
+			// This should reduce the number of scratchpad writes to the Moto
+			if (!bRCModeDisabled) {
+				aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 0);
+				bRCModeEnabled = 0;
+				bRCModeDisabled = 1;
+			}			
+		}
 
 		// Update the scratchpad on the moto
-		aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_RIGHT, RCRight);
-		aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_LEFT, RCLeft);
-
-	
+		// This should reduce the number of scratchpad writes to the Moto
+		if (RCRight != RCRightLast) {
+			aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_RIGHT, RCRight);
+			RCRightLast = RCRight;
+		}
+		
+		// This should reduce the number of scratchpad writes to the Moto
+		if (RCLeft != RCLeftLast) {
+			aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_LEFT, RCLeft);
+			RCLeftLast = RCLeft;
+		}
+		
 		/* stall for a timeslice */
 		aCore_Sleep(aSLICE);
 	
@@ -210,4 +161,4 @@ void main()
 	// clean up and shutdown
 	shutdown();
 	
-}
+} // end of main
