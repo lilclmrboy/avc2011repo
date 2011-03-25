@@ -4,7 +4,7 @@
 /* Adjust the heartbeat rate */
 2 18 2 10
 /* Set the IIC baudrate to 400Hz */
-2 18 3 1
+2 18 3 2
 /* Adjust the serial rate to 38400 */
 2 18 4 4
 
