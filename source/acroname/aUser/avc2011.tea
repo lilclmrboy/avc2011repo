@@ -12,16 +12,6 @@
 #include <aDig.tea>
 
 /* ************************************************************************** */
-void aPrint_Debug(string s)
-{
-	#ifdef aDEBUG	
-		aPrint_String(s);
-		aPrint_Char('\n');
-		aCore_Sleep(1000);
-	#endif
-}
-
-/* ************************************************************************** */
 /* Launches a persisting process. */
 void aMoto_Multi_Spawn(char fileID, char ProcID)
 {
