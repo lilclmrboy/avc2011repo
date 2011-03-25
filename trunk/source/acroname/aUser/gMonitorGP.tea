@@ -46,22 +46,34 @@ void init() {
 /* ************************************************************************** */
 void shutdown() {
 
-	aPrint_Debug("gMonitorGP shutdown");
+	aPrint_String("gMonitorGP shutdown");
 
 	/* Clean up billy! */
-	aPrint_Debug("irSensors shutdown");
+	aPrint_String("irSensors shutdown");
+	aPrint_Char('\n');
+	aCore_Sleep(1000);
+
 	aMulti_Kill(aIR_POLLING_GP2_PROCESS);
 	
 	/* Clean up billy! */
-	aPrint_Debug("sonarSensors shutdown");
+	aPrint_String("sonarSensors shutdown");
+	aPrint_Char('\n');
+	aCore_Sleep(1000);
+
 	aMulti_Kill(aSONAR_POLLING_GP2_PROCESS);	
 
 	/* Clean up billy! */
-	aPrint_Debug("locSensors shutdown");
+	aPrint_String("locSensors shutdown");
+	aPrint_Char('\n');
+	aCore_Sleep(1000);
+
 	aMulti_Kill(aLOC_POLLING_GP2_PROCESS);	
 
 	/* Clean up billy! */
-	aPrint_Debug("motionUpdate shutdown");
+	aPrint_String("motionUpdate shutdown");
+	aPrint_Char('\n');
+	aCore_Sleep(1000);
+
 	aBus_Multi_Kill(aMOTO_MODULE, aMOTION_UPDATING_MO_PROCESS);
 	
 	/* stall for a second to let all the op codes return */
@@ -81,18 +93,20 @@ void main()
 	
 	char bDebugInfo = 1;
 	char bRCModeEnabled = 0;
-	char bRCModeDisabled = 0;
+	char bRCModeDisabled = 1;
 
 	/* Initailize the system */
 	init();
 
-	aPrint_Debug("gMonitorGP launched");
-
+	aPrint_String("gMonitorGP launched");
+	aPrint_Char('\n');
+	aCore_Sleep(1000);
+	
 	/* Spawn the IR polling thread */
 	//aMulti_Spawn(aIR_POLLING_GP2_SLOT, aIR_POLLING_GP2_PROCESS);
 
 	/* Spawn the location polling thread */
-	aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
+	//aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
 	
 	/* Spawn the motion updating thread */
 	// Write a aBus_Multi_Spawn function. Add this to the aBus library
@@ -105,7 +119,9 @@ void main()
 		// Debugging for servo pulse measurement to use RC remote control over
 		// riding for motion testing.	
 		if (bDebugInfo) {
-			aPrint_Debug("RC remote monitor launched.");
+			aPrint_String("RC remote monitor launched.");
+			aPrint_Char('\n');
+			aCore_Sleep(1000);
 			bDebugInfo = 0;
 		}
 
