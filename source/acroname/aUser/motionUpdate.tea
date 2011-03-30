@@ -6,9 +6,10 @@
 
 #ifdef aDEBUG
 #include <aPrint.tea>
+#include <aA2D.tea>
 #endif
 
-#define aTIMESLICE 233
+#define aTIMESLICE 600
 
 
 /* ************************************************************************** */
@@ -79,6 +80,15 @@ void main(char callingProcID)
 #endif
 				
 			} // end if for grabbing and setting setpoints
+			
+#ifdef aMOTION_CURRENT
+		      aPrint_String("ir, il: ");
+		      aPrint_IntDec(aA2D_ReadInt(2));
+		      aPrint_String(",");
+		      aPrint_IntDec(aA2D_ReadInt(2));
+		      aPrint_Char('\n');
+		      aCore_Sleep(500);
+#endif			
 		
 		// We don't want to swamp the processor
 		aCore_Sleep(aTIMESLICE);
