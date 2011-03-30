@@ -18,7 +18,7 @@
 /* Configure the motion control mode */
 /* 2nd to last byte is the mode */
 /* Last byte is the control bits */
-4 63 0 0 7 3
+4 63 0 0 7 1
 
 /* Set the P value */
 4 63 0 1 0 0x80
@@ -33,7 +33,7 @@
 4 63 0 4 0 0
 
 /* Set the rail */
-4 63 0 5 0x3F 0xFC
+4 63 0 5 0x7F 0xFF
 
 /* Set the period */
 4 63 0 6 0 0x50
@@ -67,7 +67,7 @@
 4 63 1 4 0 0
 
 /* Set the rail */
-4 63 1 5 0x3F 0xFC
+4 63 1 5 0x7F 0xFF
 
 /* Set the period */
 4 63 1 6 0 80
