@@ -56,6 +56,9 @@ public:
 		
 	~avcPosition(void) 
 	{
+		fputs ("</trkseg></trk></gpx>", gps_track);
+		fclose(gps_track);
+		
 		aErr e;
 		if (aIO_ReleaseLibRef(m_ioRef, &e))
  	     		throw acpException(e, "unable to destroy IO lib");	
@@ -75,6 +78,7 @@ private:
 	acpStem* m_pStem;
 	aIOLib m_ioRef;
 	logger* m_logger;
+	FILE* gps_track;
 	//We'll use this time reading to get GPS updates.	
 	int m_curGPSTimeSec;
 	//Millisecond timing for motion update.
