@@ -35,7 +35,8 @@ double sgn(double x)
 avcMotion::avcMotion() :
   m_pStem(NULL),
   m_settings(NULL),
-  m_setpointMax(aMOTOR_SETPOINT_MAX)
+  m_setpointMax(aMOTOR_SETPOINT_MAX),
+  m_bInit(false)
   
 {
 	
@@ -81,6 +82,7 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
 	// Grab the pointer to the settings
 	m_settings = settings;
 	
+	//m_log = logger::getInstance();
 	// Read motion module specific settings from the settings file
 	// reference. Remember, this can get created from a configuration 
 	// file, OR as command line input arguments. 
@@ -95,6 +97,9 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
 	// 2 byte value. Short is enough. Likely even transition to an 
 	// unsigned char since we are not likely to go past 200. 
 	m_setpointMax = (short) setpoint;
+	
+	// Set the flag to inidicate that we have been properly initialized
+	m_bInit = true;
 	
 	return e;
 	
@@ -115,6 +120,12 @@ avcMotion::updateControl(const avcForceVector& potential)
 	// Make sure you other hackers initialized this first
 	if (!m_pStem) {
 		aDEBUG_PRINT("avcMotion::updateControl failed. acpStem is NULL\n"
+								 " \tCall avcMotion::init(acpStem *)\n");
+		return aErrInitialization;
+	}
+	
+	if (!m_bInit) {
+		aDEBUG_PRINT("avcMotion::updateControl failed since uninitialized.\n"
 								 " \tCall avcMotion::init(acpStem *)\n");
 		return aErrInitialization;
 	}
@@ -336,6 +347,100 @@ int doTests(acpStem *pStem, aSettingFileRef settings) {
 }
 
 ////////////////////////////////////////
+
+aErr driveDebug(acpStem *pStem,
+							 avcMotion *pMotion, 
+							 avcForceVector *pVectors, 
+							 const int nVectors);
+
+
+////////////////////////////////////////
+aErr driveDebug(acpStem *pStem,
+							 avcMotion *pMotion, 
+							 avcForceVector *pVectors, 
+							 const int nVectors)
+{
+	avcForceVector Ufinal; // always defaul to 0,0
+	
+	// Chomp through the vectors
+	for (int i = 0; i < nVectors; i++) {
+		
+		// Grab the vectors that are passed in
+		pMotion->updateControl(pVectors[i]);
+		
+		pStem->sleep(2000);
+	}
+	
+	// Stop the motors
+	pMotion->updateControl(Ufinal);
+	
+	// Let the motors settle before getting out of here
+	pStem->sleep(2000);
+	
+	return aErrNone;
+}
+
+
+////////////////////////////////////////
+int driveTests(acpStem *pStem, aSettingFileRef settings);
+
+////////////////////////////////////////
+
+int driveTests(acpStem *pStem, aSettingFileRef settings)
+{
+	
+	avcMotion motion;
+	avcForceVector Uresult[10];
+	aErr e = aErrNone;
+	float range = 0.4f;
+	
+	printf("---------------------------------------------------------\n");
+	printf("Performing actual motion tests on motModule\n");
+	
+	///////////////////////////////////////////////////
+	
+	// initialize the motion class
+	e = motion.init(pStem, settings);
+	
+	// Now do a test or 2, or 3
+	Uresult[0].x = range;
+	Uresult[0].y = 0;
+	
+	// Drive backward test
+	Uresult[1].x = -1*range;
+	Uresult[1].y = 0;
+
+	// Rotate at slight angle test 1
+	Uresult[2].x = range;
+	Uresult[2].y = range;
+	
+	// Rotate at slight angle test 2
+	Uresult[3].x = -1*range;
+	Uresult[3].y = -1*range;
+	
+	// Rotate at slight angle test 3
+	Uresult[4].x = -1*range;
+	Uresult[4].y = range;
+	
+	// Rotate at slight angle test 4
+	Uresult[5].x = range;
+	Uresult[5].y = -1*range;
+	
+	// Rotate in place
+	Uresult[6].x = 0;
+	Uresult[6].y = -1*range;
+	
+	// Rotate in place
+	Uresult[7].x = 0;
+	Uresult[7].y = range;
+	
+	e = driveDebug(pStem, &motion, Uresult, 8);
+	
+	return e;
+	
+}
+
+////////////////////////////////////////
 // main testing routine for motModule 
 int 
 main(int argc, 
@@ -376,9 +481,10 @@ main(int argc,
 	
 	do { 
 		printf(".");
+		fflush(stdout);
 		aIO_MSSleep(ioRef, 500, NULL);
 		++timeout;
-	} while (!stem.isConnected() && timeout < 10);
+	} while (!stem.isConnected() && timeout < 30);
 	
 	printf("\n");
 
@@ -389,8 +495,11 @@ main(int argc,
 	// Begin the real actual testing
 	// We are connected to the stem now, we can beat on the motion control 
 	// module. Ya!!!
-	doTests(&stem, settings);
-
+	//doTests(&stem, settings);
+	
+	// Drive forward for a bit
+	driveTests(&stem, settings);
+	
 	aIO_MSSleep(ioRef, 1000, NULL);
 	
 	//////////////////////////////////

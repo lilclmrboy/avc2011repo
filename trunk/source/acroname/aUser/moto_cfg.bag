@@ -18,7 +18,7 @@
 /* Configure the motion control mode */
 /* 2nd to last byte is the mode */
 /* Last byte is the control bits */
-4 63 0 0 7 1
+4 63 0 0 7 0
 
 /* Set the P value */
 4 63 0 1 0 0x80
@@ -52,7 +52,7 @@
 /* Configure the motion control mode */
 /* 2nd to last byte is the mode */
 /* Last byte is the control bits */
-4 63 1 0 7 0
+4 63 1 0 7 3
 
 /* Set the P value */
 4 63 1 1 0 0x80

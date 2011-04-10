@@ -4,7 +4,7 @@
 #define RAD_TO_DEG (180/aPI)
 
 avcPlanner::avcPlanner(void) {
-		
+	m_waypoints.push_back(avcWaypointVector(0.0,0.0,0.0));	
 	// setup some example waypoints to play with
 	// this might be better to read from a file (or website) later
 	/*
@@ -88,7 +88,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 						   &e);
 	// Copy flag to member variable.
 	m_unpassedZetaSliceDeg = unpassedZetaSliceDeg;
-	
+  
 	return e;
 }
 
