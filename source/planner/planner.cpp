@@ -7,6 +7,8 @@ avcPlanner::avcPlanner(void) {
 		
 	// setup some example waypoints to play with
 	// this might be better to read from a file (or website) later
+	/*
+	 //example race course map. This will be read in from a gpx file or something
 	m_waypoints.push_back(avcWaypointVector(-105.2104311212637,40.06449357185146,0.0));
 	m_waypoints.push_back(avcWaypointVector(-105.2104381888533,40.06476958373474,0.0));
 	m_waypoints.push_back(avcWaypointVector(-105.2104340684065,40.06498350881099,0.0));
@@ -21,6 +23,7 @@ avcPlanner::avcPlanner(void) {
 	m_waypoints.push_back(avcWaypointVector(-105.2097427890488,40.06448581625421,270.0));
 	m_waypoints.push_back(avcWaypointVector(-105.2100969789239,40.06449047916893,270.0));
 	m_waypoints.push_back(avcWaypointVector(-105.2104311212637,40.06449357185146,0.0));
+	*/
 	
 	
 }
@@ -54,7 +57,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	aSettingFile_GetInt (ioRef, settings,
 						   aKEY_NORMALIZE_MOTIVATION_VECTOR,
 						   &normalizeMotivationVector,
-						   0,
+						   1,
 						   &e);
 	// Copy flag to member variable.
 	m_normalizeMotivationVector = normalizeMotivationVector;
@@ -107,16 +110,24 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 	try {
 		//get the next unpassed waypoint
 		nextUnpassedWaypoint = m_waypoints[getFirstUnpassedWayPoint()];
-		// calculate a vector between the current position to the next waypoint
-		calcForceVectorBetweenStates (pos,
-							 m_waypoints[getFirstUnpassedWayPoint()].state,
-							 &goal);
 	}
 	catch (int &e) {
 		// probably couldn't find any unpassed waypoints. We might have
 		// completed the map.
 		// set the goal vector to 0,0 so we just look for sensor inputs
 		LOG_ERROR(m_logger, "Error while getting first unpassed waypoint\n\t\t\
+				  Next point will be 0,0.");
+		nextUnpassedWaypoint.state.x = 0.0;
+		nextUnpassedWaypoint.state.y = 0.0;
+	}
+	
+	// calculate a vector between the current position to the next waypoint
+	if( aErrNone != calcForceVectorBetweenStates (pos,
+								  nextUnpassedWaypoint.state,
+									 &goal) )
+	{
+		// set the goal vector to 0,0 so we just look for sensor inputs
+		LOG_ERROR(m_logger, "Error while calculating goal vector\n\t\t\
 				  Goal vector will be 0,0.");
 		goal.x = 0.0;
 		goal.y = 0.0;
