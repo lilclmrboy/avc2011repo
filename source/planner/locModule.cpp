@@ -24,7 +24,7 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 	if (!gps_track)
 		return aErrIO;
 	
-	fputs("<?xml verstion=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n",
+	fputs("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n",
 				gps_track);
 	fputs("<gpx xmlns=\"http://www.topografix.com/GPX/1/1\"" 
         " xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\"" 
