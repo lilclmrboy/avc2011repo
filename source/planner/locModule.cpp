@@ -151,7 +151,7 @@ avcPosition::updateState() {
 	int curSec = getGPSTimeSec();
 	double curLat = 0.0;
 	double curLon = 0.0;
-	if (curSec != m_curGPSTimeSec) {
+	if (curSec != m_curGPSTimeSec && getGPSQuality()) {
 		//Grab current GPS and compass settings, otherwise we'll rely on 
 		//a Kalman update with encoder values only.
 		curLat = getGPSLatitude();
