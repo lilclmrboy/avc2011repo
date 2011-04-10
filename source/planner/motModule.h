@@ -38,10 +38,12 @@ private:
 	
 	//Our controller owns this we'll let them delete.	
 	aSettingFileRef m_settings;
-	
+	//logger *m_log;
 	short m_setpointMax;
 	short m_setpoint[aMOTOR_NUM];
 	short m_setpointLast[aMOTOR_NUM];
+	
+	bool m_bInit;
 
 };
 

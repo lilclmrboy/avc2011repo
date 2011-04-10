@@ -8,7 +8,6 @@
 ////////////////////////////////////////////////////////////////////////////
 aErr
 avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
-
 	m_pStem = pStem;
 	m_settings = settings;
 	m_logger = logger::getInstance();	
@@ -18,7 +17,7 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 	time_t rawtime;
 	struct tm* timeinfo;
 	time(&rawtime);
-  timeinfo = localtime( &rawtime );
+        timeinfo = localtime( &rawtime );
 	strftime(buffer,100, "GPS_Track_%d_%m_%H_%M.gpx", timeinfo);
  
 	gps_track = fopen(buffer, "w");
@@ -65,12 +64,13 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		* our starting position from the GPS position information
 		* else we'll assume we're at the 0,0,0 position.	
 	  */
-		int timeout = 0;
+		//int timeout = 0;
 		bool haveGPS = false;
-		while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
-			aIO_MSSleep(m_ioRef, 1000, NULL);
-			++timeout;
-		}
+		//while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
+		//	aIO_MSSleep(m_ioRef, 1000, NULL);
+		//	++timeout;
+			
+		//}
 
 		if (haveGPS) {
 			//Lets get a lat, lon, and heading... from compass. We shouldn't
@@ -127,8 +127,8 @@ avcPosition::updateState() {
 	//Get the new encoder readings.
 	int curEncR = getEncoderValue(aMOTOR_RIGHT);
 	int curEncL = getEncoderValue(aMOTOR_LEFT);
-	
-	//convert those into distance traveled each wheel.
+  
+  	//convert those into distance traveled each wheel.
 	double dWheelR = (curEncR - m_rEncoder)/ m_ticksPerRev;
 	double dWheelL = (curEncL - m_rEncoder)/ m_ticksPerRev; 
 
@@ -145,10 +145,11 @@ avcPosition::updateState() {
 	state(4) = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER / tmElapsed;
 	state(5) = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER / tmElapsed;
 	state(6) = fRot * RAD_TO_DEG;
-	
+  
 	//EKF from here on out.
 	//We really only want to use GPS information if enough time has passed.
 	int curSec = getGPSTimeSec();
+  
 	double curLat = 0.0;
 	double curLon = 0.0;
 	if (curSec != m_curGPSTimeSec && getGPSQuality()) {
@@ -172,6 +173,7 @@ avcPosition::updateState() {
 	m_curPos.vw = state(6);
 
 	m_curClock = clock();
+	
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -63,8 +63,11 @@ avcController::init(const int argc, const char* argv[]) {
 		aDEBUG_PRINT("done\n");
 	
 		// Don't forget to init the modules :)
+		printf("Motion Control\n");
 		e = m_mot.init(&m_stem, m_settings);
+		printf("Position Module\n");
 		e = m_pos.init(&m_stem, m_settings);
+		printf("Initing Planner\n");
 		e = m_planner.init(m_ioRef, m_settings);
 	}
 	return e;
@@ -84,13 +87,16 @@ avcController::run(void) {
 		//First do the localization step. Lets get relevant GPS
 		//info from the unit, and compass heading. Along with 
 		//the previous state and control vector.
+	  
 		m_pos.updateState();			        
 		
 		// get sensor readings
 		avcForceVector ir;
 		
 		// motion planning step
+	  printf("getting motivation");fflush(stdout);
 		avcForceVector motivation = m_planner.getMotivation(m_pos.getPosition(), ir);
+		printf("motivation updated");fflush(stdout);
 		
 		e = m_mot.updateControl(motivation);
 
