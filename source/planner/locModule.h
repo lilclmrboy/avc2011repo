@@ -24,7 +24,7 @@ public:
 		m_wheelRd(0.07626),
 		m_wheelCf(0.479),
 		m_wheelTrk(0.15),
-		m_ticksPerRev(1024), 
+		m_ticksPerRev(400), 
 		m_settings(NULL)
 	{	
 		aErr e;
@@ -45,7 +45,7 @@ public:
 		m_wheelRd(0.07626),
 		m_wheelCf(0.479),
 		m_wheelTrk(0.15),
-		m_ticksPerRev(1024),
+		m_ticksPerRev(400),
 		m_settings(NULL)
 	{
 		aErr e;
@@ -87,8 +87,8 @@ private:
 	avcStateVector m_curPos;
 	// probability matrix for state vector.	
 	Matrix m_P;	
-	unsigned int m_rEncoder;
-	unsigned int m_lEncoder;
+	int m_rEncoder;
+	int m_lEncoder;
 	double m_wheelRd; //wheel radius	
 	double m_wheelCf; //wheel circumference
 	double m_wheelTrk; //wheel track, or dist between contact points.
