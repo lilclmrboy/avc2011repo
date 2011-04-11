@@ -87,8 +87,9 @@ $(OBJ)/%.o : %.cpp %.h
 	
 .PHONY : motModuleTest
 motModuleTest : $(OBJ)
+	$(CC) -c $(CFLAGS) logger.cpp -o $(OBJ)/logger.o
 	$(CC) -c $(CFLAGS) -DaDEBUG_MOTMODULE motModule.cpp -o $(OBJ)/motModule.o
-	$(CC) -g $(CFLAGS) -DaDEBUG_MOTMODULE $(LFLAGS) $(OBJ)/motModule.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/motModuleTest
+	$(CC) -g $(CFLAGS) -DaDEBUG_MOTMODULE $(LFLAGS) $(OBJ)/motModule.o $(OBJ)/logger.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/motModuleTest
 
 .PHONY : loggerTest
 loggerTest : $(OBJ)
