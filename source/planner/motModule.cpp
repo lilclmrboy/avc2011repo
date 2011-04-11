@@ -207,6 +207,11 @@ avcMotion::updateControl(const avcForceVector& potential)
 											(m == aMOTOR_LEFT) ? aSPAD_MO_MOTION_SETPOINT_LEFT : aSPAD_MO_MOTION_SETPOINT_RIGHT, 
 											m_setpoint[m]);
 			
+			
+			m_log->log(DEBUG,"avcMotion::updateControl channel: %d setpoint: %d",
+								 m,
+								 m_setpoint[m]);
+			
 		}
 		
 		// Store the last setpoint reading for next time with hopes of 
