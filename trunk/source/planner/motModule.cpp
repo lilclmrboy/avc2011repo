@@ -82,7 +82,6 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
 	// Grab the pointer to the settings
 	m_settings = settings;
 	
-	//m_log = logger::getInstance();
 	// Read motion module specific settings from the settings file
 	// reference. Remember, this can get created from a configuration 
 	// file, OR as command line input arguments. 
@@ -97,6 +96,10 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
 	// 2 byte value. Short is enough. Likely even transition to an 
 	// unsigned char since we are not likely to go past 200. 
 	m_setpointMax = (short) setpoint;
+		
+	// Get access to the logger class
+	m_log = logger::getInstance();
+	m_log->log(INFO, "Motion Module initialized");
 	
 	// Set the flag to inidicate that we have been properly initialized
 	m_bInit = true;
@@ -116,30 +119,64 @@ avcMotion::updateControl(const avcForceVector& potential)
 	double v[aMOTOR_NUM] = {0.0, 0.0};
 	double magnitude = 0.0;
 	double delta = 0.0;
+	bool bRCOverride = false;
 	
 	// Make sure you other hackers initialized this first
 	if (!m_pStem) {
-		aDEBUG_PRINT("avcMotion::updateControl failed. acpStem is NULL\n"
+		m_log->log(ERROR,"avcMotion::updateControl failed. acpStem is NULL\n"
 								 " \tCall avcMotion::init(acpStem *)\n");
 		return aErrInitialization;
 	}
 	
 	if (!m_bInit) {
-		aDEBUG_PRINT("avcMotion::updateControl failed since uninitialized.\n"
+		m_log->log(ERROR,"avcMotion::updateControl failed since uninitialized.\n"
 								 " \tCall avcMotion::init(acpStem *)\n");
 		return aErrInitialization;
 	}
 
 	// Boundary check the input force vectors
 	if (potential.x > 1.0 || potential.x < -1.0) {
-		aDEBUG_PRINT("avcMotion::updateControl failed.\n"
+		m_log->log(ERROR,"avcMotion::updateControl failed.\n"
 					 "\tavcForceVector.x is out of range\n");
 		return aErrRange;
 	}
 	if (potential.y > 1.0 || potential.y < -1.0) {
-		aDEBUG_PRINT("avcMotion::updateControl failed.\n"
+		m_log->log(ERROR,"avcMotion::updateControl failed.\n"
 					 "\tavcForceVector.y is out of range\n");
 		return aErrRange;
+	}
+	
+	// Check to see if we are manually over riding the motion channel
+	// with the RC receiver.
+	bRCOverride = m_pStem->PAD_IO(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE);
+	
+	// If we need to over ride, we should do it.
+	if (bRCOverride) {
+		
+		m_log->log(NOTICE, "Motion module disabled. RC Override\n");
+		
+		// Set the desired setpoint to zero
+		for (int m = 0; m < aMOTOR_NUM; m++) {
+			m_setpoint[m] = 0;
+			
+			// Check to see if the last setpoint is the same as the new one.
+			// If everything is the same, then we won't bother the Stem.
+			if (m_setpoint[m] != m_setpointLast[m]) {
+				
+				// Write the values to the scratchpad
+				m_pStem->PAD_IO(aMOTO_MODULE, 
+												(m == aMOTOR_LEFT) ? aSPAD_MO_MOTION_SETPOINT_LEFT : aSPAD_MO_MOTION_SETPOINT_RIGHT, 
+												m_setpoint[m]);
+				
+				m_setpointLast[m] = m_setpoint[m];
+				
+			}
+			
+		} // end of for loop for RC over ride
+		
+		// The motion module on the Stem is busy. Leave us alone. Leave 
+		// Brittney alone!
+		return aErrBusy;
 	}
 
 	// calculate the magnitude of the resultant input vector
@@ -183,14 +220,14 @@ avcMotion::updateControl(const avcForceVector& potential)
 #ifdef aDEBUG_MOTMODULE	
 	// Show us what we got
 	if (bDebugHeader) {
-		printf("DEBUG: Ux\tUy\t"
+		m_log->log(DEBUG,"Ux\tUy\t"
 					 "t\tr\tmag\t"
 					 "delta\t"
 					 "vL\tvR\tsetL\tsetR\n");
 		bDebugHeader = false;
 	}
 	
-	printf("DEBUG: %2.2f\t%2.2f\t"
+	m_log->log(DEBUG,"MotionModule: %2.2f\t%2.2f\t"
 				 "%2.2f\t%2.2f\t%2.2f\t"
 				 "%2.2f\t"
 				 "%2.2f\t%2.2f\t"
@@ -466,6 +503,13 @@ main(int argc,
 	// or, maybe command line arguements
 	aArguments_Separate(ioRef, settings, NULL, argc, argv);
 	
+	printf("kitty\n");
+	
+	avcMotion motion; 
+	
+	motion.init(NULL, settings);
+	
+	return 0;
 	
 	printf("connecting to stem\n");
 	
@@ -495,10 +539,10 @@ main(int argc,
 	// Begin the real actual testing
 	// We are connected to the stem now, we can beat on the motion control 
 	// module. Ya!!!
-	//doTests(&stem, settings);
+	doTests(&stem, settings);
 	
 	// Drive forward for a bit
-	driveTests(&stem, settings);
+	//driveTests(&stem, settings);
 	
 	aIO_MSSleep(ioRef, 1000, NULL);
 	
