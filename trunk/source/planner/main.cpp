@@ -14,6 +14,14 @@ main(int argc,
   	try {
   		avcController controller;			
 			retVal = controller.init(argc, argv);
+			switch (retVal) {
+				case aErrTimeout:
+					printf("Couldn't connect to stem. Check connections, jackass.\n");
+					return -1;
+					break;
+				default:
+					break;
+			}
 			if(!retVal)
 				retVal = controller.run();
 	

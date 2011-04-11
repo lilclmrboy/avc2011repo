@@ -63,11 +63,11 @@ avcController::init(const int argc, const char* argv[]) {
 		aDEBUG_PRINT("done\n");
 	
 		// Don't forget to init the modules :)
-		printf("Motion Control\n");
+		aDEBUG_PRINT("Motion Control\n");
 		e = m_mot.init(&m_stem, m_settings);
-		printf("Position Module\n");
+		aDEBUG_PRINT("Position Module\n");
 		e = m_pos.init(&m_stem, m_settings);
-		printf("Initing Planner\n");
+		aDEBUG_PRINT("Initing Planner\n");
 		e = m_planner.init(m_ioRef, m_settings);
 	}
 	return e;
@@ -80,6 +80,9 @@ avcController::run(void) {
 	
 	//Lets allow a condition to gracefully end the application. 
 	bool running = true;
+	logger *m_log = logger::getInstance();
+	avcStateVector pos;
+	avcForceVector ir;
 
 	while (running) {
 		aErr e = aErrNone;
@@ -87,21 +90,22 @@ avcController::run(void) {
 		//First do the localization step. Lets get relevant GPS
 		//info from the unit, and compass heading. Along with 
 		//the previous state and control vector.
-	  
 		m_pos.updateState();			        
 		
 		// get sensor readings
-		avcForceVector ir;
+		
 		
 		// motion planning step
-	  printf("getting motivation");fflush(stdout);
 		avcForceVector motivation = m_planner.getMotivation(m_pos.getPosition(), ir);
-		printf("motivation updated");fflush(stdout);
+		
+		pos = m_pos.getPosition();
+		m_log->log(INFO, "Current position:%e,%e", pos.x, pos.y);
+		m_log->log(INFO, "Motivation: %f,%f", motivation.x, motivation.y);
 		
 		e = m_mot.updateControl(motivation);
-
-		//avcStateVector pos;
-		//pos = m_pos.getPosition(ir);
+		
+		m_log->log(INFO, "\n");
+		
 
 	   	 // sleep a bit so we don't wail on the processor
 	    	//aIO_MSSleep(m_ioRef, 2000, NULL);

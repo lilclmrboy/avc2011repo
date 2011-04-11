@@ -127,14 +127,19 @@ avcPosition::updateState() {
 	//Get the new encoder readings.
 	int curEncR = getEncoderValue(aMOTOR_RIGHT);
 	int curEncL = getEncoderValue(aMOTOR_LEFT);
+	
   
   	//convert those into distance traveled each wheel.
-	double dWheelR = (curEncR - m_rEncoder)/ m_ticksPerRev;
-	double dWheelL = (curEncL - m_rEncoder)/ m_ticksPerRev; 
-
+	double dWheelR = ((double) (curEncR - m_rEncoder))/ m_ticksPerRev;
+	double dWheelL = ((double) (curEncL - m_lEncoder))/ m_ticksPerRev; 
+	m_logger->log(INFO, "CEncR: %d, CEncL: %d, m_rE: %d m_lE: %d, Dleft: %f, Dright: %f", 
+				  curEncR, curEncL, m_rEncoder, m_lEncoder, dWheelL, dWheelR);
 	//The forward moving distance
 	double fDist = dWheelR*m_wheelRd/2 + dWheelL*m_wheelRd/2; 	
 
+	m_rEncoder= curEncR;
+	m_lEncoder= curEncL;
+	
 	//The rotational difference
 	double fRot = dWheelR*m_wheelRd/m_wheelTrk - dWheelL*m_wheelRd/m_wheelTrk;
 	
