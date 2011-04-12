@@ -64,6 +64,9 @@ public:
 	int run(void);
 
 private:
+	
+	void getRepulsiveVector(avcForceVector& r);
+	
 	//The controller owns the settings, no other module should destroy them.
 	aSettingFileRef m_settings;
 	avcMotion m_mot;

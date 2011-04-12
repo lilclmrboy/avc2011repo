@@ -75,6 +75,20 @@ avcController::init(const int argc, const char* argv[]) {
 
 /////////////////////////////////////////////////////////////////////////////
 
+void 
+avcController::getRepulsiveVector(avcForceVector& r) {
+	
+	short tmp = 0;
+	tmp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX) << 8; 
+  tmp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
+	r.x = ((double) tmp)/32767.0;
+	tmp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY) << 8; 
+  tmp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
+	r.y = ((double) tmp)/32767.0;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 int
 avcController::run(void) {
 	
@@ -82,7 +96,7 @@ avcController::run(void) {
 	bool running = true;
 	logger *m_log = logger::getInstance();
 	avcStateVector pos;
-	avcForceVector ir;
+	avcForceVector rv;
 
 	while (running) {
 		aErr e = aErrNone;
@@ -93,10 +107,15 @@ avcController::run(void) {
 		m_pos.updateState();			        
 		
 		// get sensor readings
-		
+		// We need to fill out ir force vector. 
+		// What we need to do is:
+		//  1.) Read the scratchpad x and y value
+		//  2.) Convert them into a normalized float value
+		getRepulsiveVector(rv);
+		m_log->append(rv, INFO);
 		
 		// motion planning step
-		avcForceVector motivation = m_planner.getMotivation(m_pos.getPosition(), ir);
+		avcForceVector motivation = m_planner.getMotivation(m_pos.getPosition(), rv);
 		
 		pos = m_pos.getPosition();
 		m_log->log(INFO, "Current position:%e,%e", pos.x, pos.y);
