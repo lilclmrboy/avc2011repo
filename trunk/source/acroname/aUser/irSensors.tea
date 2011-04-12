@@ -6,17 +6,19 @@
 
 #define IR_MIN_THRESHOLD 50
 
+#define IR_UPPER_BOUND 0x8000
+
 // At a 30 degree angle from the straight ahead direction 
 #define IR_LEFT_ID 0
-#define IR_LEFT_ANGLE_COSINE 86
-#define IR_LEFT_ANGLE_SINE 50
+#define IR_LEFT_ANGLE_COSINE 100 // was 86
+#define IR_LEFT_ANGLE_SINE 0 // was 50
 
 // At a -30 (aka 270) degree angle from the straight ahead direction 
 #define IR_RIGHT_ID 1
 #define IR_RIGHT_ANGLE_COSINE 86
 #define IR_RIGHT_ANGLE_SINE -50
 
-#define IR_NUMBER_RANGERS 2
+#define IR_NUMBER_RANGERS 1
 
 /*
   when IR_NUMBER_RANGERS == 2
@@ -50,11 +52,12 @@ int gp2dxx_magnitude(char index) {
 	// Take the reading.
 	reading = aA2D_ReadInt(index);
 	
+	// If we are ever bigger the 511. Put a bird on it. 
+	if (reading > 511) reading = 511;
+	
 	// Read the result and scale it down
 	// The Sharp IR rangers at most output 2.5V, which is an A2D reading of 512. 
-	result = reading << 5;
-
-	if (result > 0x4000) result = 0x4000;
+	result = reading << (7 - IR_NUMBER_RANGERS);
 		
 	// Return the value with a distance approximation
 	return (result / 100);
@@ -69,7 +72,8 @@ void main(char callingProcID)
 	int directionSine = 0;
 	int Ux = 0;
 	int Uy = 0;
-	char id = 0;
+	char id = IR_NUMBER_RANGERS;
+	int index = IR_NUMBER_RANGERS;
 
 #ifdef aDEBUG
 	aCore_Sleep(5000);
@@ -77,6 +81,9 @@ void main(char callingProcID)
 #endif
 
 	while(1) {
+	
+			// Move to the next sensor id value
+			index--;
 	
 		// For each sensor, we do the following
 		// 1.) Read the sensor
@@ -87,7 +94,7 @@ void main(char callingProcID)
 			// Walk through the sensors. we set the id here so we can 
 			// scale the code very easily.
 			// We can also build up the Ux and Uy components
-			switch (id) {
+			switch (index) {
 
 				case 0: 
 					id = IR_LEFT_ID;
@@ -110,8 +117,8 @@ void main(char callingProcID)
 					Ux = 0;
 					Uy = 0;
 					
-					// Set the id back to 0
-					id = 0;
+					// Set the id back to the max number of sensors
+					index = IR_NUMBER_RANGERS;
 					
 					break;
 			}
@@ -125,6 +132,7 @@ void main(char callingProcID)
 			// Scale the result down to an integer value we can work with
 			Ux = -1 * magnitude * directionCosine + Ux;
 			Uy = -1 * magnitude * directionSine + Uy;
+		
 			
 #ifdef aDEBUG_IRPOLLING
 			aPrint_String("(id Mag Ux Uy):");
@@ -138,9 +146,6 @@ void main(char callingProcID)
 			aPrint_Char('\n');
 			aCore_Sleep(2000);
 #endif
-
-			// Move to the next sensor id value
-			id++;
 		
 		// We don't want to swamp the processor
 		aCore_Sleep(aSLICE);

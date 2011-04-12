@@ -100,10 +100,11 @@ void main()
 
 	aPrint_String("gMonitorGP launched");
 	aPrint_Char('\n');
-	aCore_Sleep(1000);
+	aCore_Sleep(2000);
+	aPrint_Char('\n');
 	
 	/* Spawn the IR polling thread */
-	//aMulti_Spawn(aIR_POLLING_GP2_SLOT, aIR_POLLING_GP2_PROCESS);
+	aMulti_Spawn(aIR_POLLING_GP2_SLOT, aIR_POLLING_GP2_PROCESS);
 
 	/* Spawn the location polling thread */
 	//aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);

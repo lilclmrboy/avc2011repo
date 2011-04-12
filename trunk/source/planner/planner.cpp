@@ -143,8 +143,8 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 	
 	// sum the goal vector with sensor repluse vector
 	// get summing weight from config settings
-	motivationVector.x = .1*goal.x + (double)repulse.x/32767.0;
-	motivationVector.y = .1*goal.y + (double)repulse.y/32767.0;
+	motivationVector.x = .1*(goal.x + (double)repulse.x);
+	motivationVector.y = .1*(goal.y + (double)repulse.y);
 	
 	//may want to re-normalize here (with zero magnitude option)
 	if (1 == m_normalizeMotivationVector) {
