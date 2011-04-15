@@ -4,10 +4,40 @@
 /* ************************************************************************** */
 /* MACROS and Defines. Used in TEA and C++ sources */
 
-//#define aDEBUG_IRPOLLING
-
 #define aSLICE 500
 
+
+//////////////////////////////////////////////
+// IR Sensors
+
+//#define aDEBUG_IRPOLLING
+
+#define IR_TIMESLICE 20
+
+#define IR_MIN_THRESHOLD 50
+#define IR_MAX_THRESHOLD 511
+
+#define IR_CENTER_MIN_THRES -600
+
+#define IR_UPPER_BOUND 0x8000
+
+// At a 30 degree angle from the straight ahead direction 
+#define IR_LEFT_ID 1
+#define IR_LEFT_ANGLE_COSINE 86 // was 86
+#define IR_LEFT_ANGLE_SINE 50 // was 50
+
+// At a -30 (aka 270) degree angle from the straight ahead direction 
+#define IR_RIGHT_ID 0
+#define IR_RIGHT_ANGLE_COSINE 86
+#define IR_RIGHT_ANGLE_SINE -50
+
+#define IR_CENTER_ID 2
+#define IR_CENTER_ANGLE_COSINE 100
+#define IR_CENTER_ANGLE_SINE 0
+
+#define IR_NUMBER_RANGERS 3
+
+//////////////////////////////////////////////
 //RC Control variables
 // Tick rate value for neutral.
 #define aRC_NEUTRAL 948

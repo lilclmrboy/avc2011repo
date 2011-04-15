@@ -114,13 +114,17 @@ avcController::run(void) {
 		getRepulsiveVector(rv);
 		m_log->append(rv, INFO);
 		
+		rv.x *=4;
+		rv.y *=4;
 		// motion planning step
 		avcForceVector motivation = m_planner.getMotivation(m_pos.getPosition(), rv);
 		
 		pos = m_pos.getPosition();
-		m_log->log(INFO, "Current position:%e,%e", pos.x, pos.y);
+		//m_log->log(INFO, "Current position:%e,%e", pos.x, pos.y);
 		m_log->log(INFO, "Motivation: %f,%f", motivation.x, motivation.y);
 		
+		motivation.x *= .1;
+		motivation.y *= .1;
 		e = m_mot.updateControl(motivation);
 		
 		m_log->log(INFO, "\n");
