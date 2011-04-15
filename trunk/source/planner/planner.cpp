@@ -25,10 +25,10 @@ avcPlanner::avcPlanner(void) {
 	m_waypoints.push_back(avcWaypointVector(-105.2104311212637,40.06449357185146,0.0));
 	*/
 	
-	m_waypoints.push_back(avcWaypointVector(1.946912e-06,-2.306507e-08,0.0));
-	m_waypoints.push_back(avcWaypointVector(-1.932234e-06,-5.429704e-08,0.0));
-	m_waypoints.push_back(avcWaypointVector(0.0,0.0,0.0));
-						  
+	//m_waypoints.push_back(avcWaypointVector(1.946912e-06,-2.306507e-08,0.0));
+	//m_waypoints.push_back(avcWaypointVector(-1.932234e-06,-5.429704e-08,0.0));
+	//m_waypoints.push_back(avcWaypointVector(0.0,0.0,0.0));
+	m_waypoints.push_back(avcWaypointVector(1.636801e-06,0.0,0.0));					  
 	
 }
 
@@ -143,8 +143,8 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 	
 	// sum the goal vector with sensor repluse vector
 	// get summing weight from config settings
-	motivationVector.x = .1*(goal.x + (double)repulse.x);
-	motivationVector.y = .1*(goal.y + (double)repulse.y);
+	motivationVector.x = (goal.x + (double)repulse.x);
+	motivationVector.y = (goal.y + (double)repulse.y);
 	
 	//may want to re-normalize here (with zero magnitude option)
 	if (1 == m_normalizeMotivationVector) {

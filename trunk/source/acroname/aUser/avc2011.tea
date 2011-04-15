@@ -82,9 +82,14 @@ void aBus_Multi_Spawn(char cModule, char fileID, char ProcID)
  */
 void aBus_Multi_Kill(char cModule, char ProcID)
 {
-#ifdef aDEBUG	
-	aPrint_String("  WARNING: aBus_Multi_Kill NOT IMPLEMENTED.\n");
-	aCore_Sleep(5000);
-#endif
+  asm
+  {
+    pushsb	4	/* address of Moto */
+    pushlb	2
+    pushlb	cmdVM_KILL
+    pushsb	6		/* ProcID */
+    pushlb	4
+    popcmd
+  }
 }
 

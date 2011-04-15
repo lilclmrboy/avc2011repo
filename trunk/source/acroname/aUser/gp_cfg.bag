@@ -6,7 +6,7 @@
 /* Set the IIC baudrate to 400Hz */
 2 18 3 1
 /* Adjust the serial rate to 38400 */
-2 18 4 4
+2 18 4 6
 
 /* Specify if we want any VMs to run on boot */
 /* Yes we do. */

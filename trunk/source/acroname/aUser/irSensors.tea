@@ -4,22 +4,6 @@
 #include "avc2011.tea"
 #include <aA2D.tea>
 
-#define IR_MIN_THRESHOLD 50
-
-#define IR_UPPER_BOUND 0x8000
-
-// At a 30 degree angle from the straight ahead direction 
-#define IR_LEFT_ID 0
-#define IR_LEFT_ANGLE_COSINE 100 // was 86
-#define IR_LEFT_ANGLE_SINE 0 // was 50
-
-// At a -30 (aka 270) degree angle from the straight ahead direction 
-#define IR_RIGHT_ID 1
-#define IR_RIGHT_ANGLE_COSINE 86
-#define IR_RIGHT_ANGLE_SINE -50
-
-#define IR_NUMBER_RANGERS 1
-
 /*
   when IR_NUMBER_RANGERS == 2
 	
@@ -52,8 +36,11 @@ int gp2dxx_magnitude(char index) {
 	// Take the reading.
 	reading = aA2D_ReadInt(index);
 	
-	// If we are ever bigger the 511. Put a bird on it. 
-	if (reading > 511) reading = 511;
+	// If we are ever bigger the IR_MAX_THRESHOLD. Put a bird on it. 
+	if (reading > IR_MAX_THRESHOLD) reading = IR_MAX_THRESHOLD;
+	
+	// If we are smaller then a small range
+	if (reading < IR_MIN_THRESHOLD) reading = 0;
 	
 	// Read the result and scale it down
 	// The Sharp IR rangers at most output 2.5V, which is an A2D reading of 512. 
@@ -108,10 +95,26 @@ void main(char callingProcID)
 					directionSine = IR_RIGHT_ANGLE_SINE;
 					break;	
 
+				case 2: 
+					id = IR_CENTER_ID;
+					directionCosine = IR_CENTER_ANGLE_COSINE;
+					directionSine = IR_CENTER_ANGLE_SINE;
+					break;	
+					
 				default:
 					// Write result to the scratchpad
 					aPad_WriteInt(aSPAD_GP2_REPULSIVE_UX, Ux);
 					aPad_WriteInt(aSPAD_GP2_REPULSIVE_UY, Uy);
+					
+					
+#ifdef aDEBUG_IRPOLLING
+			aPrint_String("(Ux Uy):");
+			aPrint_IntDec(Ux);
+			aPrint_String(",");
+			aPrint_IntDec(Uy);
+			aPrint_Char('\n');
+			aCore_Sleep(2000);
+#endif					
 					
 					// Set the Ux and Uy values back to zero
 					Ux = 0;
@@ -126,29 +129,23 @@ void main(char callingProcID)
 			// Get the reading magnitude value 
 			magnitude = gp2dxx_magnitude(id);
 			
+			if (id == IR_CENTER_ID) {
+			  magnitude = magnitude >> 3;
+			  
+			  if (magnitude >= IR_CENTER_MIN_THRES)
+			    magnitude = 0;
+			}
+			
 			// Since we know that fixed positions of the sensors, we can just
 			// hard code the resulting trig math fancyness. 
 			// Keeping it simple. 
-			// Scale the result down to an integer value we can work with
-			Ux = -1 * magnitude * directionCosine + Ux;
-			Uy = -1 * magnitude * directionSine + Uy;
+			  // Scale the result down to an integer value we can work with
+			  Ux = -1 * magnitude * directionCosine + Ux;
+			  Uy = -1 * magnitude * directionSine + Uy;
 		
-			
-#ifdef aDEBUG_IRPOLLING
-			aPrint_String("(id Mag Ux Uy):");
-			aPrint_IntDec(id);
-			aPrint_String(",");
-			aPrint_IntDec(magnitude);
-			aPrint_String(",");
-			aPrint_IntDec(Ux);
-			aPrint_String(",");
-			aPrint_IntDec(Uy);
-			aPrint_Char('\n');
-			aCore_Sleep(2000);
-#endif
-		
+      
 		// We don't want to swamp the processor
-		aCore_Sleep(aSLICE);
+		aCore_Sleep(IR_TIMESLICE);
 		
 	} // end of while loop
 	
