@@ -60,7 +60,7 @@ void shutdown() {
 	aPrint_Char('\n');
 	aCore_Sleep(1000);
 
-	aMulti_Kill(aSONAR_POLLING_GP2_PROCESS);	
+	aMulti_Kill(aSONAR_POLLING_MOTO_PROCESS);	
 
 	/* Clean up billy! */
 	aPrint_String("locSensors shutdown");
@@ -75,6 +75,13 @@ void shutdown() {
 	aCore_Sleep(1000);
 
 	aBus_Multi_Kill(aMOTO_MODULE, aMOTION_UPDATING_MO_PROCESS);
+	
+	/* Clean up billy! */
+	aPrint_String("sonarSensors shutdown");
+	aPrint_Char('\n');
+	aCore_Sleep(1000);
+
+	aBus_Multi_Kill(aMOTO_MODULE, aSONAR_POLLING_MOTO_PROCESS);
 	
 	/* stall for a second to let all the op codes return */
   aCore_Sleep(1000);
@@ -110,9 +117,10 @@ void main()
 	//aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
 	
 	/* Spawn the motion updating thread */
-	// Write a aBus_Multi_Spawn function. Add this to the aBus library
-	aBus_Multi_Spawn(aMOTO_MODULE, aMOTION_UPDATING_MO_SLOT,
-										aMOTION_UPDATING_MO_PROCESS);
+	aBus_Multi_Spawn(aMOTO_MODULE, aMOTION_UPDATING_MO_SLOT, aMOTION_UPDATING_MO_PROCESS);
+	
+	/* Spawn the sonar updating thread */
+	aBus_Multi_Spawn(aMOTO_MODULE, aSONAR_POLLING_MOTO_SLOT, aSONAR_POLLING_MOTO_PROCESS);
 	
 	// Do monitor relevant things. Bookkeeping, coordinating, etc. 
 	while (!aPad_ReadChar(aSPAD_GP2_GPMONITOR_SHUTDOWN)) {
