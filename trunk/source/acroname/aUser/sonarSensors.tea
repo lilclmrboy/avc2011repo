@@ -11,10 +11,15 @@
 // for example, cosine(pi/4) * 10 = 70
 
 // At a 0 degree angle from the straight ahead direction 
-#define SONAR_LEFT_ID 0
 #define SONAR_LEFT_ADDR (char) 0xE2
-#define SONAR_LEFT_ANGLE_COSINE 100
-#define SONAR_LEFT_ANGLE_SINE 0
+#define SONAR_LEFT_ANGLE_COSINE 86
+#define SONAR_LEFT_ANGLE_SINE 50
+
+#define SONAR_RIGHT_ADDR (char) 0xE0
+#define SONAR_RIGHT_ANGLE_COSINE 86
+#define SONAR_RIGHT_ANGLE_SINE -50
+
+#define SONAR_NUMBER 2
 
 #define aSRF0X_MAX_DISTANCE_CM 60
 
@@ -28,7 +33,7 @@ void main(char callingProcID)
 	int directionSine = 0;
 	int Ux = 0;
 	int Uy = 0;
-	char id = 0;
+	char id = SONAR_NUMBER;
 	unsigned char addr = 0;
 
 #ifdef aDEBUG
@@ -49,12 +54,48 @@ void main(char callingProcID)
 			// We can also build up the Ux and Uy components
 			switch (id) {
 			
-				case 0: 
-					id = SONAR_LEFT_ID;
+				case 1: 
 					directionCosine = SONAR_LEFT_ANGLE_COSINE;
 					directionSine = SONAR_LEFT_ANGLE_SINE;
 					addr = SONAR_LEFT_ADDR;
+					
+					// limit ir sensor reading to ~60cm (aSRF0X_MAX_DISTANCE_CM) and provide
+					// the negation of the distance to the force calculation
+					magnitude = aSRF08_RangeInt(addr, aSRF08_CM);
+					
+					if(magnitude > aSRF0X_MAX_DISTANCE_CM) {
+						magnitude = 0;
+					}
+					else {
+						// Calc the reading magnitude value
+						// y = -x + b 
+						magnitude = -1*aSRF08_RangeInt(addr, aSRF08_CM) + aSRF0X_MAX_DISTANCE_CM;
+					}
+
+					
 					break;
+			
+				case 2: 
+					directionCosine = SONAR_RIGHT_ANGLE_COSINE;
+					directionSine = SONAR_RIGHT_ANGLE_SINE;
+					addr = SONAR_RIGHT_ADDR;
+					
+					// limit ir sensor reading to ~60cm (aSRF0X_MAX_DISTANCE_CM) and provide
+					// the negation of the distance to the force calculation
+					magnitude = aSRF08_RangeInt(addr, aSRF08_CM);
+					
+					if(magnitude > aSRF0X_MAX_DISTANCE_CM) {
+						magnitude = 0;
+					}
+					else {
+						// Calc the reading magnitude value
+						// y = -x + b 
+						magnitude = -1*aSRF08_RangeInt(addr, aSRF08_CM) + aSRF0X_MAX_DISTANCE_CM;
+					}
+
+					
+					break;
+								
 			
 				default:
 					aPad_WriteInt(aSPAD_GP2_SONAR_REPULSIVE_UX, Ux);
@@ -65,23 +106,12 @@ void main(char callingProcID)
 					Uy = 0;
 					
 					// Set the id back to 0
-					id = 0;
+					id = SONAR_NUMBER + 1;
 					
 					break;
 			}
 		
-			// limit ir sensor reading to ~60cm (aSRF0X_MAX_DISTANCE_CM) and provide
-			// the negation of the distance to the force calculation
-			magnitude = aSRF08_RangeInt(addr, aSRF08_CM);
-			if(magnitude > aSRF0X_MAX_DISTANCE_CM) {
-				magnitude = 0;
-			}
-			else {
-				// Calc the reading magnitude value
-				// y = -x + b 
-				magnitude = -1*aSRF08_RangeInt(addr, aSRF08_CM) + aSRF0X_MAX_DISTANCE_CM;
-			}
-			
+						
 			// Since we know that fixed positions of the sensors, we can just
 			// hard code the resulting trig math fancyness. 
 			// Keeping it simple. 
@@ -89,9 +119,11 @@ void main(char callingProcID)
 			Ux = ((-1*magnitude * directionCosine)/10) + Ux;
 			Uy = ((-1*magnitude * directionSine)/10) + Uy;
 			
+			// Move to the next sensor id value
+			id--;			
 #ifdef aDEBUG
 			aPrint_String("(id Mag Ux Uy):");
-			aPrint_IntDec(id);
+			aPrint_CharUdec(addr);
 			aPrint_String(",");
 			aPrint_IntDec(magnitude);
 			aPrint_String(",");
@@ -101,12 +133,7 @@ void main(char callingProcID)
 			aPrint_Char('\n');
 			aCore_Sleep(2000);
 #endif
-
-			// Move to the next sensor id value
-			id++;
 		
-		// We don't want to swamp the processor
-		aCore_Sleep(aSLICE);
 		
 	} // end of while loop
 	
