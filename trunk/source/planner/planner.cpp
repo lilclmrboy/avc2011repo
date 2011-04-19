@@ -132,8 +132,8 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 		/*LOG_ERROR(m_logger, "Error while getting first unpassed waypoint\n\t\t\
 				  Next point will be current position");
 		 */
-		nextUnpassedWaypoint.state.x = pos.x;
-		nextUnpassedWaypoint.state.y = pos.y;
+		nextUnpassedWaypoint.state.x = m_waypoints.back().state.x;
+		nextUnpassedWaypoint.state.y = m_waypoints.back().state.y;
 
 	}
 	
