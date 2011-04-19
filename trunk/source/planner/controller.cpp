@@ -63,12 +63,11 @@ avcController::init(const int argc, const char* argv[]) {
 		aDEBUG_PRINT("done\n");
 	
 		// Don't forget to init the modules :)
-		aDEBUG_PRINT("Motion Control\n");
 		e = m_mot.init(&m_stem, m_settings);
-		aDEBUG_PRINT("Position Module\n");
 		e = m_pos.init(&m_stem, m_settings);
-		aDEBUG_PRINT("Initing Planner\n");
 		e = m_planner.init(m_ioRef, m_settings);
+		if (!m_pos.getGPSQuality())
+		  m_pos.setPosition(m_planner.getFirstMapPoint());
 	}
 	return e;
 }

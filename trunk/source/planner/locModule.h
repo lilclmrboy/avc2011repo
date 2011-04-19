@@ -71,8 +71,17 @@ public:
 	//does an EKF state update.
 	void updateState(void);
 	
+	bool getGPSQuality(void);
+	
 	//return the current robot position.
 	avcStateVector getPosition(void) { return m_curPos; }
+	
+	//Set the current robot position.
+  void setPosition(avcWaypointVector newPos) { 
+    m_curPos.x = newPos.state.x;
+    m_curPos.y = newPos.state.y;
+    m_curPos.h = newPos.state.h; 
+  }
 
 private:
 	acpStem* m_pStem;
@@ -100,7 +109,7 @@ private:
 	aSettingFileRef m_settings;
 	
 	int getGPSTimeSec(void);
-	bool getGPSQuality(void);
+	
 	//longitude and latitude are in degrees...
 	//Boulder is pretty close to -105 degrees longitude, and 40 degrees latitude.
 	//We're using double precision number here so we'll compact minutes into 

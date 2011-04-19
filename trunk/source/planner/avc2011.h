@@ -34,6 +34,7 @@
 #define aKEY_MAX_UNPASSED_DISTANCE "maxUnPassedDistanceToWaypoint" //float meters
 #define aKEY_MIN_UNPASSED_DISTANCE "minUnPassedDistanceToWaypoint" //float meters
 #define aKEY_UNPASSED_SLICE_ZETA "unpassedZeta" //float degrees
+#define aKEY_TRACKFILE "mapfile"
 
 
 // This is the default output file for text based logging
