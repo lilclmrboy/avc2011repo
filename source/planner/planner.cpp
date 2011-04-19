@@ -28,7 +28,7 @@ avcPlanner::avcPlanner(void) {
 	//m_waypoints.push_back(avcWaypointVector(1.946912e-06,-2.306507e-08,0.0));
 	//m_waypoints.push_back(avcWaypointVector(-1.932234e-06,-5.429704e-08,0.0));
 	//m_waypoints.push_back(avcWaypointVector(0.0,0.0,0.0));
-	m_waypoints.push_back(avcWaypointVector(1.636801e-06,0.0,0.0));					  
+	//m_waypoints.push_back(avcWaypointVector(1.636801e-06,0.0,0.0));					  
 	
 }
 
@@ -92,7 +92,17 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 						   &e);
 	// Copy flag to member variable.
 	m_unpassedZetaSliceDeg = unpassedZetaSliceDeg;
-  
+ 
+	//Okay, lets get some waypoints from a file.
+	char* pFile;
+	aSettingFile_GetString(ioRef, settings,
+				aKEY_TRACKFILE,
+				&pFile,
+				"map.track",
+				&e);
+	
+        loadMap(pFile);
+
 	return e;
 }
 
@@ -430,6 +440,34 @@ avcPlanner::unwrapAngleDeg(double phi){
 	unwrapped = unwrapped < 0 ? unwrapped+360.0 : unwrapped;
 	return unwrapped;
 }
+
+/////////////////////////////////////////////////////////////////////////////
+
+void
+avcPlanner::loadMap(const char* mapfile) {
+
+  FILE* map;
+  map = fopen(mapfile, "r");
+  if (map != NULL)  {
+    //empty the current map vector.
+    m_waypoints.clear();
+    char pointstr[256];
+    while(fgets(pointstr, 256, map)) {
+      double x,y,h;
+      x = y = h = 0.0;
+      sscanf(pointstr, "%le, %le, %le", &x, &y, &h);
+      m_logger->log(INFO, "adding waypoint(%le, %le, %le) to map.", x, y, h);
+      m_waypoints.push_back(avcWaypointVector(x, y, h));
+    }
+    //make sure there is at least one waypoint
+    if (!m_waypoints.size()) {
+      m_waypoints.push_back(avcWaypointVector(0.0,0.0,0.0));
+    }
+  } else {
+    m_waypoints.push_back(avcWaypointVector(0.0,0.0,0.0));
+  }
+} 
+
 ///////////////////////////////////////////////////////////////////////////
 // This section is for isolating and debugging this module. 
 #ifdef aDEBUG_PLANNER
@@ -442,7 +480,24 @@ main(int argc,
 {
 	avcPlanner planner;
 	logger* log = logger::getInstance();
+
+  aSettingFileRef settings;
+	aErr e = aErrNone;
+	aIOLib ioRef;
 	
+	// Grab an aIO reference object to gain the setting to talk to the stem.
+	aIO_GetLibRef(&ioRef, &e);
+	
+	// Read from a settings file if it exists.
+	if (aSettingFile_Create(ioRef, 
+													128,
+													"console.config",
+													&settings,
+													&e))
+		throw acpException(e, "creating settings");
+
+	planner.init(ioRef, settings);
+
 	log->log(INFO, "\n\nTesting normalizing vectors");
 	avcForceVector tempVector1 = avcForceVector(1.1, 1.1);
 	log->append(tempVector1, INFO);

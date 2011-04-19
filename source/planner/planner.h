@@ -29,6 +29,7 @@ public:
 	// new points are inserted as the next unpassed waypoint
 	// should be used by camera/laser system to add "bonus" waypoints
 	aErr insertMapPoint(const avcStateVector newPosition);
+	const avcWaypointVector& getFirstMapPoint(void) { return m_waypoints.front(); }
 #ifdef aDEBUG_PLANNER
 	friend int main(int, const char**);
 #endif
@@ -65,5 +66,8 @@ private:
 	
 	// convenience function to unwrap angles to 0-360
 	double unwrapAngleDeg(double phi);
-
+	
+	// Attempts to load map from file. If error, inits the map with one
+	// point (0.0,0.0,0.0).
+	void loadMap(const char* mapfile);
 };
