@@ -4,137 +4,151 @@
 #include "avc2011.tea"
 #include <aSRF08.tea>
 
-#define SONAR_MIN_THRESHOLD 20
+#define SONAR_MIN_THRESHOLD 850
+#define SONAR_MAX_READING 4095
 
 // The 0 degree angle is the straight ahead reading for the robot
 // Integer scaled cosine and sine values
 // for example, cosine(pi/4) * 10 = 70
 
 // At a 0 degree angle from the straight ahead direction 
-#define SONAR_LEFT_ADDR (char) 0xE2
+#define SONAR_LEFT_ADDR (char) 0xE0
 #define SONAR_LEFT_ANGLE_COSINE 86
 #define SONAR_LEFT_ANGLE_SINE 50
 
-#define SONAR_RIGHT_ADDR (char) 0xE0
+#define SONAR_RIGHT_ADDR (char) 0xE2
 #define SONAR_RIGHT_ANGLE_COSINE 86
 #define SONAR_RIGHT_ANGLE_SINE -50
 
 #define SONAR_NUMBER 2
 
-#define aSRF0X_MAX_DISTANCE_CM 60
-
 
 /* ************************************************************************** */
 void main(char callingProcID)
 {
-
-	int magnitude = 0;
-	int directionCosine = 0;
-	int directionSine = 0;
-	int Ux = 0;
-	int Uy = 0;
-	char id = SONAR_NUMBER;
-	unsigned char addr = 0;
-
+  
+  int magnitude = 0;
+  int directionCosine = 0;
+  int directionSine = 0;
+  int Ux = 0;
+  int Uy = 0;
+  char id = SONAR_NUMBER;
+  unsigned char addr = 0;
+  int result = 0;
+  
 #ifdef aDEBUG
-	aCore_Sleep(5000);
-	aPrint_String("sonarSensors launched.\n");
+  aCore_Sleep(5000);
+  aPrint_String("sonarSensors launched.\n");
 #endif
-
-	while(1) {
+  
+  while(1) {
+    
+    // For each sensor, we do the following
+    // 1.) Read the sensor
+    // 2.) Calculate the X and Y force component
+    // 3.) Aggregate all the X and Y forces
+    // 4.) Write X and Y result to scratchpad
+    
+    // Move to the next sensor index value
+    id--;	
+    
+    // Walk through the sensors. we set the id here so we can 
+    // scale the code very easily.
+    // We can also build up the Ux and Uy components
+    switch (id) {
+      
+      case 0: 
+      directionCosine = SONAR_LEFT_ANGLE_COSINE;
+      directionSine = SONAR_LEFT_ANGLE_SINE;
+      addr = SONAR_LEFT_ADDR;
+      break;
+      
+      case 1: 
+      directionCosine = SONAR_RIGHT_ANGLE_COSINE;
+      directionSine = SONAR_RIGHT_ANGLE_SINE;
+      addr = SONAR_RIGHT_ADDR;
+      break;
+      
+      
+      default:
+      aPad_WriteInt(aSPAD_GP2_SONAR_REPULSIVE_UX, Ux);
+      aPad_WriteInt(aSPAD_GP2_SONAR_REPULSIVE_UY, Uy);
+      
+      // Set the Ux and Uy values back to zero
+      Ux = 0;
+      Uy = 0;
+      
+      // Set the id back to SONAR_NUMBER
+      id = SONAR_NUMBER;
+      
+      break;
+    }
+    
+    // Only do this if we did take a reading
+    if (id != SONAR_NUMBER) {
+      
+      // limit sonar sensor reading to ~60cm (aSRF0X_MAX_DISTANCE_CM) and provide
+      // the negation of the distance to the force calculation
+      result = aSRF08_RangeInt(addr, aSRF08_MS);
+      
+      //aPrint_String("r: ");
+      //aPrint_IntDec(result);
+      //aPrint_Char('\n');
+      //aCore_Sleep(2000);
+      
+      // Put a bird on it, err a cap on it
+      // When the reading is small, let's just set the resulting magnitude full
+      // bore. This means something is right against the sonar. 
+      // 32767 == 0x7FFF
+      // So, when we have 2 sensors
+      //   we get:  0x7FFF >> (2 - 1) = 
+      if(result < SONAR_MIN_THRESHOLD) {
+	magnitude = (0x7FFF >> (SONAR_NUMBER - 1));
 	
-		// For each sensor, we do the following
-		// 1.) Read the sensor
-		// 2.) Calculate the X and Y force component
-		// 3.) Aggregate all the X and Y forces
-		// 4.) Write X and Y result to scratchpad
-		
-			// Walk through the sensors. we set the id here so we can 
-			// scale the code very easily.
-			// We can also build up the Ux and Uy components
-			switch (id) {
-			
-				case 1: 
-					directionCosine = SONAR_LEFT_ANGLE_COSINE;
-					directionSine = SONAR_LEFT_ANGLE_SINE;
-					addr = SONAR_LEFT_ADDR;
-					
-					// limit ir sensor reading to ~60cm (aSRF0X_MAX_DISTANCE_CM) and provide
-					// the negation of the distance to the force calculation
-					magnitude = aSRF08_RangeInt(addr, aSRF08_CM);
-					
-					if(magnitude > aSRF0X_MAX_DISTANCE_CM) {
-						magnitude = 0;
-					}
-					else {
-						// Calc the reading magnitude value
-						// y = -x + b 
-						magnitude = -1*aSRF08_RangeInt(addr, aSRF08_CM) + aSRF0X_MAX_DISTANCE_CM;
-					}
-
-					
-					break;
-			
-				case 2: 
-					directionCosine = SONAR_RIGHT_ANGLE_COSINE;
-					directionSine = SONAR_RIGHT_ANGLE_SINE;
-					addr = SONAR_RIGHT_ADDR;
-					
-					// limit ir sensor reading to ~60cm (aSRF0X_MAX_DISTANCE_CM) and provide
-					// the negation of the distance to the force calculation
-					magnitude = aSRF08_RangeInt(addr, aSRF08_CM);
-					
-					if(magnitude > aSRF0X_MAX_DISTANCE_CM) {
-						magnitude = 0;
-					}
-					else {
-						// Calc the reading magnitude value
-						// y = -x + b 
-						magnitude = -1*aSRF08_RangeInt(addr, aSRF08_CM) + aSRF0X_MAX_DISTANCE_CM;
-					}
-
-					
-					break;
-								
-			
-				default:
-					aPad_WriteInt(aSPAD_GP2_SONAR_REPULSIVE_UX, Ux);
-					aPad_WriteInt(aSPAD_GP2_SONAR_REPULSIVE_UY, Uy);
-					
-					// Set the Ux and Uy values back to zero
-					Ux = 0;
-					Uy = 0;
-					
-					// Set the id back to 0
-					id = SONAR_NUMBER + 1;
-					
-					break;
-			}
-		
-						
-			// Since we know that fixed positions of the sensors, we can just
-			// hard code the resulting trig math fancyness. 
-			// Keeping it simple. 
-			// Scale the result down to an integer value we can work with
-			Ux = ((-1*magnitude * directionCosine)/10) + Ux;
-			Uy = ((-1*magnitude * directionSine)/10) + Uy;
-			
-			// Move to the next sensor id value
-			id--;			
-#ifdef aDEBUG
-			aPrint_String("(id Mag Ux Uy):");
-			aPrint_CharUdec(addr);
-			aPrint_String(",");
-			aPrint_IntDec(magnitude);
-			aPrint_String(",");
-			aPrint_IntDec(Ux);
-			aPrint_String(",");
-			aPrint_IntDec(Uy);
-			aPrint_Char('\n');
-			aCore_Sleep(2000);
-#endif
-		
-		
-	} // end of while loop
+	// Divide it so we can scale against our fixed cosine and sine math
+	magnitude = magnitude / 100;
+      }
+      else {
 	
+	// Cap the result at a high water mark
+	if (result > SONAR_MAX_READING) result = SONAR_MAX_READING;
+	
+	// Scale it up to max out our int short value that will vary on 
+	// how full it can get depending on how many sensors we have
+	// Don't do more than 3 this way!!!!
+	result = result << (3 - SONAR_NUMBER);
+	
+	// Calc the reading magnitude value
+	// where b should be the biggest reading we can have
+	// y = -x + b			    			    
+	magnitude = (-1 * result + (0x7FFF >> SONAR_NUMBER)) / 100;
+		
+      }
+      
+      // Since we know that fixed positions of the sensors, we can just
+      // hard code the resulting trig math fancyness. 
+      // Keeping it simple. 
+      // Scale the result down to an integer value we can work with
+      Ux = (-1*magnitude * directionCosine) + Ux;
+      Uy = (-1*magnitude * directionSine) + Uy;	
+      
+#ifdef aDEBUG_SONAR
+      aPrint_String("(id r Mag Ux Uy):");
+      aPrint_CharHex(addr);
+      aPrint_String(",");
+      aPrint_IntDec(magnitude);
+      aPrint_String(",");
+      aPrint_IntDec(Ux);
+      aPrint_String(",");
+      aPrint_IntDec(Uy);
+      aPrint_Char('\n');
+      aCore_Sleep(2000);
+#endif	
+      
+    } // end if id check
+    
+    
+    
+  } // end of while loop
+  
 } // end of main
