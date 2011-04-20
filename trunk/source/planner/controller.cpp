@@ -76,14 +76,44 @@ avcController::init(const int argc, const char* argv[]) {
 
 void 
 avcController::getRepulsiveVector(avcForceVector& r) {
-	
-	short tmp = 0;
-	tmp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX) << 8; 
-  tmp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
-	r.x = ((double) tmp)/32767.0;
-	tmp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY) << 8; 
-  tmp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
-	r.y = ((double) tmp)/32767.0;
+  
+  short temp = 0;
+  avcForceVector sonar;
+  avcForceVector ir;
+    
+  if (m_stem.isConnected(STEMCONNECTED_WAIT)) {
+    
+    temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX) << 8; 
+    temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
+    ir.x = (double) temp / 32767.0;
+    
+    temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY) << 8; 
+    temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
+    ir.y = (double) temp / 32767.0;
+    
+    // Sonar sensors repulsive
+    
+    temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX) << 8; 
+    temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
+    sonar.x = (double) temp / 32767.0;
+    
+    temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX) << 8; 
+    temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY+1);
+    sonar.y = (double) temp / 32767.0;
+    
+  }
+  
+  // Combine all the repulsive forces
+  r.x = ir.x + sonar.x;
+  r.y = ir.y + sonar.y;
+
+  //Boundary check the repulsive force
+  r.x = r.x > 1.0 ? 1.0 : r.x;
+  r.x = r.x < -1.0 ? -1.0 : r.x;
+  
+  r.y = r.y > 1.0 ? 1.0 : r.y;
+  r.y = r.y < -1.0 ? -1.0 : r.y;
+  
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -92,18 +122,19 @@ int
 avcController::run(void) {
 	
 	//Lets allow a condition to gracefully end the application. 
-	bool running = true;
+	//bool running = true;
 	logger *m_log = logger::getInstance();
 	avcStateVector pos;
 	avcForceVector rv;
 
-	while (running) {
+	while (m_stem.isConnected(STEMCONNECTED_WAIT)) {
+	  
 		aErr e = aErrNone;
 	
 		//First do the localization step. Lets get relevant GPS
 		//info from the unit, and compass heading. Along with 
 		//the previous state and control vector.
-		m_pos.updateState();			        
+		//m_pos.updateState();			        
 		
 		// get sensor readings
 		// We need to fill out ir force vector. 
@@ -111,8 +142,11 @@ avcController::run(void) {
 		//  1.) Read the scratchpad x and y value
 		//  2.) Convert them into a normalized float value
 		getRepulsiveVector(rv);
-		m_log->append(rv, INFO);
-		
+		m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
+	  
+		e = m_mot.updateControl(rv);
+
+#if 0
 		rv.x *=4;
 		rv.y *=4;
 		// motion planning step
@@ -125,13 +159,14 @@ avcController::run(void) {
 		motivation.x *= .1;
 		motivation.y *= .1;
 		e = m_mot.updateControl(motivation);
+#endif	  
 		
-		m_log->log(INFO, "\n");
-		
-
 	   	 // sleep a bit so we don't wail on the processor
-	    	//aIO_MSSleep(m_ioRef, 2000, NULL);
+	    	aIO_MSSleep(m_ioRef, 50, NULL);
+	  
     	} // end while
+  
+	m_log->log(INFO, "BrainStem Network is no longer connected!\n");
 	
 	return 0;
 }

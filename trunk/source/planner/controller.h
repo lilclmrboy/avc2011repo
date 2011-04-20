@@ -77,7 +77,7 @@ private:
 	aIOLib m_ioRef;
 	avcStateVector m_curState;
 	//This contains the current setpoints for the left
-  //and right motors.
+	//and right motors.
 	avcControlVector m_curControl;	
 	
 };
