@@ -94,6 +94,9 @@ void main()
   char bDebugInfo = 1;
   char bRCModeEnabled = 0;
   char bRCModeDisabled = 1;
+  char bLinkDownReflex = 0;
+  
+  char bManualOverride = 0;
   
   /* Initailize the system */
   init();
@@ -127,8 +130,33 @@ void main()
       bDebugInfo = 0;
     }
     
-    // RC remote manual over ride
+    // We will assume autonomous control
+    bManualOverride = 0;
+    
+    // See if the transmitter is turned on
     if (read_RCEnable() > aRC_ENABLE_THRESHOLD) {
+//      aPrint_Char('A');
+//      aPrint_Char('\n');
+//      aCore_Sleep(1000);
+      bManualOverride = 1;
+    }
+      
+    // See if the pad has been set from a reflex or anything else
+    if (!bManualOverride) {
+      if(aBus_ReadPadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE)) {
+//	aPrint_Char('B');
+//	aPrint_Char('\n');
+//	aCore_Sleep(1000);    
+        bManualOverride = 1;
+      }
+    }
+    
+    // RC remote manual over ride
+    if (bManualOverride) {
+    
+//      aPrint_Char('C');
+//      aPrint_Char('\n');
+//      aCore_Sleep(1000);  
       
       // Read the pulse timer for the digital input pins
       RCLeft = read_LeftRC();
@@ -139,12 +167,17 @@ void main()
       // Enable the RC over ride on the Moto module
       // This should reduce the number of scratchpad writes to the Moto
       if (!bRCModeEnabled) {
-	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 1);
+	//aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 1);
 	bRCModeEnabled = 1;
 	bRCModeDisabled = 0;
       }
       
-    } else {
+    } 
+    else {
+    
+//      aPrint_Char('D');
+//      aPrint_Char('\n');
+//      aCore_Sleep(1000);  
       
       RCLeft = 0;
       RCRight = 0;
@@ -152,7 +185,12 @@ void main()
       // Disable the RC over ride on the Moto module
       // This should reduce the number of scratchpad writes to the Moto
       if (!bRCModeDisabled) {
-	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 0);
+      
+//	aPrint_Char('E');
+//	aPrint_Char('\n');
+//	aCore_Sleep(1000);  
+      
+	//aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 0);
 	bRCModeEnabled = 0;
 	bRCModeDisabled = 1;
       }			

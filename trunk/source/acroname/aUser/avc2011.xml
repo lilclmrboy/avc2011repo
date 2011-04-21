@@ -3,7 +3,11 @@
  <BATCH>
   <NAME>"gp_cfg.bag"</NAME>
  </BATCH>
- 
+
+ <BATCH>
+  <NAME>"link.bag"</NAME>
+ </BATCH>  
+
  <BATCH>
   <NAME>"moto_cfg.bag"</NAME>
  </BATCH> 
