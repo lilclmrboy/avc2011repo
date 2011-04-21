@@ -52,7 +52,7 @@ typedef struct avcStateVector {
 		vw(0.0)
   {}
 	
-	avcStateVector(double la, double lo, 
+	avcStateVector(double lo, double la, 
                  double he, double sx = 0.0,
 								 double sy = 0.0, double sw = 0.0) : 
 		x(lo),

@@ -71,9 +71,9 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		//	++timeout;
 			
 		//}
-	  m_curPos.x = -105.2104311212637;
-	  m_curPos.y = 40.06449357185146;
-	  m_curPos.h =0.0;
+	  m_curPos.x = -105.241227814428;
+	  m_curPos.y = 40.02664202181311;
+	  m_curPos.h = 0.0;
 	  
 		if (haveGPS) {
 			//Lets get a lat, lon, and heading... from compass. We shouldn't
@@ -147,11 +147,12 @@ avcPosition::updateState() {
 	double fRot = dWheelR*m_wheelRd/m_wheelTrk - dWheelL*m_wheelRd/m_wheelTrk;
 	
 	Vector state(6);
-	state(1) = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER + m_curPos.x;
-	state(2) = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER + m_curPos.y;
+	//JLG flipped cos/sin
+	state(1) = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER + m_curPos.x;
+	state(2) = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER + m_curPos.y;
 	state(3) = m_curPos.h + (fRot * RAD_TO_DEG);
-	state(4) = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER / tmElapsed;
-	state(5) = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER / tmElapsed;
+	state(4) = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER / tmElapsed;
+	state(5) = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER / tmElapsed;
 	state(6) = fRot * RAD_TO_DEG;
   
 	//EKF from here on out.

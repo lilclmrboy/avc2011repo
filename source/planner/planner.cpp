@@ -51,7 +51,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	aSettingFile_GetFloat (ioRef, settings,
 						   aKEY_REPULSE_WEIGHT,
 						   &repulse_weight,
-						   0.5,
+						   0,
 						   &e);
 	// Copy repulse weight to member variable.
 	m_repulseVectorWeight = repulse_weight;
@@ -129,11 +129,10 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 		// probably couldn't find any unpassed waypoints. We might have
 		// completed the map.
 		// set the goal vector to 0,0 so we just look for sensor inputs
-		/*LOG_ERROR(m_logger, "Error while getting first unpassed waypoint\n\t\t\
-				  Next point will be current position");
-		 */
-		nextUnpassedWaypoint.state.x = m_waypoints.back().state.x;
-		nextUnpassedWaypoint.state.y = m_waypoints.back().state.y;
+		m_logger->log(INFO, "At last waypoint. Next point will be current position");
+		 
+		nextUnpassedWaypoint.state.x = pos.x;
+		nextUnpassedWaypoint.state.y = pos.y;
 
 	}
 	
@@ -153,8 +152,15 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 	
 	// sum the goal vector with sensor repluse vector
 	// get summing weight from config settings
-	motivationVector.x = (goal.x + (double)m_repulseVectorWeight * repulse.x)/2.0;
-	motivationVector.y = (goal.y + (double)m_repulseVectorWeight * repulse.y)/2.0;
+	motivationVector.x = (goal.x + (double)m_repulseVectorWeight * repulse.x);
+	motivationVector.y = (goal.y + (double)m_repulseVectorWeight * repulse.y);
+	
+	//limit the motivation vector to ±1
+	motivationVector.x = motivationVector.x >  1.0 ?  1.0 : motivationVector.x;
+	motivationVector.x = motivationVector.x < -1.0 ? -1.0 : motivationVector.x;
+	motivationVector.y = motivationVector.y >  1.0 ?  1.0 : motivationVector.y;
+	motivationVector.y = motivationVector.y < -1.0 ? -1.0 : motivationVector.y;
+	
 	m_logger->log(INFO, "Goal\t%e\t%e\tRepulse\t%e\t%e", goal.x, goal.y, repulse.x, repulse.y);
 	
 	//may want to re-normalize here (with zero magnitude option)
@@ -216,7 +222,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		firstUnpassedWaypoint = getFirstUnpassedWayPoint();
 	}
 	catch (int &e) {
-		LOG_ERROR(m_logger, "All waypoints in map are passed.");
+		m_logger->log(INFO, "All waypoints in map are passed.");
 		firstUnpassedWaypoint = (int)m_waypoints.size()-1;
 	}
 
@@ -225,6 +231,8 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		// nothing to see here.
 		return aErrNone;
 	}
+	
+	m_logger->log(INFO, "curPos: %.8e,%.8e,%e\ttarPos: %.8e,%.8e", pos.x, pos.y, pos.h, m_waypoints[firstUnpassedWaypoint].state.x, m_waypoints[firstUnpassedWaypoint].state.y);
 	
 	// compute a dimensional vector between the current position and
 	// the next waypoint
@@ -236,10 +244,10 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		
 	// if we are within a minimum distance to the waypoint, mark it as passed; recurse
 	if (distanceToWaypoint <= m_minUnPassedDistanceToWaypoint) {
-		LOG_INFO(m_logger, "Passed waypoint minUnPassedDistance");
+		m_logger->log(INFO, "Passed waypoint minUnPassedDistance %d/%d", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
 		
-		m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
+		//m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		
 		//if we're not at the last waypoint, recurse to the next waypoint
 		if (firstUnpassedWaypoint < (int)m_waypoints.size()-1) {
@@ -251,7 +259,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 	
 	// if we are more than a max distance to the waypoint -> not passed; return
 	if (distanceToWaypoint > m_maxUnPassedDistanceToWaypoint) {
-		LOG_INFO(m_logger, "Not in donut");
+		m_logger->log(INFO,"Not in donut");
 		return aErrNone;
 	}
 	
@@ -263,10 +271,10 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 	minTheta = unwrapAngleDeg(m_waypoints[firstUnpassedWaypoint].state.h + 180 - 
 						   m_unpassedZetaSliceDeg/2.0);
 	if (thetaDeg > maxTheta || thetaDeg < minTheta) {
-		LOG_INFO(m_logger, "Passed waypoint in donut outside of slice");
+		m_logger->log(INFO, "Passed waypoint in donut outside of slice %d/%d", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
 		
-		m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
+		//m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		
 		//if we're not at the last waypoint, recurse to the next waypoint
 		if (firstUnpassedWaypoint < (int)m_waypoints.size()-1) {
@@ -278,7 +286,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 	
 	// not passed
 	else {
-		LOG_INFO(m_logger, "In donut slice. Drive FAST!");
+		m_logger->log(INFO, "In donut slice. Drive FAST!");
 		return aErrNone;
 	}
 	
@@ -314,7 +322,7 @@ avcPlanner::calcPolarVectorBetweenStates(const avcStateVector& state1,
 	y = sin( dLon) * cos(state2.y * DEG_TO_RAD);
 	x = cos(state1.y * DEG_TO_RAD) * sin(state2.y * DEG_TO_RAD) - 
 		sin(state1.y * DEG_TO_RAD) * cos(state2.y * DEG_TO_RAD) * cos( dLon );
-	*thetaRad = atan2(y, x) - aPI/2;
+	*thetaRad = atan2(y, x);// - aPI/2;
 	
 	//m_logger.logInfo("dLon, dLat: %.2e, %.2e", dLon, dLat);
 	//m_logger.logInfo("x, y: %.2e, %.2e", x, y);
@@ -368,7 +376,7 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	// check the force vector pointer validity
 	CHECK_ARG_RETURN(m_logger, pGoalForceVec);
 	
-	m_logger->log(INFO, "curPos: %e,%e,%e\ttarPos: %e,%e", state1.x, state1.y, state1.h, state2.x, state2.y);
+	//m_logger->log(INFO, "curPos: %.8e,%.8e,%e\ttarPos: %.8e,%.8e", state1.x, state1.y, state1.h, state2.x, state2.y);
 	
 	calcPolarVectorBetweenStates(state1, state2, &dist, &headingToNextStateRad);
 	
@@ -376,7 +384,7 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	// and the current heading is the direction the "force" should applied
 	// in order to reach the next waypoint goal; this goal heading is a
 	// a heading relative to the bot's current heading
-	goalHeading = headingToNextStateRad - (state1.h * DEG_TO_RAD);
+	goalHeading = (state1.h * DEG_TO_RAD) - headingToNextStateRad;
 	
 	//convert bearing to an x-y force unit vector
 	// this conversion to cartesian will eliminate >|pi| headings
@@ -385,14 +393,12 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	
 	// if the distance to the next point is within the minimum "passed" distance
 	// then we must be at the end of the list. scale the force by the distance (or set to 0)
-	if (dist < m_minUnPassedDistanceToWaypoint) {
-		pGoalForceVec->x *= dist;
-		pGoalForceVec->y *= dist;
-		pGoalForceVec->x = 0.0;
-		pGoalForceVec->y = 0.0;
+	if (dist < m_maxUnPassedDistanceToWaypoint) {
+		pGoalForceVec->x *= dist/m_maxUnPassedDistanceToWaypoint;
+		pGoalForceVec->y *= dist/m_maxUnPassedDistanceToWaypoint;
 	}
 	
-	m_logger->log(INFO, "dist: %e\tbearing(deg): %e\theading(deg): %e", dist, headingToNextStateRad*RAD_TO_DEG, goalHeading*RAD_TO_DEG);
+	m_logger->log(INFO, "dist: %e\tbearing(deg): %e\theading(deg): %e", dist, unwrapAngleDeg(headingToNextStateRad*RAD_TO_DEG), unwrapAngleDeg(goalHeading*RAD_TO_DEG));
 	//m_logger->log(INFO, "goal.x: %e\tgoal.y: %e", pGoalForceVec->x, pGoalForceVec->y);
 	
 
@@ -421,7 +427,7 @@ avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 	//check for near zero vectors and return a 0 length vector
 	if (mag < 10e-8) {
 		
-		LOG_INFO(m_logger, "Truncating near zero magnitude vector.");
+		m_logger->log(INFO, "Truncating near zero magnitude vector.");
 		pForceVector->x = 0.0;
 		pForceVector->y = 0.0;
 	}
@@ -539,7 +545,111 @@ main(int argc,
 	planner.calcForceVectorBetweenStates(planner.m_waypoints[4].state, planner.m_waypoints[5].state, &tempVector1);
 	log->append(tempVector1, INFO);
 
+	/*
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02664202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02665202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02666202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02667202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02668202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02669202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02670202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02671202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02672202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02673202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02674202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02675202181311,0));//
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02674202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02673202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02672202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02671202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02670202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02669202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02668202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02667202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02666202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02665202181311,0));
+	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02664202181311,0));*/
 	
+	planner.loadMap("map.track");
+	
+	log->log(INFO, "\n\nTest planner with N-S state vectors and one waypoint");
+	log->log(INFO, "Robot will be pushed north while facing north");
+	
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02665202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02666202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02667202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02668202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02669202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02670202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02671202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02672202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02673202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02674202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02675202181311,0), avcForceVector(0.0,0.0));
+	
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02674202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02673202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02672202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02671202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02670202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02669202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02668202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02667202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02666202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02665202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
+	
+	
+	log->log(INFO, "\n\nRobot will be pushed south while facing north");
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02663202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02662202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02661202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02660202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02659202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02658202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02657202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02656202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02655202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02654202181311,0), avcForceVector(0.0,0.0));
+	
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02655202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02656202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02657202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02658202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02659202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02660202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02661202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02662202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02663202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
+
+	
+	log->log(INFO, "\n\nRobot will be pushed southeast while facing north");
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241237814428,40.02663202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241247814428,40.02662202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241257814428,40.02661202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241267814428,40.02660202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241277814428,40.02659202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241287814428,40.02658202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241297814428,40.02657202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241307814428,40.02656202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241317814428,40.02655202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241327814428,40.02654202181311,0), avcForceVector(0.0,0.0));
+	
+	planner.getMotivation(avcStateVector(-105.241317814428,40.02655202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241307814428,40.02656202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241297814428,40.02657202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241287814428,40.02658202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241277814428,40.02659202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241267814428,40.02660202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241257814428,40.02661202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241247814428,40.02662202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241237814428,40.02663202181311,0), avcForceVector(0.0,0.0));
+	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
+
 	return 0;
 	
 }
