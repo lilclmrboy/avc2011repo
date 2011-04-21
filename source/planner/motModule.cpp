@@ -119,7 +119,6 @@ avcMotion::updateControl(const avcForceVector& potential)
   double v[aMOTOR_NUM] = {0.0, 0.0};
   double magnitude = 0.0;
   double delta = 0.0;
-  bool bRCOverride = false;
   
   // Make sure you other hackers initialized this first
   if (!m_pStem) {
@@ -144,46 +143,6 @@ avcMotion::updateControl(const avcForceVector& potential)
     m_log->log(ERROR,"avcMotion::updateControl failed.\n"
 	       "\tavcForceVector.y is out of range\n");
     return aErrRange;
-  }
-  
-  // Check to see if we are manually over riding the motion channel
-  // with the RC receiver.
-  if (m_pStem->isConnected(STEMCONNECTED_WAIT)) 
-    bRCOverride = m_pStem->PAD_IO(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE);
-
-  
-  // We slowed the I2C bus down to 400kHz.
-  // Add a bit of delay to let the packets in GP's queue get shipped out
-  m_pStem->sleep(50);
-  
-  // If we need to over ride, we should do it.
-  if (bRCOverride) {
-    
-    m_log->log(NOTICE, "Motion module disabled. RC Override\n");
-    
-    // Set the desired setpoint to zero
-    for (int m = 0; m < aMOTOR_NUM; m++) {
-      m_setpoint[m] = 0;
-      
-      // Check to see if the last setpoint is the same as the new one.
-      // If everything is the same, then we won't bother the Stem.
-      if (m_setpoint[m] != m_setpointLast[m]) {
-	
-	// Write the values to the scratchpad
-	if (m_pStem->isConnected(STEMCONNECTED_WAIT)) 
-	  m_pStem->PAD_IO(aMOTO_MODULE, 
-			(m == aMOTOR_LEFT) ? aSPAD_MO_MOTION_SETPOINT_LEFT : aSPAD_MO_MOTION_SETPOINT_RIGHT, 
-			m_setpoint[m]);
-	
-	m_setpointLast[m] = m_setpoint[m];
-	
-      }
-      
-    } // end of for loop for RC over ride
-    
-    // The motion module on the Stem is busy. Leave us alone. Leave 
-    // Brittney alone!
-    return aErrBusy;
   }
   
   // calculate the magnitude of the resultant input vector
@@ -219,10 +178,6 @@ avcMotion::updateControl(const avcForceVector& potential)
       m_log->log(DEBUG,"avcMotion::updateControl channel: %d setpoint: %d",
 		 m,
 		 m_setpoint[m]);
-      
-      // We slowed the I2C bus down to 400kHz.
-      // Add a bit of delay to let the packets in GP's queue get shipped out
-      m_pStem->sleep(50);
       
     }
     
