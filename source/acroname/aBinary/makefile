@@ -11,8 +11,10 @@ dump :
 	./steep sonarSensors.tea
 	./steep motionUpdate.tea
 	./steep locSensors.tea
+	./leaf link.leaf
 	./makedump avc2011.xml
 
 .PHONY : clean
 clean:
 	rm -rf ../aObject
+	rm -f ../aUser/link.bag
