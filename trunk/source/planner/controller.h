@@ -52,6 +52,13 @@
 #include "avc2011Defs.tea"
 #include "avc2011Structs.h"
 
+/////////////////////////////////////////////////////////////////////////////
+// We may want to move this out somewhere or into it's own seperate class
+// so other modules can use it
+int PlaySound(const char * file);
+
+/////////////////////////////////////////////////////////////////////////////
+
 class avcController
 {
 public:
