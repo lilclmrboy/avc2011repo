@@ -73,6 +73,7 @@ public:
 private:
 	
 	void getRepulsiveVector(avcForceVector& r);
+	aErr checkAndWaitForStem();
 	
 	//The controller owns the settings, no other module should destroy them.
 	aSettingFileRef m_settings;
