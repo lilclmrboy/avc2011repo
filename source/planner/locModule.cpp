@@ -71,7 +71,10 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		//	++timeout;
 			
 		//}
-
+	  m_curPos.x = -105.2104311212637;
+	  m_curPos.y = 40.06449357185146;
+	  m_curPos.h =0.0;
+	  
 		if (haveGPS) {
 			//Lets get a lat, lon, and heading... from compass. We shouldn't
 			//be moving yet.

@@ -68,7 +68,7 @@ void main(char callingProcID)
 #endif
 
 	while(1) {
-	
+	  
 			// Move to the next sensor id value
 			index--;
 	
@@ -107,7 +107,7 @@ void main(char callingProcID)
 					aPad_WriteInt(aSPAD_GP2_REPULSIVE_UY, Uy);
 					
 					
-#ifdef aDEBUG_IRPOLLING
+#ifdef aDEBUG_IR
 			aPrint_String("(Ux Uy):");
 			aPrint_IntDec(Ux);
 			aPrint_String(",");
@@ -130,9 +130,9 @@ void main(char callingProcID)
 			magnitude = gp2dxx_magnitude(id);
 			
 			if (id == IR_CENTER_ID) {
-			  magnitude = magnitude >> 3;
+			  magnitude = magnitude >> 2;
 			  
-			  if (magnitude >= IR_CENTER_MIN_THRES)
+			  if (magnitude <= IR_CENTER_MIN_THRES)
 			    magnitude = 0;
 			}
 			
@@ -145,7 +145,7 @@ void main(char callingProcID)
 		
       
 		// We don't want to swamp the processor
-		aCore_Sleep(IR_TIMESLICE);
+		aCore_Sleep(500);
 		
 	} // end of while loop
 	

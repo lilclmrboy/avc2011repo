@@ -51,7 +51,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	aSettingFile_GetFloat (ioRef, settings,
 						   aKEY_REPULSE_WEIGHT,
 						   &repulse_weight,
-						   1.0,
+						   0.5,
 						   &e);
 	// Copy repulse weight to member variable.
 	m_repulseVectorWeight = repulse_weight;
@@ -70,7 +70,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	aSettingFile_GetFloat (ioRef, settings,
 						 aKEY_MAX_UNPASSED_DISTANCE,
 						 &maxUnPassedDistanceToWaypoint,
-						 .11,
+						 2.0,
 						 &e);
 	// Copy flag to member variable.
 	m_maxUnPassedDistanceToWaypoint = maxUnPassedDistanceToWaypoint;
@@ -79,7 +79,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	aSettingFile_GetFloat (ioRef, settings,
 						 aKEY_MIN_UNPASSED_DISTANCE,
 						 &minUnPassedDistanceToWaypoint,
-						 .1,
+						 .5,
 						 &e);
 	// Copy flag to member variable.
 	m_minUnPassedDistanceToWaypoint = minUnPassedDistanceToWaypoint;
@@ -153,8 +153,9 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 	
 	// sum the goal vector with sensor repluse vector
 	// get summing weight from config settings
-	motivationVector.x = (goal.x + (double)repulse.x);
-	motivationVector.y = (goal.y + (double)repulse.y);
+	motivationVector.x = (goal.x + (double)m_repulseVectorWeight * repulse.x)/2.0;
+	motivationVector.y = (goal.y + (double)m_repulseVectorWeight * repulse.y)/2.0;
+	m_logger->log(INFO, "Goal\t%e\t%e\tRepulse\t%e\t%e", goal.x, goal.y, repulse.x, repulse.y);
 	
 	//may want to re-normalize here (with zero magnitude option)
 	if (1 == m_normalizeMotivationVector) {
@@ -238,7 +239,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		LOG_INFO(m_logger, "Passed waypoint minUnPassedDistance");
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
 		
-		m_logger->log(INFO, "%d,%d", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
+		m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		
 		//if we're not at the last waypoint, recurse to the next waypoint
 		if (firstUnpassedWaypoint < (int)m_waypoints.size()-1) {
@@ -265,7 +266,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		LOG_INFO(m_logger, "Passed waypoint in donut outside of slice");
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
 		
-		m_logger->log(INFO, "%d,%d", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
+		m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		
 		//if we're not at the last waypoint, recurse to the next waypoint
 		if (firstUnpassedWaypoint < (int)m_waypoints.size()-1) {
@@ -367,7 +368,7 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	// check the force vector pointer validity
 	CHECK_ARG_RETURN(m_logger, pGoalForceVec);
 	
-	m_logger->log(INFO, "curPos: %e,%e\ttarPos: %e,%e", state1.x, state1.y, state2.x, state2.y);
+	m_logger->log(INFO, "curPos: %e,%e,%e\ttarPos: %e,%e", state1.x, state1.y, state1.h, state2.x, state2.y);
 	
 	calcPolarVectorBetweenStates(state1, state2, &dist, &headingToNextStateRad);
 	
@@ -391,8 +392,8 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 		pGoalForceVec->y = 0.0;
 	}
 	
-	m_logger->log(INFO, "dist: %e\theading(deg): %e", dist, headingToNextStateRad*RAD_TO_DEG);
-	m_logger->log(INFO, "goal.x: %e\tgoal.y: %e", pGoalForceVec->x, pGoalForceVec->y);
+	m_logger->log(INFO, "dist: %e\tbearing(deg): %e\theading(deg): %e", dist, headingToNextStateRad*RAD_TO_DEG, goalHeading*RAD_TO_DEG);
+	//m_logger->log(INFO, "goal.x: %e\tgoal.y: %e", pGoalForceVec->x, pGoalForceVec->y);
 	
 
 	

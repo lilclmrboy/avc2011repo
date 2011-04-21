@@ -124,27 +124,26 @@ avcController::getRepulsiveVector(avcForceVector& r) {
 	avcForceVector sonar;
 	avcForceVector ir;
 	
-	if (m_stem.isConnected(STEMCONNECTED_WAIT)) {
 		
-		temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX) << 8; 
-		temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
-		ir.x = (double) temp / 32767.0;
+	temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX) << 8; 
+	temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
+	ir.x = (double) temp / 32767.0;
+	
+	temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY) << 8; 
+	temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
+	ir.y = (double) temp / 32767.0;
+	
+	
+	// Sonar sensors repulsive
+	
+	temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX) << 8; 
+	temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX+1);
+	sonar.x = (double) temp / 32767.0;
+	
+	temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY) << 8; 
+	temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY+1);
+	sonar.y = (double) temp / 32767.0;
 		
-		temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY) << 8; 
-		temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
-		ir.y = (double) temp / 32767.0;
-		
-		// Sonar sensors repulsive
-		
-		temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX) << 8; 
-		temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX+1);
-		sonar.x = (double) temp / 32767.0;
-		
-		temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY) << 8; 
-		temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY+1);
-		sonar.y = (double) temp / 32767.0;
-		
-	}
 	
 	// Combine all the repulsive forces
 	r.x = ir.x + sonar.x;
@@ -156,7 +155,7 @@ avcController::getRepulsiveVector(avcForceVector& r) {
 	
 	r.y = r.y > 1.0 ? 1.0 : r.y;
 	r.y = r.y < -1.0 ? -1.0 : r.y;
-	
+
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -198,6 +197,7 @@ avcController::run(void) {
 	
 	bool bManualOverride = false;
 	
+	//while (m_stem.isConnected(STEMCONNECTED_WAIT)) {
 	while (aErrNone ==checkAndWaitForStem())  {
 		
 		// When we get set automatic mode, we expect a value of 0
@@ -226,7 +226,7 @@ avcController::run(void) {
 		//First do the localization step. Lets get relevant GPS
 		//info from the unit, and compass heading. Along with 
 		//the previous state and control vector.
-		//m_pos.updateState();			        
+		m_pos.updateState();			        
 		
 		// get sensor readings
 		// We need to fill out ir force vector. 
@@ -236,11 +236,10 @@ avcController::run(void) {
 		getRepulsiveVector(rv);
 		m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
 		
-		e = m_mot.updateControl(rv);
+		//e = m_mot.updateControl(rv);
 		
-#if 0
-		rv.x *=4;
-		rv.y *=4;
+		//rv.x *=4;
+		//rv.y *=4;
 		// motion planning step
 		avcForceVector motivation = m_planner.getMotivation(m_pos.getPosition(), rv);
 		
@@ -248,13 +247,12 @@ avcController::run(void) {
 		//m_log->log(INFO, "Current position:%e,%e", pos.x, pos.y);
 		m_log->log(INFO, "Motivation: %f,%f", motivation.x, motivation.y);
 		
-		motivation.x *= .1;
-		motivation.y *= .1;
+		motivation.x *= 1;
+		motivation.y *= 1;
 		e = m_mot.updateControl(motivation);
-#endif	  
 		
 		// sleep a bit so we don't wail on the processor
-		aIO_MSSleep(m_ioRef, 50, NULL);
+		aIO_MSSleep(m_ioRef, 1, NULL);
 		
 	} // end while
 	
