@@ -5,6 +5,7 @@ all : dump
 
 .PHONY : dump
 dump : 
+	cp -v ../aUser/aGP2Reflexes.tea ../aSystem/
 	mkdir -p ../aObject
 	./steep gMonitorGP.tea	
 	./steep irSensors.tea
