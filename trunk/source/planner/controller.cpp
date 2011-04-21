@@ -217,8 +217,13 @@ avcController::run(void) {
 		}
 		else {
 			
-			if (bManualOverride)
+			if (bManualOverride) {
 				PlaySound("ohgodherewego.wav");
+			
+				//Lets clear the encoders to zero.
+				m_stem.MO_ENC32(aMOTO_MODULE, aMOTOR_RIGHT, 0);
+				m_stem.MO_ENC32(aMOTO_MODULE, aMOTOR_LEFT, 0);
+			}
 			
 			bManualOverride = false;
 		}
