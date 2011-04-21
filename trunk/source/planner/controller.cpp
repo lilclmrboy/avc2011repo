@@ -69,7 +69,7 @@ avcController::init(const int argc, const char* argv[]) {
   // the settings without recompiling.
   aErr e = aErrNone;
 
-  PlaySound("yes.wav");
+  PlaySound("okay.wav");
   
   if (aSettingFile_Create(m_ioRef, 
 			  128,
@@ -136,11 +136,11 @@ avcController::getRepulsiveVector(avcForceVector& r) {
     
     // Sonar sensors repulsive
     
-    temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX) << 8; 
-    temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
+    temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX) << 8; 
+    temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX+1);
     sonar.x = (double) temp / 32767.0;
     
-    temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX) << 8; 
+    temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY) << 8; 
     temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY+1);
     sonar.y = (double) temp / 32767.0;
     
@@ -169,11 +169,60 @@ avcController::run(void) {
   logger *m_log = logger::getInstance();
   avcStateVector pos;
   avcForceVector rv;
+  aErr e = aErrNone;
+  
+  //////////////////////////////////////////////
+  m_log->log(INFO, "Checking for the go signal\n");
   
   while (m_stem.isConnected(STEMCONNECTED_WAIT)) {
     
-    aErr e = aErrNone;
+    // Read the scratchpad for the RC enable bit
+    int rcswitch = m_stem.PAD_IO(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE + 1);
     
+    // When we get set automatic mode, we expect a value of 0
+    if (rcswitch) {
+      printf("."); fflush(stdout);
+    }
+    else {
+      PlaySound("yes.wav");
+      break;
+    }
+
+    // Wait for 1000 msec
+    m_stem.sleep(1000);
+  }
+  
+
+  ///////////////////////////////////////////////////////
+  // go time!
+  
+  bool bManualOverride = false;
+  
+  while (m_stem.isConnected(STEMCONNECTED_WAIT)) {
+      
+      // When we get set automatic mode, we expect a value of 0
+      if (m_stem.PAD_IO(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE + 1)) {
+	
+	if (!bManualOverride) {
+	  PlaySound("retarded.wav");
+	  bManualOverride = true;
+	}
+
+	
+	// Wait for 1000 msec
+	m_stem.sleep(1000);
+	
+	continue;
+	
+      }
+      else {
+	
+	if (bManualOverride)
+	  PlaySound("dang.wav");
+	
+	bManualOverride = false;
+      }
+
     //First do the localization step. Lets get relevant GPS
     //info from the unit, and compass heading. Along with 
     //the previous state and control vector.
@@ -210,7 +259,7 @@ avcController::run(void) {
   } // end while
   
   m_log->log(INFO, "BrainStem Network is no longer connected!\n");
-  PlaySound("crap.wav");
+  PlaySound("r2d2die.wav");
   
   return 0;
 }

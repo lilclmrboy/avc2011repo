@@ -9,90 +9,90 @@
 #include <aA2D.tea>
 #endif
 
-#define aTIMESLICE 600
+#define aTIMESLICE 50
 
 
 /* ************************************************************************** */
 void main(char callingProcID)
 {
-
-	int leftSetpoint = 0;
-	int rightSetpoint = 0;
-	int oldRightSetpoint = 0;
-	int oldLeftSetpoint = 0;
-	int newRightSetpoint = 0;
-	int newLeftSetpoint = 0;
-	int accTimeLeft = aACCELRATION_TIME;
-	int accTimeRight = aACCELRATION_TIME;
-
+  
+  int leftSetpoint = 0;
+  int rightSetpoint = 0;
+  int oldRightSetpoint = 0;
+  int oldLeftSetpoint = 0;
+  int newRightSetpoint = 0;
+  int newLeftSetpoint = 0;
+  int accTimeLeft = aACCELRATION_TIME;
+  int accTimeRight = aACCELRATION_TIME;
+  
 #ifdef aDEBUG
-	aCore_Sleep(5000);
-	aPrint_String("motionUpdate launched.\n");
+  aCore_Sleep(5000);
+  aPrint_String("motionUpdate launched.\n");
 #endif
-
-	// Enable velocity ramping for both motor channels
-	aMotion_SetRampFlags(aMOTOR_LEFT, 0x0001);
-	aMotion_SetRampFlags(aMOTOR_RIGHT, 0x0001);
-	
-	// Default is a slower acceleration time step. Just a stab at this.
-	// Likely break this out into a scratchpad variabile
-	aMotion_SetRampAccStepTime(aMOTOR_LEFT, accTimeLeft);
-	aMotion_SetRampAccStepTime(aMOTOR_RIGHT, accTimeRight);
-	
-	aMotion_RampEnable(aMOTOR_LEFT, 1);
-	aMotion_RampEnable(aMOTOR_RIGHT, 1);
-
-	while(1) {
-	
-			// If RC override is enabled, then 
-			//   grab setpoints from RC scratchpad
-			// else
-			//   grab motion setpoints from planner scratchpad
-			if (aPad_ReadInt(aSPAD_MO_MOTION_RCENABLE)) {
-				newRightSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_RCSET_RIGHT);
-				newLeftSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_RCSET_LEFT);
-			}
-			else {
-				newRightSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_RIGHT);
-				newLeftSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_LEFT);
-			}
-		
-			aMotion_SetRampAccStepTime(aMOTOR_LEFT, accTimeLeft);
-			aMotion_SetRampAccStepTime(aMOTOR_RIGHT, accTimeRight);
-				
-			if ((newRightSetpoint != oldRightSetpoint) 
-				|| (newLeftSetpoint != oldLeftSetpoint)) {
-				
-				// Send the setpoint values to the Moto using velocity ramping
-				aMotion_SetRampVelocity(newLeftSetpoint, newRightSetpoint);
-				
-				// Store the old values
-				oldRightSetpoint = newRightSetpoint;
-				oldLeftSetpoint = newLeftSetpoint;
-				
-#ifdef aDEBUG_MOTION
-				aPrint_String("RM, LM: ");
-				aPrint_IntDec(newRightSetpoint);
-				aPrint_String(",");
-				aPrint_IntDec(newLeftSetpoint);
-				aPrint_Char('\n');
-				aCore_Sleep(1000);
+  
+  // Enable velocity ramping for both motor channels
+  aMotion_SetRampFlags(aMOTOR_LEFT, 0x0001);
+  aMotion_SetRampFlags(aMOTOR_RIGHT, 0x0001);
+  
+  // Default is a slower acceleration time step. Just a stab at this.
+  // Likely break this out into a scratchpad variabile
+  aMotion_SetRampAccStepTime(aMOTOR_LEFT, accTimeLeft);
+  aMotion_SetRampAccStepTime(aMOTOR_RIGHT, accTimeRight);
+  
+  aMotion_RampEnable(aMOTOR_LEFT, 1);
+  aMotion_RampEnable(aMOTOR_RIGHT, 1);
+  
+  while(1) {
+    
+    // If RC override is enabled, then 
+    //   grab setpoints from RC scratchpad
+    // else
+    //   grab motion setpoints from planner scratchpad
+    if (aPad_ReadInt(aSPAD_MO_MOTION_RCENABLE)) {
+      newRightSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_RCSET_RIGHT);
+      newLeftSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_RCSET_LEFT);
+    }
+    else {
+      newRightSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_RIGHT);
+      newLeftSetpoint = aPad_ReadInt(aSPAD_MO_MOTION_SETPOINT_LEFT);
+    }
+    
+    aMotion_SetRampAccStepTime(aMOTOR_LEFT, accTimeLeft);
+    aMotion_SetRampAccStepTime(aMOTOR_RIGHT, accTimeRight);
+    
+    if ((newRightSetpoint != oldRightSetpoint) 
+	|| (newLeftSetpoint != oldLeftSetpoint)) {
+      
+      // Send the setpoint values to the Moto using velocity ramping
+      aMotion_SetRampVelocity(newLeftSetpoint, newRightSetpoint);
+      
+      // Store the old values
+      oldRightSetpoint = newRightSetpoint;
+      oldLeftSetpoint = newLeftSetpoint;
+      
+#ifdef aDEBUG
+      aPrint_String("RM, LM: ");
+      aPrint_IntDec(newRightSetpoint);
+      aPrint_String(",");
+      aPrint_IntDec(newLeftSetpoint);
+      aPrint_Char('\n');
+      aCore_Sleep(1000);
 #endif
-				
-			} // end if for grabbing and setting setpoints
-			
+      
+    } // end if for grabbing and setting setpoints
+    
 #ifdef aMOTION_CURRENT
-		      aPrint_String("ir, il: ");
-		      aPrint_IntDec(aA2D_ReadInt(2));
-		      aPrint_String(",");
-		      aPrint_IntDec(aA2D_ReadInt(2));
-		      aPrint_Char('\n');
-		      aCore_Sleep(500);
+    aPrint_String("ir, il: ");
+    aPrint_IntDec(aA2D_ReadInt(2));
+    aPrint_String(",");
+    aPrint_IntDec(aA2D_ReadInt(2));
+    aPrint_Char('\n');
+    aCore_Sleep(500);
 #endif			
-		
-		// We don't want to swamp the processor
-		aCore_Sleep(aTIMESLICE);
-		
-	} // end of while loop
-	
+    
+    // We don't want to swamp the processor
+    aCore_Sleep(aTIMESLICE);
+    
+  } // end of while loop
+  
 } // end of main
