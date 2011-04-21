@@ -1,0 +1,60 @@
+#include <aCmd.tea>
+#include <aGP2Reflexes.tea>
+
+/* assume the BrainStem has address 2 */
+#define MODULE 2
+
+module[MODULE] {
+
+  /************* REFLEX COMMANDS *************/
+
+  // internal heartbeat
+  message[0] {
+    MODULE, cmdVAL_SET, 5, 1
+  }
+
+  // rapid heartbeat
+  message[1] {
+    MODULE, cmdVAL_SET, 2, 4
+  }
+
+  // set timer 20 for approx 2 seconds
+  message[2] {
+    MODULE, cmdTMR_SET, 20, 80, 0
+  }
+
+  // back to link heartbeat
+  message[3] {
+    MODULE, cmdVAL_SET, 5, 0
+  }
+
+  // normal heartbeat rate
+  message[4] {
+    MODULE, cmdVAL_SET, 2, 10
+  }
+
+  // send self a host-to-stem heartbeat
+  message[5] {
+    MODULE, cmdHB, 2, 2
+  }
+  
+  // set the RC manual over ride
+  message[6] {
+    4, cmdPAD_IO, 11, 1
+  }
+
+  /************* REFLEX VECTORS *************/
+
+  vector[aGP_RFX_LINKDOWN] {
+    0,
+    1,
+    2,
+    6
+  }
+
+  vector[aGP_RFX_TIMER_20] {
+    3,
+    4,
+    5
+  }
+}
