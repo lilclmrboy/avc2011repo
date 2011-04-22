@@ -177,18 +177,47 @@ avcController::run(void) {
 		
 		// Read the scratchpad for the RC enable bit
 		int rcswitch = m_stem.PAD_IO(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE + 1);
-		
+	  
 		// When we get set automatic mode, we expect a value of 0
 		if (rcswitch) {
 			printf("."); fflush(stdout);
+		  
+		  int temp = random() % 5;
+		  
+		  switch (temp) {               
+		    case 1:
+		      PlaySound("cluck1.wav");
+		      break;
+		    case 2:
+			PlaySound("cluck7.wav");
+		      break;
+		    case 3:     
+		      PlaySound("cluck4.wav");
+		      break;       
+		    case 4:     
+		      PlaySound("cluck8.wav");
+		      break;  
+   		    case 5:     
+		      PlaySound("cluck9.wav");
+		      break;  
+		      
+		    default:
+		      PlaySound("clucking.wav");    
+		      break;                                    
+		      
+		  }
+		  
+	
 		}
 		else {
 			PlaySound("playwithmyself.wav");
 			break;
 		}
 		
-		// Wait for 1000 msec
-		m_stem.sleep(1000);
+		int extradelay = random() % 1000;
+	  
+		// Wait for 1600 msec (long enough for clucking to finish
+		m_stem.sleep(500 + extradelay);
 	}
 	
 	
@@ -210,7 +239,7 @@ avcController::run(void) {
 			
 			
 			// Wait for 1000 msec
-			m_stem.sleep(1000);
+			m_stem.sleep(2500);
 			
 			continue;
 			
@@ -280,7 +309,7 @@ avcController::checkAndWaitForStem()
 		return aErrNone;
 	}
 	else {
-		aDEBUG_PRINT("lost stem connection");
+		aDEBUG_PRINT("\nlost stem connection\t");
 		
 		aErr e = aErrNone;
 		
