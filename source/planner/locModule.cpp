@@ -2,7 +2,7 @@
 #include <sys/time.h>
 
 //We'll wait up to 30 seconds for a GPS lock on initialization.
-#define aGPS_LOCK_STEPS 30
+#define aGPS_LOCK_STEPS 3
 #define DEG_TO_RAD (aPI/180)
 #define RAD_TO_DEG (180/aPI)
 ////////////////////////////////////////////////////////////////////////////
@@ -64,16 +64,16 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		* our starting position from the GPS position information
 		* else we'll assume we're at the 0,0,0 position.	
 	  */
-		//int timeout = 0;
+		int timeout = 0;
 		bool haveGPS = false;
-		//while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
-		//	aIO_MSSleep(m_ioRef, 1000, NULL);
-		//	++timeout;
+		while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
+			aIO_MSSleep(m_ioRef, 1000, NULL);
+			++timeout;
 			
-		//}
-	  m_curPos.x = -105.241227814428;
-	  m_curPos.y = 40.02664202181311;
-	  m_curPos.h = 0.0;
+		}
+	  //m_curPos.x = -105.2411281677502;
+	  //m_curPos.y = 40.02668603350472;
+	  //m_curPos.h = 0.0;
 	  
 		if (haveGPS) {
 			//Lets get a lat, lon, and heading... from compass. We shouldn't
@@ -112,7 +112,7 @@ avcPosition::updateState() {
 	//Grab the clock.
 	long int curClock = clock();
 	long tmElapsed = (curClock - m_curClock) * 1000 / CLOCKS_PER_SEC;
-
+	
 	//First we must do an estimation step, given the previous position
   //and the current control information. Lets do this in meters, and then
 	//convert to lat, lon.

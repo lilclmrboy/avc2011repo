@@ -38,6 +38,7 @@ public:
 		m_ioRef(NULL),
 		m_curGPSTimeSec(0),
 		m_curClock(0),
+		m_gpsClock(0),
 		m_curPos(vec),
 		m_P(6,6),
 		m_rEncoder(0),
@@ -92,7 +93,7 @@ private:
 	int m_curGPSTimeSec;
 	//Millisecond timing for motion update.
 	long int m_curClock;
-	
+	long int m_gpsClock;	
 	avcStateVector m_curPos;
 	// probability matrix for state vector.	
 	Matrix m_P;	

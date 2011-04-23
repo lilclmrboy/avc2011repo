@@ -384,7 +384,8 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	// and the current heading is the direction the "force" should applied
 	// in order to reach the next waypoint goal; this goal heading is a
 	// a heading relative to the bot's current heading
-	goalHeading = (state1.h * DEG_TO_RAD) - headingToNextStateRad;
+	//goalHeading = (state1.h * DEG_TO_RAD) - headingToNextStateRad;
+	goalHeading = headingToNextStateRad - (state1.h * DEG_TO_RAD);
 	
 	//convert bearing to an x-y force unit vector
 	// this conversion to cartesian will eliminate >|pi| headings
@@ -394,8 +395,10 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	// if the distance to the next point is within the minimum "passed" distance
 	// then we must be at the end of the list. scale the force by the distance (or set to 0)
 	if (dist < m_maxUnPassedDistanceToWaypoint) {
-		pGoalForceVec->x *= dist/m_maxUnPassedDistanceToWaypoint;
-		pGoalForceVec->y *= dist/m_maxUnPassedDistanceToWaypoint;
+		//pGoalForceVec->x *= dist/m_maxUnPassedDistanceToWaypoint;
+		//pGoalForceVec->y *= dist/m_maxUnPassedDistanceToWaypoint;
+		pGoalForceVec->x *= 0.5;
+		pGoalForceVec->y *= 0.5;
 	}
 	
 	m_logger->log(INFO, "dist: %e\tbearing(deg): %e\theading(deg): %e", dist, unwrapAngleDeg(headingToNextStateRad*RAD_TO_DEG), unwrapAngleDeg(goalHeading*RAD_TO_DEG));

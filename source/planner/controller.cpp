@@ -43,7 +43,8 @@ int PlaySound(const char * file)
 
 avcController::avcController(void) : 
 m_settings(NULL),
-m_ioRef(NULL) 
+m_ioRef(NULL),
+m_lithium(0.2) 
 {
 	aErr e;
 	
@@ -72,13 +73,21 @@ avcController::init(const int argc, const char* argv[]) {
 	PlaySound("okay.wav");
 	
 	if (aSettingFile_Create(m_ioRef, 
-							128,
-							"planner.config",
-							&m_settings,
-							&e))
+				128,
+				"planner.config",
+				&m_settings,
+				&e))
 		throw acpException(e, "creating settings");
 	
 	aArguments_Separate(m_ioRef, m_settings, NULL, argc, argv);
+
+	
+	aSettingFile_GetFloat (m_ioRef,m_settings,
+						 "speedscale",
+						 &m_lithium,
+						 .2,
+						 &e);
+
 	
 	// This starts up the stem link processing and is called once to spawn
 	// the link management thread... based on the settings.
@@ -126,23 +135,27 @@ avcController::getRepulsiveVector(avcForceVector& r) {
 	
 		
 	temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX) << 8; 
+	m_stem.sleep(10);
 	temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
+	m_stem.sleep(10);
 	ir.x = (double) temp / 32767.0;
 	
 	temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY) << 8; 
+	m_stem.sleep(10);
 	temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
+	m_stem.sleep(10);
 	ir.y = (double) temp / 32767.0;
 	
 	
 	// Sonar sensors repulsive
 	
-	temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX) << 8; 
-	temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX+1);
-	sonar.x = (double) temp / 32767.0;
+	//temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX) << 8; 
+	//temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX+1);
+	//sonar.x = (double) temp / 32767.0;
 	
-	temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY) << 8; 
-	temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY+1);
-	sonar.y = (double) temp / 32767.0;
+	//temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY) << 8; 
+	//temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY+1);
+	//sonar.y = (double) temp / 32767.0;
 		
 	
 	// Combine all the repulsive forces
@@ -281,8 +294,8 @@ avcController::run(void) {
 		//m_log->log(INFO, "Current position:%e,%e", pos.x, pos.y);
 		m_log->log(INFO, "Motivation: %f,%f", motivation.x, motivation.y);
 		
-		motivation.x *= 1;
-		motivation.y *= 1;
+		motivation.x *= m_lithium;
+		motivation.y *= m_lithium;
 		e = m_mot.updateControl(motivation);
 		
 		// sleep a bit so we don't wail on the processor
@@ -325,11 +338,11 @@ avcController::checkAndWaitForStem()
 			aDEBUG_PRINT(".");
 			aIO_MSSleep(m_ioRef, 500, NULL);
 			++timeout;
-		} while (!m_stem.isConnected() && timeout < aSTEM_CONN_TIMEOUT);
+		} while (!m_stem.isConnected() && timeout < aSTEM_CONN_TIMEOUT*2);
 		
 		//If we timed out we should report an error condition.
 		//The error was a timeout, so not so critical return 1.
-		if (timeout == aSTEM_CONN_TIMEOUT) {
+		if (timeout == aSTEM_CONN_TIMEOUT*2) {
 			aDEBUG_PRINT("\n");
 			PlaySound("ahcrap.wav");
 			e = aErrTimeout;

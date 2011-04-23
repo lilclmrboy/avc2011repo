@@ -18,7 +18,7 @@ void main(char callingProcID)
 	int lonDeg = 0;
 	int lonMin = 0;
 	int lonFrac = 0;
-  int speed = 0;
+  	int speed = 0;
 	int speedFrac =0;
 	int heading = 0;
 	int headingFrac = 0;
@@ -40,18 +40,13 @@ void main(char callingProcID)
 		// 5.) If we're moving get the GPS heading, and speed.
 		// 6.) Get the Compass heading.
 						
-			//Grab current baudrate for the IIC bus. And then set the 
-			//baudrate to 400Khz for the GPS.
-			//We're settting the system IIC baudrate to 400Khz,
-			//Any other system speed will require shifting the baudrate			
-			//baud = aCore_Inportc(aPortIICBaud);
-      //aCore_Outportc(aPortIICBaud, IIC_400Khz);
 						
 
 
-			if (!aGPM_GetGPSQuality(GPS_MODULE))
+			if (!aGPM_GetGPSQuality(GPS_MODULE)) {
 				continue;
-
+				aCore_Sleep(10000);
+			}
 			//Grab minutes in the day UTC.
 			minutes = aGPM_GetHours(GPS_MODULE) * 60 + aGPM_GetMinutes(GPS_MODULE);
 			sec = aGPM_GetSeconds(GPS_MODULE);
@@ -77,7 +72,7 @@ void main(char callingProcID)
 				aPad_WriteInt(aSPAD_GP2_GPS_LAT, latDeg);
 				aPad_WriteInt(aSPAD_GP2_GPS_LAT+2, latMin);
 				aPad_WriteInt(aSPAD_GP2_GPS_LAT+4, latFrac);
-        aPad_WriteInt(aSPAD_GP2_GPS_LON, lonDeg);
+        			aPad_WriteInt(aSPAD_GP2_GPS_LON, lonDeg);
 				aPad_WriteInt(aSPAD_GP2_GPS_LON+2, lonMin);
 				aPad_WriteInt(aSPAD_GP2_GPS_LON+4, lonFrac);
 				aPad_WriteInt(aSPAD_GP2_GPS_SPD, speed);
@@ -86,26 +81,26 @@ void main(char callingProcID)
 				aPad_WriteInt(aSPAD_GP2_GPS_HD+2, headingFrac);
 				aPad_WriteInt(aSPAD_GP2_CMPS_HD, aCompass_ReadInt());
 	
-#ifdef aDEBUG_LOC_SENSORS
+#ifdef aDEBUG
 				aPrint_String("GPS Timestamp (sec): ");
 				aPrint_IntDec(sec);
 				aPrint_Char('\n');
 				aCore_Sleep(2000);
-				aPrint_String("GPS Latitude (deg, min, frac):");
-				aPrint_IntDec(latDeg);
-				aCore_Sleep(2000);				
-				aPrint_String(", ");
-				aPrint_IntDec(latMin);
-				aPrint_String(", ");
-				aCore_Sleep(2000);				
-				aPrint_IntDec(latFrac);
-				aPrint_Char('\n');
-				aCore_Sleep(2000);
-				aPrint_String("GPS speed (speed):");
-				aPrint_IntDec(speed);
-				aPrint_Char('.');
-				aPrint_IntDec(speedFrac);
-				aCore_Sleep(2000);				
+			//	aPrint_String("GPS Latitude (deg, min, frac):");
+			//	aPrint_IntDec(latDeg);
+			//	aCore_Sleep(2000);				
+			//	aPrint_String(", ");
+			//	aPrint_IntDec(latMin);
+			//	aPrint_String(", ");
+			//	aCore_Sleep(2000);				
+			//	aPrint_IntDec(latFrac);
+			//	aPrint_Char('\n');
+			//	aCore_Sleep(2000);
+			//	aPrint_String("GPS speed (speed):");
+			//	aPrint_IntDec(speed);
+			//	aPrint_Char('.');
+			//	aPrint_IntDec(speedFrac);
+			//	aCore_Sleep(2000);				
 #endif
 
 				prevSec = sec;
