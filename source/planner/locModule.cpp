@@ -149,7 +149,7 @@ avcPosition::updateState() {
 	state(1,1) = dx + m_curPos.x;
 	state(2,1) = dy + m_curPos.y;
 	state(3,1) = m_curPos.h + (fRot * RAD_TO_DEG);
-
+  m_logger->log(INFO, "Set State: ");
 	//EKF from here on out.
 	//We need to calculate the probability matrix for the motion each time.
 	Matrix F(3,3), G(3,3);
@@ -164,6 +164,7 @@ avcPosition::updateState() {
 	G(1,1) = cos(m_curPos.h); G(1,2) = -sin(m_curPos.h);
   G(2,1) = sin(m_curPos.h); G(2,2) = cos(m_curPos.h);
   G(3,3) = 1;
+  m_logger->log(INFO, "Calculated F and G: ");
 	
 	//Now calculate the probabilit matrix for the position.
 	m_P = F * m_P * F.transpose() + G * m_Q * G.transpose();
@@ -187,7 +188,7 @@ avcPosition::updateState() {
 		V(1,1) = curLat - state(1,1);
 		V(2,1) = curLon - state(2,1);
 		V(3,1) = curHed - state(3,1);
-	
+	  
 	  Matrix S(3, 3), R(3, 3);
 	  S = m_P + m_W;
 	  R = m_P * S.invert();
