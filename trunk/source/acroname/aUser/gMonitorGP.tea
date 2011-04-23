@@ -109,7 +109,7 @@ void main()
 	aMulti_Spawn(aIR_POLLING_GP2_SLOT, aIR_POLLING_GP2_PROCESS);
 	
 	/* Spawn the location polling thread */
-	//aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
+	aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
 	
 	/* Spawn the motion updating thread */
 	aBus_Multi_Spawn(aMOTO_MODULE, aMOTION_UPDATING_MO_SLOT, aMOTION_UPDATING_MO_PROCESS);

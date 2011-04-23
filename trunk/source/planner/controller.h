@@ -87,7 +87,7 @@ private:
 	//This contains the current setpoints for the left
 	//and right motors.
 	avcControlVector m_curControl;	
-	
+	float m_lithium;	
 };
 
 #endif //_controller_H_
