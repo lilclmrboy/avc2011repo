@@ -49,10 +49,10 @@
 #define aWHEEL_RADIUS 0.0762 /* radius of wheel in meters (6 inches) */
 
 #define aKEY_WHEEL_TRACK "wheel_track"
-#define aWHEEL_TRACK 0.18224 /* distance in meters between contact point of wheel. */
+#define aWHEEL_TRACK 0.162 /* distance in meters between contact point of wheel. */
 
 #define aKEY_ENCTICK_PER_REV "encoder_ticks"
-#define aENCTICKS	1024
+#define aENCTICKS	400
 
 // degree of latitude per meter at 40 degrees latitude.
 #define aLAT_PER_METER 0.00000900620125

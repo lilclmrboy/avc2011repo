@@ -71,9 +71,6 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 			++timeout;
 			
 		}
-	  //m_curPos.x = -105.2411281677502;
-	  //m_curPos.y = 40.02668603350472;
-	  //m_curPos.h = 0.0;
 	  
 		if (haveGPS) {
 			//Lets get a lat, lon, and heading... from compass. We shouldn't
@@ -98,6 +95,19 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		m_pStem->MO_ENC32(aMOTO_MODULE, aMOTOR_RIGHT, 0);
 		m_pStem->MO_ENC32(aMOTO_MODULE, aMOTOR_LEFT, 0);
 
+    //Initialize the Variance matrix Q.
+    //1 meter x and y, and 1 degree heading.
+    // ~ .31 meters per reading. * 10% is .0312 
+    m_Q(1,1) = aLAT_PER_METER * .0312;
+    m_Q(2,2) = aLON_PER_METER * .0312;
+    // heading variance 
+    m_Q(3,3) = DEG_TO_RAD * .25;
+
+    //The GPS is accurate to a meter, but I don't really trust that. 
+    m_W(1,1) = aLAT_PER_METER * 1.25;
+    m_W(2,2) = aLON_PER_METER * 1.25;
+    //Compass is accurate to 4 degrees.
+    m_W(3,3) = DEG_TO_RAD * 2.5;
 		return aErrNone;
 	} else {
 		return aErrConnection;
@@ -145,43 +155,73 @@ avcPosition::updateState() {
 	
 	//The rotational difference
 	double fRot = dWheelR*m_wheelRd/m_wheelTrk - dWheelL*m_wheelRd/m_wheelTrk;
+	double dx = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER;
+	double dy = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER;
 	
-	Vector state(6);
-	//JLG flipped cos/sin
-	state(1) = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER + m_curPos.x;
-	state(2) = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER + m_curPos.y;
-	state(3) = m_curPos.h + (fRot * RAD_TO_DEG);
-	state(4) = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER / tmElapsed;
-	state(5) = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER / tmElapsed;
-	state(6) = fRot * RAD_TO_DEG;
-  
+	Matrix state(3,1);
+	//JLG flipped cos/sin - world cordinate system aligns latitude values with,
+	//values along the x axis, and longitude values along the y axis.
+	state(1,1) = dx + m_curPos.x;
+	state(2,1) = dy + m_curPos.y;
+	state(3,1) = m_curPos.h + (fRot * RAD_TO_DEG);
+
 	//EKF from here on out.
+	//We need to calculate the probability matrix for the motion each time.
+	Matrix F(3,3), G(3,3);
+	
+	//Setting diags for F to 1, and G 33 to 1.
+	F(1,1) = F(2,2) = F(3,3) = 1;
+	//Calculating the Linearization Matrix points for F.
+	F(1,3) = -dx*sin(m_curPos.h) - dy*cos(m_curPos.h);
+	F(2,3) = dx*cos(m_curPos.h) - dy*cos(m_curPos.h);
+	
+	//Calculate the Linearization Matrix points for G.
+	G(1,1) = cos(m_curPos.h); G(1,2) = -sin(m_curPos.h);
+  G(2,1) = sin(m_curPos.h); G(2,2) = cos(m_curPos.h);
+  G(3,3) = 1;
+	
+	//Now calculate the probabilit matrix for the position.
+	m_P = F * m_P * F.transpose() + G * m_Q * G.transpose();
+	
 	//We really only want to use GPS information if enough time has passed.
 	int curSec = getGPSTimeSec();
   
-	double curLat = 0.0;
-	double curLon = 0.0;
-	if (curSec != m_curGPSTimeSec && getGPSQuality()) {
+	double curLat = m_curPos.y;
+	double curLon = m_curPos.x;
+	double curHed = m_curPos.h;
+	if (tmElapsed > 1200 && curSec != m_curGPSTimeSec && getGPSQuality()) {
+	
 		//Grab current GPS and compass settings, otherwise we'll rely on 
 		//a Kalman update with encoder values only.
 		curLat = getGPSLatitude();
 		curLon = getGPSLongitude();
+		curHed = getCMPSHeading();
+		
+		//Lets to this KF thing.
+		Matrix V(3, 1);
+		V(1,1) = curLat - state(1,1);
+		V(2,1) = curLon - state(2,1);
+		V(3,1) = curHed - state(3,1);
+	
+	  Matrix S(3, 3), R(3, 3);
+	  S = m_P + m_W;
+	  R = m_P * S.invert();
+	  state = state + R * V;
+	  
+	  m_P = m_P - R * m_P;
 	
 		fprintf(gps_track, "<trkpt lat=\"%3.12f\" lon=\"%2.12f\">\n" 
 									"\t<time>2011-3-17T%d:%d:%dZ</time>\n</trkpt>\n", 
 		       curLat, curLon, curSec/3600, (curSec%3600)/60, curSec%60);
 		m_curGPSTimeSec = curSec;
+		
+		m_curClock = clock();
 	}
 
 	//Localization is done. Update the current robot state.
-	m_curPos.x = state(1);
-	m_curPos.y = state(2);
-	m_curPos.h = state(3);
-	m_curPos.vx = state(4);
-	m_curPos.vy = state(5);
-	m_curPos.vw = state(6);
-
-	m_curClock = clock();
+	m_curPos.x = state(2, 1);
+	m_curPos.y = state(1, 1);
+	m_curPos.h = state(3, 1);
 	
 }
 

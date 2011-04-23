@@ -40,7 +40,9 @@ public:
 		m_curClock(0),
 		m_gpsClock(0),
 		m_curPos(vec),
-		m_P(6,6),
+		m_P(3,3),
+		m_Q(3,3),
+		m_W(3,3),
 		m_rEncoder(0),
 		m_lEncoder(0),
 		m_wheelRd(0.07626),
@@ -96,15 +98,15 @@ private:
 	long int m_gpsClock;	
 	avcStateVector m_curPos;
 	// probability matrix for state vector.	
-	Matrix m_P;	
+	Matrix m_P;
+	Matrix m_Q;
+	Matrix m_W;	
 	int m_rEncoder;
 	int m_lEncoder;
 	double m_wheelRd; //wheel radius	
 	double m_wheelCf; //wheel circumference
 	double m_wheelTrk; //wheel track, or dist between contact points.
 	int m_ticksPerRev; //encoder ticks per revolution.
-
-		
 
 	//Our controller owns this we'll let them delete.	
 	aSettingFileRef m_settings;
