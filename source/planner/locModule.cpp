@@ -23,23 +23,8 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 	gps_track = fopen(buffer, "w");
 	if (!gps_track)
 		return aErrIO;
-	
-	fputs("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n",
-				gps_track);
-	fputs("<gpx xmlns=\"http://www.topografix.com/GPX/1/1\"" 
-        " xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\"" 
-        " xmlns:gpxtpx=\"http://www.garmin.com/xmlschemas/"
-        " TrackPointExtension/v1\" creator=\"Oregon 400t\" version=\"1.1\"" 
-        " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-        " xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 "
-        " http://www.topografix.com/GPX/1/1/gpx.xsd "
-        " http://www.garmin.com/xmlschemas/GpxExtensions/v3" 
-        " http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd" 
-        " http://www.garmin.com/xmlschemas/TrackPointExtension/v1" 
-        " http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd\">",
-				gps_track);
 
-	fputs("<trk><name>Chicken GPS track</name><trkseg>",gps_track);
+	fputs("Chicken GPS track",gps_track);
 	
 	//first we'll grab some settings from the settings file.
 	float fSetVar;
@@ -210,9 +195,8 @@ avcPosition::updateState() {
 	  
 	  m_P = m_P - R * m_P;
 	
-		fprintf(gps_track, "<trkpt lat=\"%3.12f\" lon=\"%2.12f\">\n" 
-									"\t<time>2011-3-17T%d:%d:%dZ</time>\n</trkpt>\n", 
-		       curLat, curLon, curSec/3600, (curSec%3600)/60, curSec%60);
+		fprintf(gps_track, "%3.12f, %2.12f, %3.1f\n", 
+		       curLon, curLat, curHed);
 		m_curGPSTimeSec = curSec;
 		
 		m_curClock = clock();
