@@ -1,10 +1,10 @@
 # avc2011/source/aBinary/makefile
 
 .PHONY : all
-all : dump
+all : dump2012
 
-.PHONY : dump
-dump : 
+.PHONY : dump2011
+dump2011 : 
 	cp -v ../aUser/aGP2Reflexes.tea ../aSystem/
 	mkdir -p ../aObject
 	./steep gMonitorGP.tea	
@@ -14,6 +14,11 @@ dump :
 	./steep locSensors.tea
 	./leaf link.leaf
 	./makedump avc2011.xml
+
+.PHONY : dump2012
+dump2012 : 
+	mkdir -p ../aObject
+	./makedump avc2012.xml
 
 .PHONY : clean
 clean:
