@@ -1,10 +1,19 @@
 # whole project makefile
 
 OS := $(shell uname)
+EXTRACTION = tar -xvmf
+EXTRACTIONEXT = tgz
+
 ifeq ($(OS), Darwin)
 TAROS = mac
 else
+ifeq ($(OS), Linux)
 TAROS = linux
+else
+TAROS = win
+EXTRACTION = zip
+EXTRACTIONEXT = zip
+endif
 endif
 
 .PHONY : all
@@ -12,7 +21,7 @@ all : MotionPlanner TEAWare
 
 .PHONY : acroname
 acroname :
-	tar -xvmf acroname_$(TAROS).tgz
+	$(EXTRACTION) acroname_$(TAROS).$(EXTRACTIONEXT)
 
 .PHONY : TEAWare
 TEAWare :
