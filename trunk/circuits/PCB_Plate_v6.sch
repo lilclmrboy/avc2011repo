@@ -4808,12 +4808,12 @@ MAX3223-MAX3243.pdf</description>
 <instance part="Q1" gate="G$1" x="78.74" y="137.16" rot="R90"/>
 <instance part="GND8" gate="G$1" x="81.28" y="111.76"/>
 <instance part="S1" gate="G$1" x="55.88" y="63.5" rot="R180"/>
-<instance part="D1" gate="G$1" x="114.3" y="116.84" rot="R90"/>
-<instance part="D2" gate="G$1" x="106.68" y="119.38" smashed="yes">
-<attribute name="NAME" x="102.616" y="116.586" size="1.27" layer="95" rot="R90"/>
+<instance part="D1" gate="G$1" x="193.04" y="116.84" rot="R90"/>
+<instance part="D2" gate="G$1" x="185.42" y="119.38" smashed="yes">
+<attribute name="NAME" x="181.356" y="116.586" size="1.27" layer="95" rot="R90"/>
 </instance>
-<instance part="R4" gate="G$1" x="106.68" y="132.08" rot="R90"/>
-<instance part="GND9" gate="G$1" x="106.68" y="99.06"/>
+<instance part="R4" gate="G$1" x="185.42" y="132.08" rot="R90"/>
+<instance part="GND9" gate="G$1" x="185.42" y="99.06"/>
 <instance part="Q2" gate="G$1" x="86.36" y="160.02" rot="R90"/>
 <instance part="R5" gate="G$1" x="124.46" y="76.2" rot="R90"/>
 <instance part="R15" gate="G$1" x="124.46" y="58.42" rot="R90"/>
@@ -4874,11 +4874,11 @@ MAX3223-MAX3243.pdf</description>
 </net>
 <net name="GND3" class="0">
 <segment>
-<wire x1="106.68" y1="114.3" x2="106.68" y2="109.22" width="0.1524" layer="91"/>
-<wire x1="106.68" y1="109.22" x2="106.68" y2="101.6" width="0.1524" layer="91"/>
-<wire x1="114.3" y1="114.3" x2="114.3" y2="109.22" width="0.1524" layer="91"/>
-<wire x1="114.3" y1="109.22" x2="106.68" y2="109.22" width="0.1524" layer="91"/>
-<junction x="106.68" y="109.22"/>
+<wire x1="185.42" y1="114.3" x2="185.42" y2="109.22" width="0.1524" layer="91"/>
+<wire x1="185.42" y1="109.22" x2="185.42" y2="101.6" width="0.1524" layer="91"/>
+<wire x1="193.04" y1="114.3" x2="193.04" y2="109.22" width="0.1524" layer="91"/>
+<wire x1="193.04" y1="109.22" x2="185.42" y2="109.22" width="0.1524" layer="91"/>
+<junction x="185.42" y="109.22"/>
 <pinref part="D2" gate="G$1" pin="C"/>
 <pinref part="GND9" gate="G$1" pin="GND3"/>
 <pinref part="D1" gate="G$1" pin="A"/>
@@ -4905,11 +4905,11 @@ MAX3223-MAX3243.pdf</description>
 </net>
 <net name="N$4" class="0">
 <segment>
-<wire x1="106.68" y1="127" x2="106.68" y2="124.46" width="0.1524" layer="91"/>
-<wire x1="106.68" y1="124.46" x2="106.68" y2="121.92" width="0.1524" layer="91"/>
-<wire x1="106.68" y1="124.46" x2="114.3" y2="124.46" width="0.1524" layer="91"/>
-<wire x1="114.3" y1="124.46" x2="114.3" y2="119.38" width="0.1524" layer="91"/>
-<junction x="106.68" y="124.46"/>
+<wire x1="185.42" y1="127" x2="185.42" y2="124.46" width="0.1524" layer="91"/>
+<wire x1="185.42" y1="124.46" x2="185.42" y2="121.92" width="0.1524" layer="91"/>
+<wire x1="185.42" y1="124.46" x2="193.04" y2="124.46" width="0.1524" layer="91"/>
+<wire x1="193.04" y1="124.46" x2="193.04" y2="119.38" width="0.1524" layer="91"/>
+<junction x="185.42" y="124.46"/>
 <pinref part="R4" gate="G$1" pin="1"/>
 <pinref part="D2" gate="G$1" pin="A"/>
 <pinref part="D1" gate="G$1" pin="C"/>
@@ -5028,7 +5028,6 @@ MAX3223-MAX3243.pdf</description>
 <wire x1="157.48" y1="132.08" x2="152.4" y2="132.08" width="0.1524" layer="91"/>
 <wire x1="152.4" y1="132.08" x2="152.4" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="83.82" y1="139.7" x2="106.68" y2="139.7" width="0.1524" layer="91"/>
-<wire x1="106.68" y1="137.16" x2="106.68" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="91.44" y1="162.56" x2="106.68" y2="162.56" width="0.1524" layer="91"/>
 <wire x1="106.68" y1="162.56" x2="106.68" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="152.4" y1="139.7" x2="124.46" y2="139.7" width="0.1524" layer="91"/>
@@ -5044,7 +5043,6 @@ MAX3223-MAX3243.pdf</description>
 <pinref part="R11" gate="G$1" pin="1"/>
 <pinref part="U4" gate="-A" pin="VIN-"/>
 <pinref part="Q1" gate="G$1" pin="S"/>
-<pinref part="R4" gate="G$1" pin="2"/>
 <pinref part="Q2" gate="G$1" pin="S"/>
 <pinref part="R5" gate="G$1" pin="2"/>
 <pinref part="J96" gate="G$1" pin="P$1"/>
@@ -5057,12 +5055,16 @@ MAX3223-MAX3243.pdf</description>
 <wire x1="162.56" y1="132.08" x2="167.64" y2="132.08" width="0.1524" layer="91"/>
 <wire x1="167.64" y1="132.08" x2="167.64" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="167.64" y1="139.7" x2="165.1" y2="139.7" width="0.1524" layer="91"/>
-<wire x1="167.64" y1="139.7" x2="175.26" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="167.64" y1="139.7" x2="185.42" y2="139.7" width="0.1524" layer="91"/>
 <junction x="167.64" y="139.7"/>
-<label x="175.26" y="139.7" size="1.27" layer="95" xref="yes"/>
+<label x="200.66" y="139.7" size="1.27" layer="95" xref="yes"/>
 <pinref part="U4" gate="-A" pin="VIN+"/>
 <pinref part="R11" gate="G$1" pin="2"/>
 <pinref part="J97" gate="G$1" pin="P$1"/>
+<pinref part="R4" gate="G$1" pin="2"/>
+<wire x1="185.42" y1="139.7" x2="200.66" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="185.42" y1="137.16" x2="185.42" y2="139.7" width="0.1524" layer="91"/>
+<junction x="185.42" y="139.7"/>
 </segment>
 </net>
 <net name="BATTERY_MOTOR+_IN" class="0">
@@ -5312,14 +5314,6 @@ MAX3223-MAX3243.pdf</description>
 </segment>
 </net>
 <net name="POWER_LIPO+_IN" class="0">
-<segment>
-<wire x1="142.24" y1="121.92" x2="134.62" y2="121.92" width="0.1524" layer="91"/>
-<wire x1="134.62" y1="121.92" x2="114.3" y2="121.92" width="0.1524" layer="91"/>
-<junction x="134.62" y="121.92"/>
-<label x="142.24" y="121.92" size="1.27" layer="95" xref="yes"/>
-<pinref part="J6" gate="-B" pin="P$16"/>
-<pinref part="J17" gate="G$1" pin="P$16"/>
-</segment>
 <segment>
 <wire x1="71.12" y1="45.72" x2="68.58" y2="45.72" width="0.1524" layer="91"/>
 <wire x1="68.58" y1="45.72" x2="66.04" y2="45.72" width="0.1524" layer="91"/>
@@ -6014,6 +6008,13 @@ MAX3223-MAX3243.pdf</description>
 <wire x1="144.78" y1="38.1" x2="139.7" y2="38.1" width="0.1524" layer="91"/>
 <pinref part="J45" gate="G$1" pin="P$2"/>
 <pinref part="J14" gate="G$1" pin="11"/>
+</segment>
+</net>
+<net name="N$80" class="0">
+<segment>
+<pinref part="J6" gate="-B" pin="P$16"/>
+<pinref part="J17" gate="G$1" pin="P$16"/>
+<wire x1="134.62" y1="121.92" x2="114.3" y2="121.92" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
