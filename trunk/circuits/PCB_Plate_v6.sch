@@ -119,25 +119,6 @@
 <libraries>
 <library name="aAcroname">
 <packages>
-<package name="R0603@1">
-<description>RESISTOR</description>
-<wire x1="-0.432" y1="-0.356" x2="0.432" y2="-0.356" width="0.1524" layer="51"/>
-<wire x1="0.432" y1="0.356" x2="-0.432" y2="0.356" width="0.1524" layer="51"/>
-<wire x1="-1.473" y1="0.983" x2="1.473" y2="0.983" width="0.0508" layer="39"/>
-<wire x1="1.473" y1="0.983" x2="1.473" y2="-0.983" width="0.0508" layer="39"/>
-<wire x1="1.473" y1="-0.983" x2="-1.473" y2="-0.983" width="0.0508" layer="39"/>
-<wire x1="-1.473" y1="-0.983" x2="-1.473" y2="0.983" width="0.0508" layer="39"/>
-<wire x1="-1.5748" y1="0.762" x2="1.5748" y2="0.762" width="0.1524" layer="21"/>
-<wire x1="1.5748" y1="0.762" x2="1.5748" y2="-0.762" width="0.1524" layer="21"/>
-<wire x1="1.5748" y1="-0.762" x2="-1.5748" y2="-0.762" width="0.1524" layer="21"/>
-<wire x1="-1.5748" y1="-0.762" x2="-1.5748" y2="0.762" width="0.1524" layer="21"/>
-<smd name="1" x="-0.85" y="0" dx="1" dy="1.1" layer="1"/>
-<smd name="2" x="0.85" y="0" dx="1" dy="1.1" layer="1"/>
-<text x="-0.508" y="1.27" size="1.016" layer="25" font="vector" ratio="13">&gt;NAME</text>
-<rectangle x1="0.4318" y1="-0.4318" x2="0.8382" y2="0.4318" layer="51"/>
-<rectangle x1="-0.8382" y1="-0.4318" x2="-0.4318" y2="0.4318" layer="51"/>
-<rectangle x1="-0.1999" y1="-0.4001" x2="0.1999" y2="0.4001" layer="35"/>
-</package>
 <package name="TO263-3">
 <description>&lt;b&gt;TO-263 3-Lead Plastic Surface Mount Package&lt;/b&gt; NS Package Number TS3B&lt;p&gt;
 Source. http://cache.national.com/ds/LM/LM2937-2.5.pdf</description>
@@ -1458,21 +1439,6 @@ MAX3223-MAX3243.pdf</description>
 <rectangle x1="42.1767" y1="16.2687" x2="42.3037" y2="16.2941" layer="97"/>
 <rectangle x1="42.2021" y1="16.2941" x2="42.3037" y2="16.3195" layer="97"/>
 </symbol>
-<symbol name="ERJ-3EKF1780V">
-<wire x1="-2.54" y1="0" x2="-2.159" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="-2.159" y1="1.016" x2="-1.524" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="-1.524" y1="-1.016" x2="-0.889" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="-0.889" y1="1.016" x2="-0.254" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="-0.254" y1="-1.016" x2="0.381" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="0.381" y1="1.016" x2="1.016" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="1.016" y1="-1.016" x2="1.651" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="1.651" y1="1.016" x2="2.286" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="2.286" y1="-1.016" x2="2.54" y2="0" width="0.2032" layer="94"/>
-<text x="-1.524" y="1.4986" size="1.27" layer="95">&gt;NAME</text>
-<text x="-3.556" y="-2.794" size="1.27" layer="96" font="vector">178Û,1%</text>
-<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
-<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
-</symbol>
 <symbol name="LDO-4PIN">
 <wire x1="-10.16" y1="7.62" x2="12.7" y2="7.62" width="0.4064" layer="94"/>
 <wire x1="12.7" y1="7.62" x2="12.7" y2="-5.08" width="0.4064" layer="94"/>
@@ -1484,22 +1450,6 @@ MAX3223-MAX3243.pdf</description>
 <pin name="ADJ/GND" x="-12.7" y="-2.54" length="short"/>
 <pin name="VOUT" x="15.24" y="-2.54" length="short" rot="R180"/>
 <pin name="OUTPUT" x="15.24" y="2.54" length="short" rot="R180"/>
-</symbol>
-<symbol name="ERJ-3EKF3830V">
-<wire x1="-2.54" y1="0" x2="-2.159" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="-2.159" y1="1.016" x2="-1.524" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="-1.524" y1="-1.016" x2="-0.889" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="-0.889" y1="1.016" x2="-0.254" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="-0.254" y1="-1.016" x2="0.381" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="0.381" y1="1.016" x2="1.016" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="1.016" y1="-1.016" x2="1.651" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="1.651" y1="1.016" x2="2.286" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="2.286" y1="-1.016" x2="2.54" y2="0" width="0.2032" layer="94"/>
-<text x="-1.524" y="1.4986" size="1.27" layer="95">&gt;NAME</text>
-<text x="-3.81" y="-2.794" size="1.27" layer="96" font="vector">383Û,1%</text>
-<text x="-2.794" y="-4.8514" size="1.27" layer="95">&gt;NOTES</text>
-<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
-<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
 </symbol>
 <symbol name="GND">
 <wire x1="-1.905" y1="1.27" x2="1.905" y2="1.27" width="0.254" layer="94"/>
@@ -1620,6 +1570,82 @@ MAX3223-MAX3243.pdf</description>
 <text x="-1.524" y="1.4986" size="1.27" layer="95">&gt;NAME</text>
 <text x="-3.81" y="-2.794" size="1.27" layer="96" font="vector">10kÛ,1%</text>
 <text x="-2.794" y="-4.8514" size="1.27" layer="95">&gt;NOTES</text>
+<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
+</symbol>
+<symbol name="PRESI00007">
+<wire x1="-2.54" y1="0" x2="-2.159" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-2.159" y1="1.016" x2="-1.524" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-1.524" y1="-1.016" x2="-0.889" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-0.889" y1="1.016" x2="-0.254" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-0.254" y1="-1.016" x2="0.381" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="0.381" y1="1.016" x2="1.016" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="1.016" y1="-1.016" x2="1.651" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="1.651" y1="1.016" x2="2.286" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="2.286" y1="-1.016" x2="2.54" y2="0" width="0.2032" layer="94"/>
+<text x="-1.524" y="1.4986" size="1.27" layer="95">&gt;NAME</text>
+<text x="-4.318" y="-2.794" size="1.27" layer="96" font="vector">2.2kÛ,1%</text>
+<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
+</symbol>
+<symbol name="PRESI00002">
+<wire x1="-2.54" y1="0" x2="-2.159" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-2.159" y1="1.016" x2="-1.524" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-1.524" y1="-1.016" x2="-0.889" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-0.889" y1="1.016" x2="-0.254" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-0.254" y1="-1.016" x2="0.381" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="0.381" y1="1.016" x2="1.016" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="1.016" y1="-1.016" x2="1.651" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="1.651" y1="1.016" x2="2.286" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="2.286" y1="-1.016" x2="2.54" y2="0" width="0.2032" layer="94"/>
+<text x="-1.524" y="1.4986" size="1.27" layer="95">&gt;NAME</text>
+<text x="-3.556" y="-2.794" size="1.27" layer="96" font="vector">3.3kÛ,1%</text>
+<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
+</symbol>
+<symbol name="RC0603FR072K4L">
+<wire x1="-2.54" y1="0" x2="-2.159" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-2.159" y1="1.016" x2="-1.524" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-1.524" y1="-1.016" x2="-0.889" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-0.889" y1="1.016" x2="-0.254" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-0.254" y1="-1.016" x2="0.381" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="0.381" y1="1.016" x2="1.016" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="1.016" y1="-1.016" x2="1.651" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="1.651" y1="1.016" x2="2.286" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="2.286" y1="-1.016" x2="2.54" y2="0" width="0.2032" layer="94"/>
+<text x="-1.524" y="1.4986" size="1.27" layer="95">&gt;NAME</text>
+<text x="-3.81" y="-3.302" size="1.27" layer="96" font="vector">2.4kÛ,1%</text>
+<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
+</symbol>
+<symbol name="ERJ-3EKF6980V">
+<wire x1="-2.54" y1="0" x2="-2.159" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-2.159" y1="1.016" x2="-1.524" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-1.524" y1="-1.016" x2="-0.889" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-0.889" y1="1.016" x2="-0.254" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-0.254" y1="-1.016" x2="0.381" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="0.381" y1="1.016" x2="1.016" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="1.016" y1="-1.016" x2="1.651" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="1.651" y1="1.016" x2="2.286" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="2.286" y1="-1.016" x2="2.54" y2="0" width="0.2032" layer="94"/>
+<text x="-1.524" y="1.4986" size="1.27" layer="95">&gt;NAME</text>
+<text x="-3.81" y="-2.794" size="1.27" layer="96" font="vector">698Û,1%</text>
+<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
+</symbol>
+<symbol name="R_6.49K">
+<wire x1="-2.54" y1="0" x2="-2.159" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-2.159" y1="1.016" x2="-1.524" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-1.524" y1="-1.016" x2="-0.889" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-0.889" y1="1.016" x2="-0.254" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-0.254" y1="-1.016" x2="0.381" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="0.381" y1="1.016" x2="1.016" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="1.016" y1="-1.016" x2="1.651" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="1.651" y1="1.016" x2="2.286" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="2.286" y1="-1.016" x2="2.54" y2="0" width="0.2032" layer="94"/>
+<text x="-1.524" y="1.4986" size="1.27" layer="95">&gt;NAME</text>
+<text x="-3.81" y="-2.794" size="1.27" layer="96" font="vector">6.49kÛ,1%</text>
+<text x="-3.81" y="-4.318" size="1.27" layer="96" font="vector">&gt;NOTES</text>
 <pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
 <pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
 </symbol>
@@ -2390,22 +2416,132 @@ LETTER landscape</description>
 </device>
 </devices>
 </deviceset>
-<deviceset name="ERJ-3EKF1780V" prefix="R">
-<description>178 OHM 1/10W 1%</description>
+<deviceset name="PRESI00007" prefix="R">
+<description>2.2K OHM 1/10W +/-1%</description>
 <gates>
-<gate name="G$1" symbol="ERJ-3EKF1780V" x="0" y="0"/>
+<gate name="G$1" symbol="PRESI00007" x="0" y="0"/>
 </gates>
 <devices>
-<device name="" package="R0603@1">
+<device name="" package="R0603">
 <connects>
 <connect gate="G$1" pin="1" pad="1"/>
 <connect gate="G$1" pin="2" pad="2"/>
 </connects>
 <technologies>
 <technology name="">
-<attribute name="ACRONAME" value="PRESI00036"/>
+<attribute name="ACRONAME" value="PRESI00007" constant="no"/>
 <attribute name="NOTES" value="" constant="no"/>
-<attribute name="PARTNUM" value="ERJ-3EKF1780V" constant="no"/>
+<attribute name="PARTNUM" value="ERJ-3GEYJ222V" constant="no"/>
+<attribute name="UNITCOST" value="" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="PRESI00002" prefix="R">
+<description>3.3K OHM 1/10W +/-5%</description>
+<gates>
+<gate name="G$1" symbol="PRESI00002" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="R0603">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="ACRONAME" value="PRESI00002"/>
+<attribute name="NOTES" value="" constant="no"/>
+<attribute name="PARTNUM" value="ERJ-3GEYJ332V"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="PRESI00019" prefix="R">
+<description>2.4K OHM 1/10W 1%</description>
+<gates>
+<gate name="G$1" symbol="RC0603FR072K4L" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="R0603">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="ACRONAME" value="PRESI00019"/>
+<attribute name="NOTES" value="" constant="no"/>
+<attribute name="PARTNUM" value="ERJ-3EKF2431V"/>
+<attribute name="UNITCOST" value="0.006" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="PRESI00039" prefix="R">
+<description>698 OHM 1/10W 1%</description>
+<gates>
+<gate name="G$1" symbol="ERJ-3EKF6980V" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="R0603">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="ACRONAME" value="PRESI00039"/>
+<attribute name="NOTES" value="" constant="no"/>
+<attribute name="PARTNUM" value="ERJ-3EKF6980V"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="PRESI00056" prefix="R">
+<description>6.49K OHM 1/10W +/-1%</description>
+<gates>
+<gate name="G$1" symbol="R_6.49K" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="R0402">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="ACRONAME" value="PRESI00056" constant="no"/>
+<attribute name="NOTES" value="" constant="no"/>
+<attribute name="PARTNUM" value="ERJ-3EKF6491V" constant="no"/>
+<attribute name="UNITCOST" value="0.006" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="RESISTOR" prefix="R" uservalue="yes">
+<description>General purpose resistor component</description>
+<gates>
+<gate name="G$1" symbol="R" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="R0603">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="ACRONAME" value="-" constant="no"/>
+<attribute name="CVALUE" value="" constant="no"/>
+<attribute name="NOTES" value="" constant="no"/>
+<attribute name="PARTNUM" value="" constant="no"/>
+<attribute name="RESISTANCE" value="" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -2429,27 +2565,6 @@ LETTER landscape</description>
 <attribute name="ACRONAME" value="PCHIP00038"/>
 <attribute name="NOTES" value="" constant="no"/>
 <attribute name="PARTNUM" value="LM1084IS-ADJ/NOPB"/>
-</technology>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="ERJ-3EKF3830V" prefix="R">
-<description>383 OHM 1/10W 1%</description>
-<gates>
-<gate name="G$1" symbol="ERJ-3EKF3830V" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="R0603@1">
-<connects>
-<connect gate="G$1" pin="1" pad="1"/>
-<connect gate="G$1" pin="2" pad="2"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="ACRONAME" value="-" constant="no"/>
-<attribute name="NOTES" value="" constant="no"/>
-<attribute name="PARTNUM" value="ERJ-3EKF3830V" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -4458,8 +4573,14 @@ MAX3223-MAX3243.pdf</description>
 <part name="C13" library="aAcroname" deviceset="T491D227K016ZT" device="">
 <attribute name="ACRONAME" value="PCAPI00037"/>
 </part>
-<part name="R10" library="aAcroname" deviceset="ERJ-3EKF1780V" device=""/>
-<part name="R11" library="aAcroname" deviceset="ERJ-3EKF3830V" device="" value="on"/>
+<part name="R10" library="aAcroname" deviceset="PRESI00039" device="">
+<attribute name="ACRONAME" value="PRESI00039"/>
+<attribute name="PARTNUM" value="ERJ-3EKF6980V"/>
+</part>
+<part name="R11" library="aAcroname" deviceset="RESISTOR" device="" value="on">
+<attribute name="PARTNUM" value=""/>
+<attribute name="RESISTANCE" value="4.22k"/>
+</part>
 <part name="C11" library="aAcroname" deviceset="T491D227K016ZT" device="">
 <attribute name="ACRONAME" value="PCAPI00037"/>
 </part>
@@ -4471,8 +4592,14 @@ MAX3223-MAX3243.pdf</description>
 <part name="C10" library="aAcroname" deviceset="T491D227K016ZT" device="">
 <attribute name="ACRONAME" value="PCAPI00037"/>
 </part>
-<part name="R8" library="aAcroname" deviceset="ERJ-3EKF1780V" device=""/>
-<part name="R9" library="aAcroname" deviceset="ERJ-3EKF3830V" device="" value="on"/>
+<part name="R8" library="aAcroname" deviceset="PRESI00019" device="">
+<attribute name="ACRONAME" value="PRESI00019"/>
+<attribute name="PARTNUM" value="ERJ-3EKF2431V"/>
+</part>
+<part name="R9" library="aAcroname" deviceset="PRESI00056" device="" value="on">
+<attribute name="ACRONAME" value="PRESI00056"/>
+<attribute name="PARTNUM" value="ERJ-3EKF6491V"/>
+</part>
 <part name="C7" library="aAcroname" deviceset="T491D227K016ZT" device="">
 <attribute name="ACRONAME" value="PCAPI00037"/>
 </part>
@@ -4484,8 +4611,14 @@ MAX3223-MAX3243.pdf</description>
 <part name="C6" library="aAcroname" deviceset="T491D227K016ZT" device="">
 <attribute name="ACRONAME" value="PCAPI00037"/>
 </part>
-<part name="R7" library="aAcroname" deviceset="ERJ-3EKF1780V" device=""/>
-<part name="R6" library="aAcroname" deviceset="ERJ-3EKF3830V" device="" value="on"/>
+<part name="R7" library="aAcroname" deviceset="PRESI00007" device="">
+<attribute name="ACRONAME" value="PRESI00007"/>
+<attribute name="PARTNUM" value="ERJ-3GEYJ222V"/>
+</part>
+<part name="R6" library="aAcroname" deviceset="PRESI00002" device="" value="on">
+<attribute name="ACRONAME" value="PRESI00002"/>
+<attribute name="PARTNUM" value="ERJ-3GEYJ332V"/>
+</part>
 <part name="C4" library="aAcroname" deviceset="T491D227K016ZT" device="">
 <attribute name="ACRONAME" value="PCAPI00037"/>
 </part>
@@ -4854,6 +4987,7 @@ MAX3223-MAX3243.pdf</description>
 <text x="184.404" y="12.446" size="1.778" layer="97">Headless Chicken AVC2012</text>
 <text x="170.18" y="172.72" size="1.778" layer="97">Don't forget to adjust feedback resistor values!!!</text>
 <rectangle x1="183.388" y1="10.16" x2="219.964" y2="16.51" layer="105"/>
+<text x="7.62" y="157.48" size="1.778" layer="97">12.0 V LDO calculations Calculating resitor values for LDO for 12.000V. Tried 4683 resistor combinations. Final Voltage of: 11.996 using R1: 330.0 ohm  R2: 2800.0 ohm   Acroname Stock Part. Use R1 = PRESI00060 (330.000 ohm)   Voutput range w/ 1 percent: 11.785V - 12.212V  9.0 V LDO calculations Calculating resitor values for LDO for 9.000V. Tried 4683 resistor combinations. Final Voltage of: 9.018 using R1: 698.0 ohm  R2: 4220.0 ohm   Acroname Stock Part. Use R1 = PRESI00039 (698.000 ohm)   Voutput range w/ 1 percent: 8.867V - 9.173V  5.0 V LDO calculations Calculating resitor values for LDO for 5.000V. Tried 441 resistor combinations. Final Voltage of: 4.955 using R1: 2400.0 ohm  R2: 6490.0 ohm   Acroname Stock Part. Use R1 = PRESI00019 (2400.000 ohm)   Acroname Stock Part. Use R2 = PRESI00056 (6490.000 ohm)   Voutput range w/ 1 percent: 4.885V - 5.026V  3.3 V LDO calculations Calculating resitor values for LDO for 3.300V. Tried 441 resistor combinations. Final Voltage of: 3.290 using R1: 2200.0 ohm  R2: 3300.0 ohm   Acroname Stock Part. Use R1 = PRESI00007 (2200.000 ohm)   Acroname Stock Part. \nUse R2 = PRESI00002 (3300.000 ohm)   Voutput range w/ 1 percent: 3.251V - 3.330V</text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0" smashed="yes"/>
@@ -4866,6 +5000,7 @@ MAX3223-MAX3243.pdf</description>
 <instance part="R11" gate="G$1" x="99.06" y="81.28" smashed="yes" rot="R90">
 <attribute name="NAME" x="97.5614" y="79.756" size="1.27" layer="95" rot="R90"/>
 <attribute name="NOTES" x="103.9114" y="78.486" size="1.27" layer="95" rot="R90"/>
+<attribute name="RESISTANCE" x="101.854" y="77.724" size="1.27" layer="96" font="vector" rot="R90"/>
 </instance>
 <instance part="C11" gate="G$1" x="106.68" y="101.6"/>
 <instance part="GND4" gate="1" x="43.18" y="93.98"/>

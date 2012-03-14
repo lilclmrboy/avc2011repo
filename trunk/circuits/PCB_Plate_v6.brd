@@ -12454,25 +12454,6 @@
 <libraries>
 <library name="aAcroname">
 <packages>
-<package name="R0603@1">
-<description>RESISTOR</description>
-<wire x1="-0.432" y1="-0.356" x2="0.432" y2="-0.356" width="0.1524" layer="51"/>
-<wire x1="0.432" y1="0.356" x2="-0.432" y2="0.356" width="0.1524" layer="51"/>
-<wire x1="-1.473" y1="0.983" x2="1.473" y2="0.983" width="0.0508" layer="39"/>
-<wire x1="1.473" y1="0.983" x2="1.473" y2="-0.983" width="0.0508" layer="39"/>
-<wire x1="1.473" y1="-0.983" x2="-1.473" y2="-0.983" width="0.0508" layer="39"/>
-<wire x1="-1.473" y1="-0.983" x2="-1.473" y2="0.983" width="0.0508" layer="39"/>
-<wire x1="-1.5748" y1="0.762" x2="1.5748" y2="0.762" width="0.1524" layer="21"/>
-<wire x1="1.5748" y1="0.762" x2="1.5748" y2="-0.762" width="0.1524" layer="21"/>
-<wire x1="1.5748" y1="-0.762" x2="-1.5748" y2="-0.762" width="0.1524" layer="21"/>
-<wire x1="-1.5748" y1="-0.762" x2="-1.5748" y2="0.762" width="0.1524" layer="21"/>
-<smd name="1" x="-0.85" y="0" dx="1" dy="1.1" layer="1"/>
-<smd name="2" x="0.85" y="0" dx="1" dy="1.1" layer="1"/>
-<text x="-0.508" y="1.27" size="1.016" layer="25" font="vector" ratio="13">&gt;NAME</text>
-<rectangle x1="0.4318" y1="-0.4318" x2="0.8382" y2="0.4318" layer="51"/>
-<rectangle x1="-0.8382" y1="-0.4318" x2="-0.4318" y2="0.4318" layer="51"/>
-<rectangle x1="-0.1999" y1="-0.4001" x2="0.1999" y2="0.4001" layer="35"/>
-</package>
 <package name="TO263-3">
 <description>&lt;b&gt;TO-263 3-Lead Plastic Surface Mount Package&lt;/b&gt; NS Package Number TS3B&lt;p&gt;
 Source. http://cache.national.com/ds/LM/LM2937-2.5.pdf</description>
@@ -13747,17 +13728,18 @@ Acroname Design rules specific Advanced Circuits PCB for 2-layer boards.</descri
 <attribute name="CAPACITANCE" value="220uF,16V" x="57.15" y="74.803" size="1.778" layer="27" display="off"/>
 <attribute name="NAME" x="56.388" y="77.343" size="1.016" layer="25" font="vector" ratio="13"/>
 </element>
-<element name="R10" library="aAcroname" package="R0603@1" value="ERJ-3EKF1780V" x="53.213" y="88.392" locked="yes" smashed="yes" rot="R90">
-<attribute name="ACRONAME" value="PRESI00036" x="53.213" y="88.392" size="1.778" layer="27" rot="R90" display="off"/>
+<element name="R10" library="aAcroname" package="R0603" value="PRESI00039" x="53.213" y="88.392" locked="yes" smashed="yes" rot="R90">
+<attribute name="ACRONAME" value="PRESI00039" x="53.213" y="88.392" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="NOTES" value="" x="53.213" y="88.392" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="PARTNUM" value="ERJ-3EKF1780V" x="53.213" y="88.392" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="NAME" x="51.943" y="87.884" size="1.016" layer="25" font="vector" ratio="13" rot="R90"/>
+<attribute name="PARTNUM" value="ERJ-3EKF6980V" x="53.213" y="88.392" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
-<element name="R11" library="aAcroname" package="R0603@1" value="on" x="55.245" y="88.392" locked="yes" smashed="yes" rot="R270">
+<element name="R11" library="aAcroname" package="R0603" value="on" x="55.245" y="88.392" locked="yes" smashed="yes" rot="R270">
 <attribute name="ACRONAME" value="-" x="55.245" y="88.392" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NOTES" value="" x="55.245" y="88.392" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="PARTNUM" value="ERJ-3EKF3830V" x="55.245" y="88.392" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="56.515" y="88.9" size="1.016" layer="25" font="vector" ratio="13" rot="R270"/>
+<attribute name="CVALUE" value="" x="55.245" y="88.392" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="RESISTANCE" value="4.22k" x="55.245" y="88.392" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="C11" library="aAcroname" package="SMC_D" value="T491D227K016ZT" x="63.373" y="92.456" locked="yes" smashed="yes" rot="R180">
 <attribute name="ACRONAME" value="PCAPI00037" x="63.373" y="92.456" size="1.778" layer="27" rot="R180" display="off"/>
@@ -13789,17 +13771,19 @@ Acroname Design rules specific Advanced Circuits PCB for 2-layer boards.</descri
 <attribute name="CAPACITANCE" value="220uF,16V" x="54.229" y="92.456" size="1.778" layer="27" display="off"/>
 <attribute name="NAME" x="53.467" y="94.996" size="1.016" layer="25" font="vector" ratio="13"/>
 </element>
-<element name="R8" library="aAcroname" package="R0603@1" value="ERJ-3EKF1780V" x="53.34" y="106.045" locked="yes" smashed="yes" rot="R90">
-<attribute name="ACRONAME" value="PRESI00036" x="53.34" y="106.045" size="1.778" layer="27" rot="R90" display="off"/>
+<element name="R8" library="aAcroname" package="R0603" value="PRESI00019" x="53.34" y="106.045" locked="yes" smashed="yes" rot="R90">
+<attribute name="ACRONAME" value="PRESI00019" x="53.34" y="106.045" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="NOTES" value="" x="53.34" y="106.045" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="PARTNUM" value="ERJ-3EKF1780V" x="53.34" y="106.045" size="1.778" layer="27" rot="R90" display="off"/>
+<attribute name="PARTNUM" value="ERJ-3EKF2431V" x="53.34" y="106.045" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="NAME" x="52.07" y="108.2548" size="1.016" layer="25" font="vector" ratio="13" rot="R180"/>
+<attribute name="UNITCOST" value="0.006" x="53.34" y="106.045" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
-<element name="R9" library="aAcroname" package="R0603@1" value="on" x="55.372" y="106.045" locked="yes" smashed="yes" rot="R270">
-<attribute name="ACRONAME" value="-" x="55.372" y="106.045" size="1.778" layer="27" rot="R270" display="off"/>
+<element name="R9" library="aAcroname" package="R0402" value="on" x="55.372" y="106.045" locked="yes" smashed="yes" rot="R270">
+<attribute name="ACRONAME" value="PRESI00056" x="55.372" y="106.045" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NOTES" value="" x="55.372" y="106.045" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="PARTNUM" value="ERJ-3EKF3830V" x="55.372" y="106.045" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="PARTNUM" value="ERJ-3EKF6491V" x="55.372" y="106.045" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="56.5912" y="107.1626" size="1.016" layer="25" font="vector" ratio="13"/>
+<attribute name="UNITCOST" value="0.006" x="55.372" y="106.045" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="C7" library="aAcroname" package="SMC_D" value="T491D227K016ZT" x="63.373" y="110.236" locked="yes" smashed="yes" rot="R180">
 <attribute name="ACRONAME" value="PCAPI00037" x="63.373" y="110.236" size="1.778" layer="27" rot="R180" display="off"/>
@@ -13831,16 +13815,17 @@ Acroname Design rules specific Advanced Circuits PCB for 2-layer boards.</descri
 <attribute name="CAPACITANCE" value="220uF,16V" x="54.229" y="110.236" size="1.778" layer="27" display="off"/>
 <attribute name="NAME" x="53.467" y="112.776" size="1.016" layer="25" font="vector" ratio="13"/>
 </element>
-<element name="R7" library="aAcroname" package="R0603@1" value="ERJ-3EKF1780V" x="26.67" y="110.617" locked="yes" smashed="yes" rot="R270">
-<attribute name="ACRONAME" value="PRESI00036" x="26.67" y="110.617" size="1.778" layer="27" rot="R270" display="off"/>
+<element name="R7" library="aAcroname" package="R0603" value="PRESI00007" x="26.67" y="110.617" locked="yes" smashed="yes" rot="R270">
+<attribute name="ACRONAME" value="PRESI00007" x="26.67" y="110.617" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NOTES" value="" x="26.67" y="110.617" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="PARTNUM" value="ERJ-3EKF1780V" x="26.67" y="110.617" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="PARTNUM" value="ERJ-3GEYJ222V" x="26.67" y="110.617" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="26.035" y="108.839" size="1.016" layer="25" font="vector" ratio="13" rot="R270"/>
+<attribute name="UNITCOST" value="" x="26.67" y="110.617" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
-<element name="R6" library="aAcroname" package="R0603@1" value="on" x="26.67" y="113.919" locked="yes" smashed="yes" rot="R270">
-<attribute name="ACRONAME" value="-" x="26.67" y="113.919" size="1.778" layer="27" rot="R270" display="off"/>
+<element name="R6" library="aAcroname" package="R0603" value="on" x="26.67" y="113.919" locked="yes" smashed="yes" rot="R270">
+<attribute name="ACRONAME" value="PRESI00002" x="26.67" y="113.919" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NOTES" value="" x="26.67" y="113.919" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="PARTNUM" value="ERJ-3EKF3830V" x="26.67" y="113.919" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="PARTNUM" value="ERJ-3GEYJ332V" x="26.67" y="113.919" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="27.051" y="115.824" size="1.016" layer="25" font="vector" ratio="13" rot="R90"/>
 </element>
 <element name="C4" library="aAcroname" package="SMC_D" value="T491D227K016ZT" x="23.114" y="112.395" locked="yes" smashed="yes" rot="R90">
