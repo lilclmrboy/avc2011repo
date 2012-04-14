@@ -419,7 +419,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <wire x1="2.3114" y1="-1.016" x2="-2.286" y2="-1.016" width="0.1778" layer="21"/>
 <wire x1="-2.286" y1="-1.016" x2="-2.286" y2="1.016" width="0.1778" layer="21"/>
 <pad name="P$2" x="1.27" y="0" drill="1.02"/>
-<pad name="P$1" x="-1.27" y="0" drill="1.02"/>
+<pad name="P$1" x="-1.27" y="0" drill="1.02" shape="square"/>
 <text x="-0.508" y="1.778" size="1.016" layer="25" font="vector" ratio="13">&gt;NAME</text>
 </package>
 <package name="R0603">
@@ -438,6 +438,21 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <rectangle x1="-0.1999" y1="-0.4001" x2="0.1999" y2="0.4001" layer="35"/>
 </package>
 <package name="R0402">
+<description>&lt;b&gt;RESISTOR&lt;/b&gt;</description>
+<wire x1="-1.1428" y1="0.5846" x2="1.1428" y2="0.5846" width="0.0254" layer="39"/>
+<wire x1="1.1428" y1="0.5846" x2="1.1428" y2="-0.5846" width="0.0254" layer="39"/>
+<wire x1="1.1428" y1="-0.5846" x2="-1.1428" y2="-0.5846" width="0.0254" layer="39"/>
+<wire x1="-1.1428" y1="-0.5846" x2="-1.1428" y2="0.5846" width="0.0254" layer="39"/>
+<wire x1="-1.1938" y1="0.635" x2="1.1938" y2="0.635" width="0.127" layer="51"/>
+<wire x1="1.1938" y1="0.635" x2="1.1938" y2="-0.635" width="0.127" layer="51"/>
+<wire x1="1.1938" y1="-0.635" x2="-1.1938" y2="-0.635" width="0.127" layer="51"/>
+<wire x1="-1.1938" y1="-0.635" x2="-1.1938" y2="0.635" width="0.127" layer="51"/>
+<smd name="1" x="-0.65" y="0" dx="0.7" dy="0.9" layer="1"/>
+<smd name="2" x="0.65" y="0" dx="0.7" dy="0.9" layer="1"/>
+<text x="-0.5842" y="0.9906" size="1.016" layer="25" font="vector" ratio="13">&gt;NAME</text>
+<rectangle x1="-0.1999" y1="-0.4001" x2="0.1999" y2="0.4001" layer="35"/>
+</package>
+<package name="R0402@1">
 <description>&lt;b&gt;RESISTOR&lt;/b&gt;</description>
 <wire x1="-1.1428" y1="0.5846" x2="1.1428" y2="0.5846" width="0.0254" layer="39"/>
 <wire x1="1.1428" y1="0.5846" x2="1.1428" y2="-0.5846" width="0.0254" layer="39"/>
@@ -932,8 +947,8 @@ MAX3223-MAX3243.pdf</description>
 <circle x="0" y="0" radius="2.794" width="2.032" layer="39"/>
 <circle x="0" y="0" radius="2.794" width="2.032" layer="43"/>
 <circle x="0" y="0" radius="2.794" width="2.032" layer="40"/>
-<circle x="0" y="0" radius="2.794" width="2.032" layer="41"/>
-<circle x="0" y="0" radius="2.794" width="2.032" layer="42"/>
+<circle x="0" y="0" radius="2.413" width="2.032" layer="41"/>
+<circle x="0" y="0" radius="2.413" width="2.032" layer="42"/>
 <circle x="0" y="0" radius="1.8035" width="0.1778" layer="51"/>
 <hole x="0" y="0" drill="3.2"/>
 </package>
@@ -1045,30 +1060,31 @@ MAX3223-MAX3243.pdf</description>
 </symbol>
 <symbol name="DOCFIELD">
 <wire x1="35.56" y1="0" x2="81.026" y2="0" width="0.254" layer="97"/>
-<wire x1="101.6" y1="9.906" x2="88.9" y2="9.906" width="0.254" layer="97"/>
+<wire x1="101.6" y1="9.906" x2="91.44" y2="9.906" width="0.254" layer="97"/>
 <wire x1="35.56" y1="0" x2="35.56" y2="3.81" width="0.254" layer="97"/>
 <wire x1="35.56" y1="3.81" x2="81.026" y2="3.81" width="0.254" layer="97"/>
 <wire x1="35.56" y1="3.81" x2="35.56" y2="9.906" width="0.254" layer="97"/>
 <wire x1="101.6" y1="9.906" x2="101.6" y2="3.81" width="0.254" layer="97"/>
 <wire x1="81.026" y1="3.81" x2="81.026" y2="0" width="0.254" layer="97"/>
 <wire x1="81.026" y1="0" x2="101.6" y2="0" width="0.254" layer="97"/>
-<wire x1="88.9" y1="9.906" x2="35.56" y2="9.906" width="0.254" layer="97"/>
-<wire x1="81.026" y1="3.81" x2="101.6" y2="3.81" width="0.254" layer="97"/>
+<wire x1="91.44" y1="9.906" x2="35.56" y2="9.906" width="0.254" layer="97"/>
+<wire x1="81.026" y1="3.81" x2="91.44" y2="3.81" width="0.254" layer="97"/>
+<wire x1="91.44" y1="3.81" x2="101.6" y2="3.81" width="0.254" layer="97"/>
 <wire x1="101.6" y1="3.81" x2="101.6" y2="0" width="0.254" layer="97"/>
 <wire x1="35.56" y1="9.906" x2="35.56" y2="17.018" width="0.254" layer="97"/>
-<wire x1="35.56" y1="17.018" x2="88.9" y2="17.018" width="0.254" layer="97"/>
-<wire x1="88.9" y1="17.018" x2="101.6" y2="17.018" width="0.254" layer="97"/>
+<wire x1="35.56" y1="17.018" x2="91.44" y2="17.018" width="0.254" layer="97"/>
+<wire x1="91.44" y1="17.018" x2="101.6" y2="17.018" width="0.254" layer="97"/>
 <wire x1="101.6" y1="17.018" x2="101.6" y2="9.906" width="0.254" layer="97"/>
-<wire x1="88.9" y1="9.906" x2="88.9" y2="17.018" width="0.254" layer="97"/>
+<wire x1="91.44" y1="9.906" x2="91.44" y2="17.018" width="0.254" layer="97"/>
 <text x="36.83" y="1.016" size="1.778" layer="97">Date:</text>
 <text x="43.688" y="1.016" size="1.778" layer="97">&gt;LAST_DATE_TIME</text>
 <text x="82.296" y="1.016" size="1.778" layer="97">Sheet:</text>
 <text x="90.424" y="1.016" size="1.778" layer="97">&gt;SHEET</text>
-<text x="91.44" y="14.732" size="1.27" layer="97">Revision:</text>
+<text x="92.456" y="14.986" size="1.27" layer="97">Revision</text>
 <text x="43.688" y="6.858" size="1.9304" layer="97">&gt;DRAWING_NAME</text>
 <text x="46.99" y="12.192" size="2.54" layer="97" ratio="13">Acroname Inc.</text>
 <text x="36.83" y="6.858" size="1.9304" layer="97" ratio="13">Title:</text>
-<text x="92.964" y="11.684" size="1.9304" layer="97">&gt;REV</text>
+<text x="94.234" y="12.446" size="1.27" layer="97">&gt;REV</text>
 <text x="43.942" y="4.572" size="1.27" layer="97">&gt;DESCRIPTION</text>
 <rectangle x1="42.6593" y1="10.6553" x2="42.7863" y2="10.6807" layer="97"/>
 <rectangle x1="42.6085" y1="10.6807" x2="42.7863" y2="10.7061" layer="97"/>
@@ -1438,6 +1454,9 @@ MAX3223-MAX3243.pdf</description>
 <rectangle x1="42.1513" y1="16.2433" x2="42.3037" y2="16.2687" layer="97"/>
 <rectangle x1="42.1767" y1="16.2687" x2="42.3037" y2="16.2941" layer="97"/>
 <rectangle x1="42.2021" y1="16.2941" x2="42.3037" y2="16.3195" layer="97"/>
+<text x="92.202" y="7.874" size="1.27" layer="97">ENGINEER</text>
+<wire x1="91.44" y1="9.906" x2="91.44" y2="3.81" width="0.254" layer="97"/>
+<text x="93.218" y="5.588" size="1.27" layer="97">&gt;INITIALS</text>
 </symbol>
 <symbol name="LDO-4PIN">
 <wire x1="-10.16" y1="7.62" x2="12.7" y2="7.62" width="0.4064" layer="94"/>
@@ -1531,7 +1550,7 @@ MAX3223-MAX3243.pdf</description>
 <pin name="4" x="0" y="-2.54" visible="off" length="point" direction="nc"/>
 <pin name="5" x="2.54" y="-2.54" visible="off" length="point" direction="nc"/>
 </symbol>
-<symbol name="PDIOD00001">
+<symbol name="LED">
 <wire x1="1.27" y1="0" x2="0" y2="-2.54" width="0.254" layer="94"/>
 <wire x1="0" y1="-2.54" x2="-1.27" y2="0" width="0.254" layer="94"/>
 <wire x1="1.27" y1="-2.54" x2="0" y2="-2.54" width="0.254" layer="94"/>
@@ -1541,9 +1560,9 @@ MAX3223-MAX3243.pdf</description>
 <wire x1="0" y1="0" x2="0" y2="-2.54" width="0.1524" layer="94"/>
 <wire x1="-2.032" y1="-0.762" x2="-3.429" y2="-2.159" width="0.1524" layer="94"/>
 <wire x1="-1.905" y1="-1.905" x2="-3.302" y2="-3.302" width="0.1524" layer="94"/>
-<text x="-4.064" y="-2.794" size="1.27" layer="95" rot="R90">&gt;NAME</text>
-<text x="3.175" y="-3.81" size="1.27" layer="96" rot="R90">Red</text>
-<text x="5.715" y="-3.81" size="1.27" layer="96" rot="R90">&gt;NOTES</text>
+<text x="-4.064" y="-3.048" size="1.27" layer="95" rot="R90">&gt;NAME</text>
+<text x="2.921" y="-3.81" size="1.27" layer="96" rot="R90">&gt;COLOR</text>
+<text x="4.826" y="-4.318" size="1.27" layer="95" rot="R90">&gt;ASSEMBLY</text>
 <pin name="C" x="0" y="-5.08" visible="off" length="short" direction="pas" rot="R90"/>
 <pin name="A" x="0" y="2.54" visible="off" length="short" direction="pas" rot="R270"/>
 <polygon width="0.1524" layer="94">
@@ -1650,6 +1669,22 @@ MAX3223-MAX3243.pdf</description>
 <pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
 </symbol>
 <symbol name="R">
+<wire x1="-2.54" y1="0" x2="-2.159" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-2.159" y1="1.016" x2="-1.524" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-1.524" y1="-1.016" x2="-0.889" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="-0.889" y1="1.016" x2="-0.254" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="-0.254" y1="-1.016" x2="0.381" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="0.381" y1="1.016" x2="1.016" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="1.016" y1="-1.016" x2="1.651" y2="1.016" width="0.2032" layer="94"/>
+<wire x1="1.651" y1="1.016" x2="2.286" y2="-1.016" width="0.2032" layer="94"/>
+<wire x1="2.286" y1="-1.016" x2="2.54" y2="0" width="0.2032" layer="94"/>
+<text x="-3.048" y="1.4986" size="1.27" layer="95">&gt;NAME</text>
+<text x="-3.556" y="-2.794" size="1.27" layer="96" font="vector">&gt;RESISTANCE</text>
+<text x="-3.556" y="-4.572" size="1.27" layer="96">&gt;ASSEMBLY</text>
+<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
+</symbol>
+<symbol name="R@1">
 <wire x1="-2.54" y1="0" x2="-2.159" y2="1.016" width="0.2032" layer="94"/>
 <wire x1="-2.159" y1="1.016" x2="-1.524" y2="-1.016" width="0.2032" layer="94"/>
 <wire x1="-1.524" y1="-1.016" x2="-0.889" y2="1.016" width="0.2032" layer="94"/>
@@ -1962,22 +1997,6 @@ MAX3223-MAX3243.pdf</description>
 <vertex x="-2.921" y="-2.413"/>
 <vertex x="-2.413" y="-2.921"/>
 </polygon>
-</symbol>
-<symbol name="PRESI00006">
-<wire x1="-2.54" y1="0" x2="-2.159" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="-2.159" y1="1.016" x2="-1.524" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="-1.524" y1="-1.016" x2="-0.889" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="-0.889" y1="1.016" x2="-0.254" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="-0.254" y1="-1.016" x2="0.381" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="0.381" y1="1.016" x2="1.016" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="1.016" y1="-1.016" x2="1.651" y2="1.016" width="0.2032" layer="94"/>
-<wire x1="1.651" y1="1.016" x2="2.286" y2="-1.016" width="0.2032" layer="94"/>
-<wire x1="2.286" y1="-1.016" x2="2.54" y2="0" width="0.2032" layer="94"/>
-<text x="-1.524" y="1.4986" size="1.27" layer="95">&gt;NAME</text>
-<text x="-3.048" y="-2.794" size="1.27" layer="96" font="vector">1kÛ,1%</text>
-<text x="-2.54" y="-4.5974" size="1.27" layer="95">&gt;NOTES</text>
-<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
-<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
 </symbol>
 <symbol name="T491B105K035AT">
 <wire x1="-2.54" y1="1.905" x2="0" y2="1.905" width="0.254" layer="94"/>
@@ -2691,7 +2710,8 @@ LETTER landscape</description>
 <technologies>
 <technology name="">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff" constant="no"/>
+<attribute name="ASSEMBLY" value="DNI" constant="no"/>
+<attribute name="NOTES" value="" constant="no"/>
 <attribute name="PARTNUM" value="-"/>
 </technology>
 </technologies>
@@ -2703,7 +2723,8 @@ LETTER landscape</description>
 <technologies>
 <technology name="">
 <attribute name="ACRONAME" value="-" constant="no"/>
-<attribute name="NOTES" value="No Stuff" constant="no"/>
+<attribute name="ASSEMBLY" value="No Stuff" constant="no"/>
+<attribute name="NOTES" value="" constant="no"/>
 <attribute name="PARTNUM" value="-" constant="no"/>
 <attribute name="UNITCOST" value="0.0" constant="no"/>
 </technology>
@@ -2714,7 +2735,7 @@ LETTER landscape</description>
 <deviceset name="PDIOD00001" prefix="D">
 <description>LED SMT Red 0805</description>
 <gates>
-<gate name="G$1" symbol="PDIOD00001" x="0" y="0"/>
+<gate name="G$1" symbol="LED" x="0" y="0"/>
 </gates>
 <devices>
 <device name="" package="CHIPLED_0805">
@@ -2725,6 +2746,8 @@ LETTER landscape</description>
 <technologies>
 <technology name="">
 <attribute name="ACRONAME" value="PDIOD00001"/>
+<attribute name="ASSEMBLY" value="" constant="no"/>
+<attribute name="COLOR" value="Red" constant="no"/>
 <attribute name="NOTES" value="Thicker silk line designates cathode" constant="no"/>
 <attribute name="PARTNUM" value="LTST-C171CKT"/>
 <attribute name="UNITCOST" value="0.06" constant="no"/>
@@ -3050,7 +3073,7 @@ LETTER landscape</description>
 <deviceset name="PRESI00006" prefix="R">
 <description>1.0K OHM 1/10W +/-1%</description>
 <gates>
-<gate name="G$1" symbol="PRESI00006" x="0" y="0"/>
+<gate name="G$1" symbol="R" x="0" y="0"/>
 </gates>
 <devices>
 <device name="" package="R0603">
@@ -3061,8 +3084,10 @@ LETTER landscape</description>
 <technologies>
 <technology name="">
 <attribute name="ACRONAME" value="PRESI00006"/>
+<attribute name="ASSEMBLY" value="" constant="no"/>
 <attribute name="NOTES" value="" constant="no"/>
 <attribute name="PARTNUM" value="ERJ-3EKF1001V"/>
+<attribute name="RESISTANCE" value="1.0kÛ,1%" constant="no"/>
 <attribute name="UNITCOST" value="0.006" constant="no"/>
 </technology>
 </technologies>
@@ -3271,10 +3296,10 @@ LETTER landscape</description>
 <deviceset name="ERJ-2RKF9101X" prefix="R">
 <description>9.1K OHM 1/10W 0402</description>
 <gates>
-<gate name="G$1" symbol="R" x="0" y="0"/>
+<gate name="G$1" symbol="R@1" x="0" y="0"/>
 </gates>
 <devices>
-<device name="" package="R0402">
+<device name="" package="R0402@1">
 <connects>
 <connect gate="G$1" pin="1" pad="1"/>
 <connect gate="G$1" pin="2" pad="2"/>
@@ -3294,10 +3319,10 @@ LETTER landscape</description>
 <deviceset name="ERJ-2RKF1021X" prefix="R">
 <description>1.02K OHM 1/10W 0402</description>
 <gates>
-<gate name="G$1" symbol="R" x="0" y="0"/>
+<gate name="G$1" symbol="R@1" x="0" y="0"/>
 </gates>
 <devices>
-<device name="" package="R0402">
+<device name="" package="R0402@1">
 <connects>
 <connect gate="G$1" pin="1" pad="1"/>
 <connect gate="G$1" pin="2" pad="2"/>
@@ -3383,10 +3408,10 @@ LETTER landscape</description>
 <technologies>
 <technology name="">
 <attribute name="ACRONAME" value="PCONN00082" constant="no"/>
-<attribute name="ALTERNATIVE" value="SSW-120-01-G-S" constant="no"/>
+<attribute name="ALTERNATIVE" value="SSW-120-01-G-S:75915-320LF" constant="no"/>
+<attribute name="ASSEMBLY" value="" constant="no"/>
 <attribute name="NOTES" value="" constant="no"/>
-<attribute name="PARTNUM" value="75915-320LF" constant="no"/>
-<attribute name="UNITCOST" value="1.351" constant="no"/>
+<attribute name="PARTNUM" value="1-534237-8" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -4587,7 +4612,9 @@ MAX3223-MAX3243.pdf</description>
 <part name="GND4" library="aAcroname" deviceset="GND" device=""/>
 <part name="GND5" library="aAcroname" deviceset="GND" device=""/>
 <part name="GND6" library="aAcroname" deviceset="GND" device=""/>
-<part name="J21" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="9.0V"/>
+<part name="J21" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="9.0V">
+<attribute name="NOTES" value=""/>
+</part>
 <part name="U3" library="aAcroname" deviceset="LM1084IS-ADJ" device=""/>
 <part name="C10" library="aAcroname" deviceset="T491D227K016ZT" device="">
 <attribute name="ACRONAME" value="PCAPI00037"/>
@@ -4606,7 +4633,9 @@ MAX3223-MAX3243.pdf</description>
 <part name="GND11" library="aAcroname" deviceset="GND" device=""/>
 <part name="GND12" library="aAcroname" deviceset="GND" device=""/>
 <part name="GND13" library="aAcroname" deviceset="GND" device=""/>
-<part name="J16" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="5.0V"/>
+<part name="J16" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="5.0V">
+<attribute name="NOTES" value=""/>
+</part>
 <part name="U2" library="aAcroname" deviceset="LM1084IS-ADJ" device=""/>
 <part name="C6" library="aAcroname" deviceset="T491D227K016ZT" device="">
 <attribute name="ACRONAME" value="PCAPI00037"/>
@@ -4625,12 +4654,18 @@ MAX3223-MAX3243.pdf</description>
 <part name="GND15" library="aAcroname" deviceset="GND" device=""/>
 <part name="GND16" library="aAcroname" deviceset="GND" device=""/>
 <part name="GND17" library="aAcroname" deviceset="GND" device=""/>
-<part name="J18" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="3.3V"/>
+<part name="J18" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="3.3V">
+<attribute name="NOTES" value=""/>
+</part>
 <part name="U$1" library="aAcroname" deviceset="3V3" device=""/>
 <part name="U$2" library="aAcroname" deviceset="5V0" device=""/>
 <part name="U$3" library="aAcroname" deviceset="5V0" device=""/>
-<part name="J22" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="Router V+"/>
-<part name="J24" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="Router V-"/>
+<part name="J22" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="Router V+">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J24" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="Router V-">
+<attribute name="NOTES" value=""/>
+</part>
 <part name="GND20" library="aAcroname" deviceset="GND" device=""/>
 <part name="J20" library="aAcroname" deviceset="BOARD00012" device=""/>
 <part name="J23" library="aAcroname" deviceset="BOARD00012" device=""/>
@@ -4648,7 +4683,9 @@ MAX3223-MAX3243.pdf</description>
 </part>
 <part name="R16" library="aAcroname" deviceset="ERJ-2RKF9101X" device=""/>
 <part name="R17" library="aAcroname" deviceset="ERJ-2RKF1021X" device=""/>
-<part name="J62" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="VMOTOR_A2D"/>
+<part name="J62" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="VMOTOR_A2D">
+<attribute name="NOTES" value=""/>
+</part>
 <part name="U8" library="aAcroname" deviceset="PCHIP00026" device=""/>
 <part name="U$5" library="aAcroname" deviceset="3V3" device=""/>
 <part name="GND18" library="aAcroname" deviceset="GND" device=""/>
@@ -4656,10 +4693,18 @@ MAX3223-MAX3243.pdf</description>
 <part name="R15" library="aAcroname" deviceset="PRESI00018" device=""/>
 <part name="GND19" library="aAcroname" deviceset="GND" device=""/>
 <part name="R13" library="aAcroname" deviceset="PRESI00041" device=""/>
-<part name="J54" library="aAcroname" deviceset="BOARD00003" device="WVALUE"/>
-<part name="J51" library="aAcroname" deviceset="BOARD00003" device="WVALUE"/>
-<part name="J63" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="GND"/>
-<part name="J59" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="IMOTOR_A2D"/>
+<part name="J54" library="aAcroname" deviceset="BOARD00003" device="WVALUE">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J51" library="aAcroname" deviceset="BOARD00003" device="WVALUE">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J63" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="GND">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J59" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="IMOTOR_A2D">
+<attribute name="NOTES" value=""/>
+</part>
 <part name="J42" library="aAcroname" deviceset="BOARD00008" device=""/>
 <part name="J43" library="aAcroname" deviceset="BOARD00008" device=""/>
 <part name="Q6" library="aAcroname" deviceset="IXTA52P10P" device="">
@@ -4668,7 +4713,10 @@ MAX3223-MAX3243.pdf</description>
 <part name="FRAME3" library="aAcroname" deviceset="LETTER_L" device=""/>
 <part name="J44" library="avc" deviceset="MPT-08-01-01-L-RA-LC" device=""/>
 <part name="J36" library="avc" deviceset="IPL1-1XX-02-XXX-DH-K-XX-MKT" device=""/>
-<part name="J34" library="aAcroname" deviceset="BRAINSTEMSOCKET_FEMALE" device=""/>
+<part name="J34" library="aAcroname" deviceset="BRAINSTEMSOCKET_FEMALE" device="">
+<attribute name="ALTERNATIVE" value="SSW-120-01-G-S:75915-320LF"/>
+<attribute name="PARTNUM" value="1-534237-8"/>
+</part>
 <part name="GND14" library="aAcroname" deviceset="GND3" device=""/>
 <part name="GND26" library="aAcroname" deviceset="GND" device=""/>
 <part name="U$4" library="aAcroname" deviceset="3V3" device=""/>
@@ -4716,7 +4764,9 @@ MAX3223-MAX3243.pdf</description>
 <attribute name="CAPACITANCE" value="?"/>
 </part>
 <part name="GND7" library="aAcroname" deviceset="GND" device=""/>
-<part name="J35" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="12.0V"/>
+<part name="J35" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="12.0V">
+<attribute name="NOTES" value=""/>
+</part>
 <part name="Q3" library="aAcroname" deviceset="IXTA52P10P" device=""/>
 <part name="S1" library="aAcroname" deviceset="PMISC00005" device=""/>
 <part name="GND24" library="aAcroname" deviceset="GND" device=""/>
@@ -4738,15 +4788,33 @@ MAX3223-MAX3243.pdf</description>
 <part name="R5" library="aAcroname" deviceset="PRESI00006" device=""/>
 <part name="C1" library="aAcroname" deviceset="ECJ-1VC1H270J" device=""/>
 <part name="GND37" library="aAcroname" deviceset="GND" device=""/>
-<part name="J8" library="aAcroname" deviceset="BOARD00003" device=""/>
-<part name="J11" library="aAcroname" deviceset="BOARD00003" device=""/>
-<part name="J4" library="aAcroname" deviceset="BOARD00003" device=""/>
-<part name="J5" library="aAcroname" deviceset="BOARD00003" device=""/>
-<part name="J10" library="aAcroname" deviceset="BOARD00003" device=""/>
-<part name="J6" library="aAcroname" deviceset="BOARD00003" device=""/>
-<part name="J7" library="aAcroname" deviceset="BOARD00003" device=""/>
-<part name="J1" library="aAcroname" deviceset="BOARD00003" device=""/>
-<part name="J13" library="aAcroname" deviceset="BOARD00003" device=""/>
+<part name="J8" library="aAcroname" deviceset="BOARD00003" device="">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J11" library="aAcroname" deviceset="BOARD00003" device="">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J4" library="aAcroname" deviceset="BOARD00003" device="">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J5" library="aAcroname" deviceset="BOARD00003" device="">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J10" library="aAcroname" deviceset="BOARD00003" device="">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J6" library="aAcroname" deviceset="BOARD00003" device="">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J7" library="aAcroname" deviceset="BOARD00003" device="">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J1" library="aAcroname" deviceset="BOARD00003" device="">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J13" library="aAcroname" deviceset="BOARD00003" device="">
+<attribute name="NOTES" value=""/>
+</part>
 <part name="J31" library="aAcroname" deviceset="BOARD00012" device=""/>
 <part name="J33" library="aAcroname" deviceset="BOARD00012" device=""/>
 <part name="J32" library="aAcroname" deviceset="BOARD00012" device=""/>
@@ -4792,8 +4860,12 @@ MAX3223-MAX3243.pdf</description>
 <part name="C22" library="aAcroname" deviceset="T491A106K010AT" device=""/>
 <part name="C18" library="aAcroname" deviceset="PCAPI00015" device=""/>
 <part name="GND44" library="aAcroname" deviceset="GND" device=""/>
-<part name="J45" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="INT2"/>
-<part name="J39" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="INT"/>
+<part name="J45" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="INT2">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J39" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="INT">
+<attribute name="NOTES" value=""/>
+</part>
 <part name="U7" library="avc" deviceset="CMPS10" device=""/>
 <part name="GND48" library="aAcroname" deviceset="GND" device=""/>
 <part name="J47" library="aAcroname" deviceset="BOARD00012" device=""/>
@@ -4860,15 +4932,33 @@ MAX3223-MAX3243.pdf</description>
 <part name="U$12" library="aAcroname" deviceset="5V0" device=""/>
 <part name="U$13" library="aAcroname" deviceset="5V0" device=""/>
 <part name="M7" library="avc" deviceset="BRAINSTEM_MOUNT" device=""/>
-<part name="J91" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="GND"/>
-<part name="J88" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="SDA"/>
-<part name="J85" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="SCL"/>
-<part name="J95" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="5.0V"/>
-<part name="J82" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="D0"/>
-<part name="J78" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="D1"/>
-<part name="J75" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="D2"/>
-<part name="J72" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="A0"/>
-<part name="J69" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="A1"/>
+<part name="J91" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="GND">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J88" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="SDA">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J85" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="SCL">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J95" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="5.0V">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J82" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="D0">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J78" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="D1">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J75" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="D2">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J72" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="A0">
+<attribute name="NOTES" value=""/>
+</part>
+<part name="J69" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="A1">
+<attribute name="NOTES" value=""/>
+</part>
 <part name="GND39" library="aAcroname" deviceset="GND" device=""/>
 <part name="U$17" library="aAcroname" deviceset="5V0" device=""/>
 <part name="M2" library="aAcroname" deviceset="MOUNT-HOLE" device="3.2">
@@ -4885,42 +4975,42 @@ MAX3223-MAX3243.pdf</description>
 </part>
 <part name="J99" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="GND">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff"/>
+<attribute name="NOTES" value=""/>
 <attribute name="PARTNUM" value="-"/>
 <attribute name="UNITCOST" value="0.0"/>
 </part>
 <part name="GND40" library="aAcroname" deviceset="GND" device=""/>
 <part name="J9" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="GND">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff"/>
+<attribute name="NOTES" value=""/>
 <attribute name="PARTNUM" value="-"/>
 <attribute name="UNITCOST" value="0.0"/>
 </part>
 <part name="GND51" library="aAcroname" deviceset="GND" device=""/>
 <part name="J3" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="GND">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff"/>
+<attribute name="NOTES" value=""/>
 <attribute name="PARTNUM" value="-"/>
 <attribute name="UNITCOST" value="0.0"/>
 </part>
 <part name="GND52" library="aAcroname" deviceset="GND" device=""/>
 <part name="J100" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="GND">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff"/>
+<attribute name="NOTES" value=""/>
 <attribute name="PARTNUM" value="-"/>
 <attribute name="UNITCOST" value="0.0"/>
 </part>
 <part name="GND53" library="aAcroname" deviceset="GND" device=""/>
 <part name="J2" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="GND">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff"/>
+<attribute name="NOTES" value=""/>
 <attribute name="PARTNUM" value="-"/>
 <attribute name="UNITCOST" value="0.0"/>
 </part>
 <part name="GND54" library="aAcroname" deviceset="GND" device=""/>
 <part name="J12" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="GND">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff"/>
+<attribute name="NOTES" value=""/>
 <attribute name="PARTNUM" value="-"/>
 <attribute name="UNITCOST" value="0.0"/>
 </part>
@@ -4957,25 +5047,25 @@ MAX3223-MAX3243.pdf</description>
 <part name="U$29" library="aAcroname" deviceset="3V3" device=""/>
 <part name="J98" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="3.3V">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff"/>
+<attribute name="NOTES" value=""/>
 <attribute name="PARTNUM" value="-"/>
 <attribute name="UNITCOST" value="0.0"/>
 </part>
 <part name="J14" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="3.3V">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff"/>
+<attribute name="NOTES" value=""/>
 <attribute name="PARTNUM" value="-"/>
 <attribute name="UNITCOST" value="0.0"/>
 </part>
 <part name="J19" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="3.3V">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff"/>
+<attribute name="NOTES" value=""/>
 <attribute name="PARTNUM" value="-"/>
 <attribute name="UNITCOST" value="0.0"/>
 </part>
 <part name="J17" library="aAcroname" deviceset="BOARD00003" device="WVALUE" value="3.3V">
 <attribute name="ACRONAME" value="-"/>
-<attribute name="NOTES" value="No Stuff"/>
+<attribute name="NOTES" value=""/>
 <attribute name="PARTNUM" value="-"/>
 <attribute name="UNITCOST" value="0.0"/>
 </part>
@@ -4985,9 +5075,11 @@ MAX3223-MAX3243.pdf</description>
 <plain>
 <text x="185.42" y="12.446" size="1.778" layer="250">Headless Chicken AVC2012</text>
 <text x="184.404" y="12.446" size="1.778" layer="97">Headless Chicken AVC2012</text>
-<text x="170.18" y="172.72" size="1.778" layer="97">Don't forget to adjust feedback resistor values!!!</text>
 <rectangle x1="183.388" y1="10.16" x2="219.964" y2="16.51" layer="105"/>
-<text x="7.62" y="157.48" size="1.778" layer="97">12.0 V LDO calculations Calculating resitor values for LDO for 12.000V. Tried 4683 resistor combinations. Final Voltage of: 11.996 using R1: 330.0 ohm  R2: 2800.0 ohm   Acroname Stock Part. Use R1 = PRESI00060 (330.000 ohm)   Voutput range w/ 1 percent: 11.785V - 12.212V  9.0 V LDO calculations Calculating resitor values for LDO for 9.000V. Tried 4683 resistor combinations. Final Voltage of: 9.018 using R1: 698.0 ohm  R2: 4220.0 ohm   Acroname Stock Part. Use R1 = PRESI00039 (698.000 ohm)   Voutput range w/ 1 percent: 8.867V - 9.173V  5.0 V LDO calculations Calculating resitor values for LDO for 5.000V. Tried 441 resistor combinations. Final Voltage of: 4.955 using R1: 2400.0 ohm  R2: 6490.0 ohm   Acroname Stock Part. Use R1 = PRESI00019 (2400.000 ohm)   Acroname Stock Part. Use R2 = PRESI00056 (6490.000 ohm)   Voutput range w/ 1 percent: 4.885V - 5.026V  3.3 V LDO calculations Calculating resitor values for LDO for 3.300V. Tried 441 resistor combinations. Final Voltage of: 3.290 using R1: 2200.0 ohm  R2: 3300.0 ohm   Acroname Stock Part. Use R1 = PRESI00007 (2200.000 ohm)   Acroname Stock Part. \nUse R2 = PRESI00002 (3300.000 ohm)   Voutput range w/ 1 percent: 3.251V - 3.330V</text>
+<text x="7.62" y="157.48" size="1.778" layer="97">12.0 V LDO: Final Voltage of: 11.996 using R1: 330.0 ohm  R2: 2800.0 ohm   Acroname Stock Part. Use R1 = PRESI00060 (330.000 ohm)</text>
+<text x="7.62" y="154.94" size="1.778" layer="97">9.0 V LDO: Final Voltage of: 9.018 using R1: 698.0 ohm  R2: 4220.0 ohm   Acroname Stock Part. Use R1 = PRESI00039 (698.000 ohm)</text>
+<text x="7.62" y="152.4" size="1.778" layer="97">5.0 V LDO: Final Voltage of: 4.955 using R1: 2400.0 ohm  R2: 6490.0 ohm   Acroname Stock Part. Use R1 = PRESI00019 (2400.000 ohm)   Acroname Stock Part. Use R2 = PRESI00056 (6490.000 ohm)</text>
+<text x="7.62" y="149.86" size="1.778" layer="97">3.3 V LDO: Final Voltage of: 3.290 using R1: 2200.0 ohm  R2: 3300.0 ohm   Acroname Stock Part. Use R1 = PRESI00007 (2200.000 ohm)   Acroname Stock Part. Use R2 = PRESI00002 (3300.000 ohm)   </text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0" smashed="yes"/>
