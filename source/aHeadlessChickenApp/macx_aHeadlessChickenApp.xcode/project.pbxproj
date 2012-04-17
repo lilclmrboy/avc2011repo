@@ -1,0 +1,267 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		13353210153D0A4300EB378C /* acpHeadlessChickenApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1335320E153D0A4300EB378C /* acpHeadlessChickenApp.cpp */; };
+		F00E6F3014F813DD00AB80A4 /* aMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F00E6F2F14F813DD00AB80A4 /* aMath.framework */; };
+		F03CD14E14955F8800476B51 /* acpStemSuperControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F03CD14D14955F8800476B51 /* acpStemSuperControl.cpp */; };
+		F03CD1691495759100476B51 /* acpStemDIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F03CD1671495759100476B51 /* acpStemDIO.cpp */; };
+		F0F7017C1470824000D81195 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0F7017B1470824000D81195 /* Cocoa.framework */; };
+		F0F7019A1470828A00D81195 /* aIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0F701961470828A00D81195 /* aIO.framework */; };
+		F0F7019B1470828A00D81195 /* aStem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0F701971470828A00D81195 /* aStem.framework */; };
+		F0F7019C1470828A00D81195 /* aUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0F701981470828A00D81195 /* aUI.framework */; };
+		F0F7019D1470828A00D81195 /* aUtil.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0F701991470828A00D81195 /* aUtil.framework */; };
+		F0F701A0147084C600D81195 /* acpStemApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0F7019E147084C600D81195 /* acpStemApp.cpp */; };
+		F0F701B1147098EE00D81195 /* acpStemAnalog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0F701AF147098EE00D81195 /* acpStemAnalog.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1335320E153D0A4300EB378C /* acpHeadlessChickenApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = acpHeadlessChickenApp.cpp; sourceTree = "<group>"; };
+		1335320F153D0A4300EB378C /* acpHeadlessChickenApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = acpHeadlessChickenApp.h; sourceTree = "<group>"; };
+		F00E6F2F14F813DD00AB80A4 /* aMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aMath.framework; path = /Users/acroname/software/acroname/aBinary/aMath.framework; sourceTree = "<absolute>"; };
+		F03CD14B14955E9600476B51 /* acpStemSuperControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = acpStemSuperControl.h; path = ../../acroname/aSource/aCommon/acpStemSuperControl.h; sourceTree = "<group>"; };
+		F03CD14D14955F8800476B51 /* acpStemSuperControl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = acpStemSuperControl.cpp; path = ../../acroname/aSource/aCommon/acpStemSuperControl.cpp; sourceTree = "<group>"; };
+		F03CD1671495759100476B51 /* acpStemDIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = acpStemDIO.cpp; path = ../../acroname/aSource/aCommon/acpStemDIO.cpp; sourceTree = "<group>"; };
+		F03CD1681495759100476B51 /* acpStemDIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = acpStemDIO.h; path = ../../acroname/aSource/aCommon/acpStemDIO.h; sourceTree = "<group>"; };
+		F0DE9C08148D9390007AF6A3 /* a40PinStem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = a40PinStem.h; path = ../../acroname/aInclude/a40PinStem.h; sourceTree = "<group>"; };
+		F0F7017B1470824000D81195 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		F0F701961470828A00D81195 /* aIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aIO.framework; path = ../../acroname/aDebug/aIO.framework; sourceTree = "<group>"; };
+		F0F701971470828A00D81195 /* aStem.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aStem.framework; path = ../../acroname/aDebug/aStem.framework; sourceTree = "<group>"; };
+		F0F701981470828A00D81195 /* aUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aUI.framework; path = ../../acroname/aDebug/aUI.framework; sourceTree = "<group>"; };
+		F0F701991470828A00D81195 /* aUtil.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aUtil.framework; path = ../../acroname/aDebug/aUtil.framework; sourceTree = "<group>"; };
+		F0F7019E147084C600D81195 /* acpStemApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = acpStemApp.cpp; path = ../../acroname/aSource/aCommon/acpStemApp.cpp; sourceTree = "<group>"; };
+		F0F7019F147084C600D81195 /* acpStemApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = acpStemApp.h; path = ../../acroname/aSource/aCommon/acpStemApp.h; sourceTree = "<group>"; };
+		F0F701AF147098EE00D81195 /* acpStemAnalog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = acpStemAnalog.cpp; path = ../../acroname/aSource/aCommon/acpStemAnalog.cpp; sourceTree = "<group>"; };
+		F0F701B0147098EE00D81195 /* acpStemAnalog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = acpStemAnalog.h; path = ../../acroname/aSource/aCommon/acpStemAnalog.h; sourceTree = "<group>"; };
+		F0F701B21470996C00D81195 /* aIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aIO.h; path = ../../acroname/aInclude/aIO.h; sourceTree = "<group>"; };
+		F0F701B31470996C00D81195 /* aStem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aStem.h; path = ../../acroname/aInclude/aStem.h; sourceTree = "<group>"; };
+		F0F701B41470996D00D81195 /* aUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aUI.h; path = ../../acroname/aInclude/aUI.h; sourceTree = "<group>"; };
+		F0F701B51470996D00D81195 /* aUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aUtil.h; path = ../../acroname/aInclude/aUtil.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F0F701741470824000D81195 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0F7019A1470828A00D81195 /* aIO.framework in Frameworks */,
+				F0F7019B1470828A00D81195 /* aStem.framework in Frameworks */,
+				F0F7019C1470828A00D81195 /* aUI.framework in Frameworks */,
+				F0F7019D1470828A00D81195 /* aUtil.framework in Frameworks */,
+				F0F7017C1470824000D81195 /* Cocoa.framework in Frameworks */,
+				F00E6F3014F813DD00AB80A4 /* aMath.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F0F7016014707FD100D81195 = {
+			isa = PBXGroup;
+			children = (
+				1335320E153D0A4300EB378C /* acpHeadlessChickenApp.cpp */,
+				1335320F153D0A4300EB378C /* acpHeadlessChickenApp.h */,
+				F0DE9C08148D9390007AF6A3 /* a40PinStem.h */,
+				F0F701AF147098EE00D81195 /* acpStemAnalog.cpp */,
+				F0F701B0147098EE00D81195 /* acpStemAnalog.h */,
+				F0F7019E147084C600D81195 /* acpStemApp.cpp */,
+				F0F7019F147084C600D81195 /* acpStemApp.h */,
+				F03CD1671495759100476B51 /* acpStemDIO.cpp */,
+				F03CD1681495759100476B51 /* acpStemDIO.h */,
+				F03CD14D14955F8800476B51 /* acpStemSuperControl.cpp */,
+				F03CD14B14955E9600476B51 /* acpStemSuperControl.h */,
+				F0F701B21470996C00D81195 /* aIO.h */,
+				F0F701B31470996C00D81195 /* aStem.h */,
+				F0F701B41470996D00D81195 /* aUI.h */,
+				F0F701B51470996D00D81195 /* aUtil.h */,
+				F0F7017A1470824000D81195 /* Frameworks */,
+				F0F701781470824000D81195 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F0F701781470824000D81195 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F0F7017A1470824000D81195 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F0F701961470828A00D81195 /* aIO.framework */,
+				F0F701971470828A00D81195 /* aStem.framework */,
+				F0F701981470828A00D81195 /* aUI.framework */,
+				F0F701991470828A00D81195 /* aUtil.framework */,
+				F0F7017B1470824000D81195 /* Cocoa.framework */,
+				F00E6F2F14F813DD00AB80A4 /* aMath.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F0F701761470824000D81195 /* aHeadlessChickenApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F0F701931470824000D81195 /* Build configuration list for PBXNativeTarget "aHeadlessChickenApp" */;
+			buildPhases = (
+				F0F701731470824000D81195 /* Sources */,
+				F0F701741470824000D81195 /* Frameworks */,
+				F0F701751470824000D81195 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = aHeadlessChickenApp;
+			productName = aHeadlessChickenApp;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F0F7016214707FD100D81195 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+				ORGANIZATIONNAME = "Acroname Inc.";
+			};
+			buildConfigurationList = F0F7016514707FD100D81195 /* Build configuration list for PBXProject "macx_aHeadlessChickenApp" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = F0F7016014707FD100D81195;
+			productRefGroup = F0F701781470824000D81195 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F0F701761470824000D81195 /* aHeadlessChickenApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F0F701751470824000D81195 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F0F701731470824000D81195 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0F701A0147084C600D81195 /* acpStemApp.cpp in Sources */,
+				F0F701B1147098EE00D81195 /* acpStemAnalog.cpp in Sources */,
+				F03CD14E14955F8800476B51 /* acpStemSuperControl.cpp in Sources */,
+				F03CD1691495759100476B51 /* acpStemDIO.cpp in Sources */,
+				13353210153D0A4300EB378C /* acpHeadlessChickenApp.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F0F7016814707FD100D81195 /* aBinary */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
+				FRAMEWORK_SEARCH_PATHS = ../../acroname/aBinary;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
+				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
+				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				GCC_WARN_MULTIPLE_DEFINITION_TYPES_FOR_SELECTOR = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_SHADOW = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				GCC_WARN_STRICT_SELECTOR_MATCH = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNKNOWN_PRAGMAS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../acroname/aInclude,
+					../../acroname/aSource,
+					../../acroname/aSource/aCommon,
+				);
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../../..";
+				OTHER_CFLAGS = (
+					"-D",
+					aUNIX,
+					"-D",
+					aMACX,
+				);
+				SDKROOT = macosx10.6;
+				SHARED_PRECOMPS_DIR = ../../acroname/aBinary;
+				SYMROOT = ../../acroname;
+			};
+			name = aBinary;
+		};
+		F0F701951470824000D81195 /* aBinary */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../acroname/aBinary\"",
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = aBinary;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F0F7016514707FD100D81195 /* Build configuration list for PBXProject "macx_aHeadlessChickenApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F0F7016814707FD100D81195 /* aBinary */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = aBinary;
+		};
+		F0F701931470824000D81195 /* Build configuration list for PBXNativeTarget "aHeadlessChickenApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F0F701951470824000D81195 /* aBinary */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = aBinary;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F0F7016214707FD100D81195 /* Project object */;
+}
