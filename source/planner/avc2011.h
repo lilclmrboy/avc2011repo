@@ -19,6 +19,10 @@
 #include "avc2011Defs.tea"
 #include "logger.h"
 
+#define aGP_MODULE 6
+#define aGP_NUMSERVOS_USED 2
+
+
 // Utilites
 #ifdef aDEBUG_H
 #define aDEBUG_PRINT(arg, ... ) printf(arg, ##__VA_ARGS__);fflush(stdout)
@@ -59,8 +63,5 @@
 
 // degree of Longitude per meter
 #define aLON_PER_METER 0.000011710448481
-
-
-// 
 
 #endif //_avc2011_H_
