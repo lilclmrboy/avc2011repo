@@ -47,10 +47,4 @@ private:
 
 };
 
-// In 2011-2012 we used an ackerman steering platform for the mobile robot 
-// base. 
-class avcMotionAckerman : public avcMotion {
-
-};
-
 #endif //_motModule_H_

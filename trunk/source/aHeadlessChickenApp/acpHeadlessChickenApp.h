@@ -57,12 +57,16 @@ private:
   
   bool m_bInited;
 
+  bool m_bAwaitingUpdate;
+  bool m_bGP2Present;
   unsigned long m_nextUpdateSystem;
+  unsigned int m_updateIndex;
 
   acpControlCheckbox* m_pUserLED;
   acpStemA2D* m_analogs[a40PINSTEM_NUM_A2D];
   acpStemDIO* m_digitals[a40PINSTEM_NUM_DIG];
   acpStemServo* m_pServo[aGP_NUMSERVOS_USED];
+  acpControlLabel* m_pGPStatus;
   
   acpStemSuperControl* m_pCurrentUpdate;
   
