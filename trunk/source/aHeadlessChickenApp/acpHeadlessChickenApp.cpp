@@ -38,9 +38,9 @@
 
 /////////////////////////////////////////////////////////////////////
 
-acpHeadlessChicken::acpHeadlessChicken(acpStem& stem) :
-acpStemApp("chicken", stem),
-m_stem(stem),
+acpHeadlessChicken::acpHeadlessChicken(acpStem& cstem) :
+acpStemApp("chicken", cstem),
+m_stem(cstem),
 m_bInited(false),
 m_bGP2Present(false),
 m_nextUpdateSystem(0),
@@ -94,7 +94,7 @@ acpHeadlessChicken::stemCreateUI(void)
 
 /////////////////////////////////////////////////////////////////////
 
-#define aCHICKEN_UPDATEMS 500
+#define aCHICKEN_UPDATEMS 1000
 
 bool 
 acpHeadlessChicken::stemUIIdle(void)
@@ -106,6 +106,8 @@ acpHeadlessChicken::stemUIIdle(void)
   if (!m_bInited) {
     
     // Check that a GP is present by sending a debug packet
+    m_stem.sleep(500);
+    
     aUInt8 data[2] = {33,44};
     if (m_stem.DEBUG(aGP_MODULE, data, 2)) {
       m_bGP2Present = true;
