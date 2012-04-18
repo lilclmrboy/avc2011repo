@@ -42,7 +42,10 @@ acpHeadlessChicken::acpHeadlessChicken(acpStem& stem) :
 acpStemApp("chicken", stem),
 m_stem(stem),
 m_bInited(false),
-m_nextUpdateSystem(0)
+m_bGP2Present(false),
+m_nextUpdateSystem(0),
+m_bAwaitingUpdate(false),
+m_updateIndex(0)
 {
 }
 
@@ -68,6 +71,7 @@ acpHeadlessChicken::stemCreateUI(void)
   
   m_pUserLED = createCheckboxControl(c, "User LED");
   
+  // Show general analog controls that are tied to accel 3 axis
   for (i = 0; i < a40PINSTEM_NUM_A2D; i++) {
     m_analogs[i] = new acpStemA2D(this, c, a40PINSTEM_MODULE, i);
     m_analogs[i]->setEnable(true);
@@ -77,10 +81,12 @@ acpHeadlessChicken::stemCreateUI(void)
   }
   
   createLabelControl(c, acpControlLabel::kHeading, "GP 2.0 Controls");
+  m_pGPStatus = createLabelControl(c, acpControlLabel::kBody, "---");
   
+  // Show servo controls
   for (i = 0; i < aGP_NUMSERVOS_USED; i++) {
     m_pServo[i] = new acpStemServo(this, c, aGP_MODULE, i);
-    m_pServo[i]->setEnable(true);
+    m_pServo[i]->setEnable(false);
   }
   
 } // stemCreateUI
@@ -88,17 +94,65 @@ acpHeadlessChicken::stemCreateUI(void)
 
 /////////////////////////////////////////////////////////////////////
 
+#define aCHICKEN_UPDATEMS 500
+
 bool 
 acpHeadlessChicken::stemUIIdle(void)
 {
   bool bBusy = false;
+  unsigned long now;
+  aIO_GetMSTicks(ioRef(), &now, NULL);
   
   if (!m_bInited) {
+    
+    // Check that a GP is present by sending a debug packet
+    aUInt8 data[2] = {33,44};
+    if (m_stem.DEBUG(aGP_MODULE, data, 2)) {
+      m_bGP2Present = true;
+      
+      for (int i = 0; i < aGP_NUMSERVOS_USED; i++)
+        m_pServo[i]->setEnable(true);
+      
+      // Set the GUI status
+      m_pGPStatus->setText("Connected");
+    }
+    else {
+      // Set the GUI status
+      m_pGPStatus->setText("Not responding. Controls Disabled");
+    }
+    
+    // Configure and set any digital pins 
     
     m_bInited = true;
     shrinkWrap();
     
     return bBusy;
+  }
+  
+  if (m_bInited && !bBusy) {
+    
+    // see if analog is updated and then advance if so
+    if (m_analogs[m_updateIndex]->updated()) {
+      do {
+        m_updateIndex++;
+        m_updateIndex %= a40PINSTEM_NUM_A2D;
+      } while (!m_analogs[m_updateIndex]->isEnabled());
+      bBusy = true;
+    }
+    
+    // Update the servos 
+    if (m_bGP2Present && !bBusy) {
+      for (int i = 0; i < aGP_NUMSERVOS_USED; i++) {
+        m_pServo[i]->refresh();
+      }
+    }
+    
+    // update when we should
+    if (m_nextUpdateSystem < now) {
+      m_analogs[m_updateIndex]->sendUpdate();
+      m_nextUpdateSystem += aCHICKEN_UPDATEMS;
+    }
+    
   }
   
   return bBusy;
