@@ -8,40 +8,52 @@
 
 /* Begin PBXBuildFile section */
 		13353210153D0A4300EB378C /* acpHeadlessChickenApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1335320E153D0A4300EB378C /* acpHeadlessChickenApp.cpp */; };
-		F00E6F3014F813DD00AB80A4 /* aMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F00E6F2F14F813DD00AB80A4 /* aMath.framework */; };
-		F03CD14E14955F8800476B51 /* acpStemSuperControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F03CD14D14955F8800476B51 /* acpStemSuperControl.cpp */; };
-		F03CD1691495759100476B51 /* acpStemDIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F03CD1671495759100476B51 /* acpStemDIO.cpp */; };
+		138D383A153E55F200621144 /* aIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 138D3835153E55F200621144 /* aIO.framework */; };
+		138D383B153E55F200621144 /* aMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 138D3836153E55F200621144 /* aMath.framework */; };
+		138D383C153E55F200621144 /* aStem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 138D3837153E55F200621144 /* aStem.framework */; };
+		138D383D153E55F200621144 /* aUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 138D3838153E55F200621144 /* aUI.framework */; };
+		138D383E153E55F200621144 /* aUtil.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 138D3839153E55F200621144 /* aUtil.framework */; };
+		138D3853153E562B00621144 /* acpStemA2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 138D3849153E562B00621144 /* acpStemA2D.cpp */; };
+		138D3854153E562B00621144 /* acpStemApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 138D384B153E562B00621144 /* acpStemApp.cpp */; };
+		138D3855153E562B00621144 /* acpStemDIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 138D384D153E562B00621144 /* acpStemDIO.cpp */; };
+		138D3856153E562B00621144 /* acpStemSuperControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 138D384F153E562B00621144 /* acpStemSuperControl.cpp */; };
+		138D3857153E562B00621144 /* aStemAppLogo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 138D3851153E562B00621144 /* aStemAppLogo.cpp */; };
+		138D385A153E58AF00621144 /* acpStemServo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 138D3858153E58AF00621144 /* acpStemServo.cpp */; };
+		138D3860153E595600621144 /* aCmd.tea in Resources */ = {isa = PBXBuildFile; fileRef = 138D385F153E595600621144 /* aCmd.tea */; };
+		138D3863153E5C4C00621144 /* avc2011Defs.tea in Resources */ = {isa = PBXBuildFile; fileRef = 138D3862153E5C4C00621144 /* avc2011Defs.tea */; };
 		F0F7017C1470824000D81195 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0F7017B1470824000D81195 /* Cocoa.framework */; };
-		F0F7019A1470828A00D81195 /* aIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0F701961470828A00D81195 /* aIO.framework */; };
-		F0F7019B1470828A00D81195 /* aStem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0F701971470828A00D81195 /* aStem.framework */; };
-		F0F7019C1470828A00D81195 /* aUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0F701981470828A00D81195 /* aUI.framework */; };
-		F0F7019D1470828A00D81195 /* aUtil.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0F701991470828A00D81195 /* aUtil.framework */; };
-		F0F701A0147084C600D81195 /* acpStemApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0F7019E147084C600D81195 /* acpStemApp.cpp */; };
-		F0F701B1147098EE00D81195 /* acpStemAnalog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0F701AF147098EE00D81195 /* acpStemAnalog.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1335320E153D0A4300EB378C /* acpHeadlessChickenApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = acpHeadlessChickenApp.cpp; sourceTree = "<group>"; };
 		1335320F153D0A4300EB378C /* acpHeadlessChickenApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = acpHeadlessChickenApp.h; sourceTree = "<group>"; };
-		F00E6F2F14F813DD00AB80A4 /* aMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aMath.framework; path = /Users/acroname/software/acroname/aBinary/aMath.framework; sourceTree = "<absolute>"; };
-		F03CD14B14955E9600476B51 /* acpStemSuperControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = acpStemSuperControl.h; path = ../../acroname/aSource/aCommon/acpStemSuperControl.h; sourceTree = "<group>"; };
-		F03CD14D14955F8800476B51 /* acpStemSuperControl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = acpStemSuperControl.cpp; path = ../../acroname/aSource/aCommon/acpStemSuperControl.cpp; sourceTree = "<group>"; };
-		F03CD1671495759100476B51 /* acpStemDIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = acpStemDIO.cpp; path = ../../acroname/aSource/aCommon/acpStemDIO.cpp; sourceTree = "<group>"; };
-		F03CD1681495759100476B51 /* acpStemDIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = acpStemDIO.h; path = ../../acroname/aSource/aCommon/acpStemDIO.h; sourceTree = "<group>"; };
-		F0DE9C08148D9390007AF6A3 /* a40PinStem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = a40PinStem.h; path = ../../acroname/aInclude/a40PinStem.h; sourceTree = "<group>"; };
+		138D3835153E55F200621144 /* aIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aIO.framework; path = ../acroname/aBinary/aIO.framework; sourceTree = "<group>"; };
+		138D3836153E55F200621144 /* aMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aMath.framework; path = ../acroname/aBinary/aMath.framework; sourceTree = "<group>"; };
+		138D3837153E55F200621144 /* aStem.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aStem.framework; path = ../acroname/aBinary/aStem.framework; sourceTree = "<group>"; };
+		138D3838153E55F200621144 /* aUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aUI.framework; path = ../acroname/aBinary/aUI.framework; sourceTree = "<group>"; };
+		138D3839153E55F200621144 /* aUtil.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aUtil.framework; path = ../acroname/aBinary/aUtil.framework; sourceTree = "<group>"; };
+		138D3841153E562100621144 /* a40PinStem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = a40PinStem.h; sourceTree = "<group>"; };
+		138D3842153E562100621144 /* aIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aIO.h; sourceTree = "<group>"; };
+		138D3843153E562100621144 /* aMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aMath.h; sourceTree = "<group>"; };
+		138D3844153E562100621144 /* aStem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aStem.h; sourceTree = "<group>"; };
+		138D3845153E562100621144 /* aUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aUI.h; sourceTree = "<group>"; };
+		138D3846153E562100621144 /* aUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aUtil.h; sourceTree = "<group>"; };
+		138D3849153E562B00621144 /* acpStemA2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = acpStemA2D.cpp; sourceTree = "<group>"; };
+		138D384A153E562B00621144 /* acpStemA2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = acpStemA2D.h; sourceTree = "<group>"; };
+		138D384B153E562B00621144 /* acpStemApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = acpStemApp.cpp; sourceTree = "<group>"; };
+		138D384C153E562B00621144 /* acpStemApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = acpStemApp.h; sourceTree = "<group>"; };
+		138D384D153E562B00621144 /* acpStemDIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = acpStemDIO.cpp; sourceTree = "<group>"; };
+		138D384E153E562B00621144 /* acpStemDIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = acpStemDIO.h; sourceTree = "<group>"; };
+		138D384F153E562B00621144 /* acpStemSuperControl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = acpStemSuperControl.cpp; sourceTree = "<group>"; };
+		138D3850153E562B00621144 /* acpStemSuperControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = acpStemSuperControl.h; sourceTree = "<group>"; };
+		138D3851153E562B00621144 /* aStemAppLogo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aStemAppLogo.cpp; sourceTree = "<group>"; };
+		138D3852153E562B00621144 /* aVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aVersion.h; sourceTree = "<group>"; };
+		138D3858153E58AF00621144 /* acpStemServo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = acpStemServo.cpp; sourceTree = "<group>"; };
+		138D3859153E58AF00621144 /* acpStemServo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = acpStemServo.h; sourceTree = "<group>"; };
+		138D385F153E595600621144 /* aCmd.tea */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = aCmd.tea; sourceTree = "<group>"; };
+		138D3861153E5B5F00621144 /* avc2011.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avc2011.h; path = ../planner/avc2011.h; sourceTree = "<group>"; };
+		138D3862153E5C4C00621144 /* avc2011Defs.tea */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = avc2011Defs.tea; path = ../acroname/aUser/avc2011Defs.tea; sourceTree = "<group>"; };
 		F0F7017B1470824000D81195 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		F0F701961470828A00D81195 /* aIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aIO.framework; path = ../../acroname/aDebug/aIO.framework; sourceTree = "<group>"; };
-		F0F701971470828A00D81195 /* aStem.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aStem.framework; path = ../../acroname/aDebug/aStem.framework; sourceTree = "<group>"; };
-		F0F701981470828A00D81195 /* aUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aUI.framework; path = ../../acroname/aDebug/aUI.framework; sourceTree = "<group>"; };
-		F0F701991470828A00D81195 /* aUtil.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aUtil.framework; path = ../../acroname/aDebug/aUtil.framework; sourceTree = "<group>"; };
-		F0F7019E147084C600D81195 /* acpStemApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = acpStemApp.cpp; path = ../../acroname/aSource/aCommon/acpStemApp.cpp; sourceTree = "<group>"; };
-		F0F7019F147084C600D81195 /* acpStemApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = acpStemApp.h; path = ../../acroname/aSource/aCommon/acpStemApp.h; sourceTree = "<group>"; };
-		F0F701AF147098EE00D81195 /* acpStemAnalog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = acpStemAnalog.cpp; path = ../../acroname/aSource/aCommon/acpStemAnalog.cpp; sourceTree = "<group>"; };
-		F0F701B0147098EE00D81195 /* acpStemAnalog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = acpStemAnalog.h; path = ../../acroname/aSource/aCommon/acpStemAnalog.h; sourceTree = "<group>"; };
-		F0F701B21470996C00D81195 /* aIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aIO.h; path = ../../acroname/aInclude/aIO.h; sourceTree = "<group>"; };
-		F0F701B31470996C00D81195 /* aStem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aStem.h; path = ../../acroname/aInclude/aStem.h; sourceTree = "<group>"; };
-		F0F701B41470996D00D81195 /* aUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aUI.h; path = ../../acroname/aInclude/aUI.h; sourceTree = "<group>"; };
-		F0F701B51470996D00D81195 /* aUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aUtil.h; path = ../../acroname/aInclude/aUtil.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,36 +61,87 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F0F7019A1470828A00D81195 /* aIO.framework in Frameworks */,
-				F0F7019B1470828A00D81195 /* aStem.framework in Frameworks */,
-				F0F7019C1470828A00D81195 /* aUI.framework in Frameworks */,
-				F0F7019D1470828A00D81195 /* aUtil.framework in Frameworks */,
 				F0F7017C1470824000D81195 /* Cocoa.framework in Frameworks */,
-				F00E6F3014F813DD00AB80A4 /* aMath.framework in Frameworks */,
+				138D383A153E55F200621144 /* aIO.framework in Frameworks */,
+				138D383B153E55F200621144 /* aMath.framework in Frameworks */,
+				138D383C153E55F200621144 /* aStem.framework in Frameworks */,
+				138D383D153E55F200621144 /* aUI.framework in Frameworks */,
+				138D383E153E55F200621144 /* aUtil.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		138D383F153E561000621144 /* acroname */ = {
+			isa = PBXGroup;
+			children = (
+				138D385E153E595600621144 /* aSystem */,
+				138D3847153E562B00621144 /* aSource */,
+				138D3840153E562100621144 /* aInclude */,
+			);
+			name = acroname;
+			sourceTree = "<group>";
+		};
+		138D3840153E562100621144 /* aInclude */ = {
+			isa = PBXGroup;
+			children = (
+				138D3841153E562100621144 /* a40PinStem.h */,
+				138D3842153E562100621144 /* aIO.h */,
+				138D3843153E562100621144 /* aMath.h */,
+				138D3844153E562100621144 /* aStem.h */,
+				138D3845153E562100621144 /* aUI.h */,
+				138D3846153E562100621144 /* aUtil.h */,
+			);
+			name = aInclude;
+			path = ../acroname/aInclude;
+			sourceTree = "<group>";
+		};
+		138D3847153E562B00621144 /* aSource */ = {
+			isa = PBXGroup;
+			children = (
+				138D3848153E562B00621144 /* aCommon */,
+			);
+			name = aSource;
+			path = ../acroname/aSource;
+			sourceTree = "<group>";
+		};
+		138D3848153E562B00621144 /* aCommon */ = {
+			isa = PBXGroup;
+			children = (
+				138D3849153E562B00621144 /* acpStemA2D.cpp */,
+				138D384A153E562B00621144 /* acpStemA2D.h */,
+				138D384B153E562B00621144 /* acpStemApp.cpp */,
+				138D384C153E562B00621144 /* acpStemApp.h */,
+				138D384D153E562B00621144 /* acpStemDIO.cpp */,
+				138D384E153E562B00621144 /* acpStemDIO.h */,
+				138D3858153E58AF00621144 /* acpStemServo.cpp */,
+				138D3859153E58AF00621144 /* acpStemServo.h */,
+				138D384F153E562B00621144 /* acpStemSuperControl.cpp */,
+				138D3850153E562B00621144 /* acpStemSuperControl.h */,
+				138D3851153E562B00621144 /* aStemAppLogo.cpp */,
+				138D3852153E562B00621144 /* aVersion.h */,
+			);
+			path = aCommon;
+			sourceTree = "<group>";
+		};
+		138D385E153E595600621144 /* aSystem */ = {
+			isa = PBXGroup;
+			children = (
+				138D385F153E595600621144 /* aCmd.tea */,
+			);
+			name = aSystem;
+			path = ../acroname/aSystem;
+			sourceTree = "<group>";
+		};
 		F0F7016014707FD100D81195 = {
 			isa = PBXGroup;
 			children = (
 				1335320E153D0A4300EB378C /* acpHeadlessChickenApp.cpp */,
 				1335320F153D0A4300EB378C /* acpHeadlessChickenApp.h */,
-				F0DE9C08148D9390007AF6A3 /* a40PinStem.h */,
-				F0F701AF147098EE00D81195 /* acpStemAnalog.cpp */,
-				F0F701B0147098EE00D81195 /* acpStemAnalog.h */,
-				F0F7019E147084C600D81195 /* acpStemApp.cpp */,
-				F0F7019F147084C600D81195 /* acpStemApp.h */,
-				F03CD1671495759100476B51 /* acpStemDIO.cpp */,
-				F03CD1681495759100476B51 /* acpStemDIO.h */,
-				F03CD14D14955F8800476B51 /* acpStemSuperControl.cpp */,
-				F03CD14B14955E9600476B51 /* acpStemSuperControl.h */,
-				F0F701B21470996C00D81195 /* aIO.h */,
-				F0F701B31470996C00D81195 /* aStem.h */,
-				F0F701B41470996D00D81195 /* aUI.h */,
-				F0F701B51470996D00D81195 /* aUtil.h */,
+				138D3861153E5B5F00621144 /* avc2011.h */,
+				138D3862153E5C4C00621144 /* avc2011Defs.tea */,
+				138D383F153E561000621144 /* acroname */,
 				F0F7017A1470824000D81195 /* Frameworks */,
 				F0F701781470824000D81195 /* Products */,
 			);
@@ -94,12 +157,12 @@
 		F0F7017A1470824000D81195 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F0F701961470828A00D81195 /* aIO.framework */,
-				F0F701971470828A00D81195 /* aStem.framework */,
-				F0F701981470828A00D81195 /* aUI.framework */,
-				F0F701991470828A00D81195 /* aUtil.framework */,
+				138D3835153E55F200621144 /* aIO.framework */,
+				138D3836153E55F200621144 /* aMath.framework */,
+				138D3837153E55F200621144 /* aStem.framework */,
+				138D3838153E55F200621144 /* aUI.framework */,
+				138D3839153E55F200621144 /* aUtil.framework */,
 				F0F7017B1470824000D81195 /* Cocoa.framework */,
-				F00E6F2F14F813DD00AB80A4 /* aMath.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -154,6 +217,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				138D3860153E595600621144 /* aCmd.tea in Resources */,
+				138D3863153E5C4C00621144 /* avc2011Defs.tea in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,11 +229,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F0F701A0147084C600D81195 /* acpStemApp.cpp in Sources */,
-				F0F701B1147098EE00D81195 /* acpStemAnalog.cpp in Sources */,
-				F03CD14E14955F8800476B51 /* acpStemSuperControl.cpp in Sources */,
-				F03CD1691495759100476B51 /* acpStemDIO.cpp in Sources */,
 				13353210153D0A4300EB378C /* acpHeadlessChickenApp.cpp in Sources */,
+				138D3853153E562B00621144 /* acpStemA2D.cpp in Sources */,
+				138D3854153E562B00621144 /* acpStemApp.cpp in Sources */,
+				138D3855153E562B00621144 /* acpStemDIO.cpp in Sources */,
+				138D3856153E562B00621144 /* acpStemSuperControl.cpp in Sources */,
+				138D3857153E562B00621144 /* aStemAppLogo.cpp in Sources */,
+				138D385A153E58AF00621144 /* acpStemServo.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,10 +293,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../acroname/aBinary\"",
+					../acroname/aBinary,
+					"\"$(SRCROOT)/../acroname/aBinary\"",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -237,7 +304,17 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../acroname/aInclude,
+					../acroname/aSource,
+					../acroname/aSource/aCommon,
+					../acroname/aSystem,
+					../planner,
+					../acroname/aUser,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SHARED_PRECOMPS_DIR = ../acroname/aBinary;
+				SYMROOT = ../acroname;
 				WRAPPER_EXTENSION = app;
 			};
 			name = aBinary;
