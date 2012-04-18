@@ -32,9 +32,11 @@
 /////////////////////////////////////////////////////////////////////
 
 #include "acpStemApp.h"
-#include "acpStemAnalog.h"
+#include "acpStemA2D.h"
 #include "acpStemDIO.h"
+#include "acpStemServo.h"
 #include "aMath.h"
+#include "avc2011.h"
 
 class acpHeadlessChicken : public acpStemApp 
 {
@@ -54,40 +56,15 @@ public:
 private:
   
   bool m_bInited;
-//  bool m_bRunPlot;
-//  bool m_bShowProfile;
-//  bool m_bShowTemperature;
-//  bool m_bFinishedProfile;
-//  bool m_bWaitingForTemperatureReading;
-//  float m_fTemperatureDesired;
-//  float m_fTemperatureCurrent;
-//  float m_fLastError;
-//  float m_fCurrentError;
-//  float m_fpid;
-//  aInt32 m_ItermIndex;
-//  unsigned long m_LastErrorTime;
-//  aUInt8 m_module;
-//  
-//  // floating point time and temp points
-//  acpList<acpVec2> m_profilePTs;
-//  
-//  acpString m_profile;
-//  
+
   unsigned long m_nextUpdateSystem;
-//  unsigned long m_nextTemperatureTime;
-//  unsigned long m_nextRelayTime;
-//  unsigned long m_nextPlotUpdate;
-//  unsigned int m_temperatureDesiredIndex;
-//  unsigned int m_temperatureIndex;
-//  acpControlDrawable* m_pGraphView;
+
   acpControlCheckbox* m_pUserLED;
-//  acpControlCheckbox* m_pShowProfile;
-//  acpControlCheckbox* m_pRelayOn;
-//  acpControlCheckbox* m_pShowTemperature;  
-//  acpControlLabel* m_pSystemDiags;
-//  acpControlValue* m_pCurrentTemperature;
-//  acpControlValue* m_pCurrentError;
-//  acpControlValue* m_pTemperatureCalibrate;
+  acpStemA2D* m_analogs[a40PINSTEM_NUM_A2D];
+  acpStemDIO* m_digitals[a40PINSTEM_NUM_DIG];
+  acpStemServo* m_pServo[aGP_NUMSERVOS_USED];
+  
+  acpStemSuperControl* m_pCurrentUpdate;
   
 
 };

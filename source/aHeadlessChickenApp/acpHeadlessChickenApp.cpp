@@ -36,36 +36,13 @@
 #include <math.h>
 #include "acpHeadlessChickenApp.h"
 
-#define aOVEN_PLOT_UPDATE             1000
-
-
 /////////////////////////////////////////////////////////////////////
 
 acpHeadlessChicken::acpHeadlessChicken(acpStem& stem) :
 acpStemApp("chicken", stem),
 m_stem(stem),
 m_bInited(false),
-//m_bRunPlot(false),
-//m_bShowProfile(false),
-//m_bShowTemperature(false),
-//m_bFinishedProfile(false),
-//m_bWaitingForTemperatureReading(false),
 m_nextUpdateSystem(0)
-//m_nextPlotUpdate(0),
-//m_nextTemperatureTime(0),
-//m_nextRelayTime(0),
-//m_temperatureDesiredIndex(0),
-//m_temperatureIndex(0),
-//m_ItermIndex(0),
-//m_fTemperatureDesired(0.0f),
-//m_fTemperatureCurrent(20.0f),
-//m_fpid(0.0f),
-//m_fLastError(0.0f),
-//m_fCurrentError(0.0f),
-//m_LastErrorTime(0.0f),
-//m_pShowProfile(NULL),
-//m_pRunSystem(NULL),
-//m_TLength(0)
 {
 }
 
@@ -82,11 +59,29 @@ void
 acpHeadlessChicken::stemCreateUI(void)
 {
   acpString name;
+  int i = 0;
   acpView* v = getContentView();
   acpRowView* r = new acpRowView(v);
   acpColumnView* c = new acpColumnView(r);
   
+  createLabelControl(c, acpControlLabel::kHeading, "USBStem 1.0 Controls");
+  
   m_pUserLED = createCheckboxControl(c, "User LED");
+  
+  for (i = 0; i < a40PINSTEM_NUM_A2D; i++) {
+    m_analogs[i] = new acpStemA2D(this, c, a40PINSTEM_MODULE, i);
+    m_analogs[i]->setEnable(true);
+    m_analogs[i]->setMinWidth(200);
+    m_analogs[i]->setScaling(3.3f);
+    m_analogs[i]->setUnits("V");
+  }
+  
+  createLabelControl(c, acpControlLabel::kHeading, "GP 2.0 Controls");
+  
+  for (i = 0; i < aGP_NUMSERVOS_USED; i++) {
+    m_pServo[i] = new acpStemServo(this, c, aGP_MODULE, i);
+    m_pServo[i]->setEnable(true);
+  }
   
 } // stemCreateUI
 
@@ -120,7 +115,9 @@ acpHeadlessChicken::handleValue(acpView* pControl)
   // Toggle the show profile plot
   if (pControl == m_pUserLED) {
     
-    m_stem.DIO(a40PINSTEM_MODULE, a40PINSTEM_DIG_USERLED, *m_pUserLED ? true : false);
+    m_stem.DIO(a40PINSTEM_MODULE, 
+               a40PINSTEM_DIG_USERLED, 
+               *m_pUserLED ? true : false);
     
     return true;
   }
