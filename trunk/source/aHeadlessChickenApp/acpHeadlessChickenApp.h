@@ -38,6 +38,9 @@
 #include "aMath.h"
 #include "avc2011.h"
 
+#define aUSBSTEMPANE 0
+#define aSERVOPANE 1
+
 class acpHeadlessChicken : public acpStemApp 
 {
 public:
@@ -50,10 +53,12 @@ public:
   
   // general app event handling
   bool handleValue(acpView* pControl);
+  bool handleSelection(acpView* pControl);
 
   acpStem& m_stem;
 
 private:
+  acpControlTab* m_pTabs;
   
   bool m_bInited;
 

@@ -20,7 +20,7 @@
 #include "logger.h"
 
 #define aGP_MODULE 2
-#define aGP_NUMSERVOS_USED 2
+#define aGP_NUMSERVOS_USED 3
 
 
 // Utilites

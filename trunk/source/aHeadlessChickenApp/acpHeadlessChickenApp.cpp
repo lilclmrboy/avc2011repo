@@ -36,11 +36,14 @@
 #include <math.h>
 #include "acpHeadlessChickenApp.h"
 
+#define aCHICKEN_UPDATEMS 500
+
 /////////////////////////////////////////////////////////////////////
 
-acpHeadlessChicken::acpHeadlessChicken(acpStem& cstem) :
-acpStemApp("chicken", cstem),
-m_stem(cstem),
+acpHeadlessChicken::acpHeadlessChicken(acpStem& stem) :
+acpStemApp("chicken", stem),
+m_pTabs(NULL),
+m_stem(stem),
 m_bInited(false),
 m_bGP2Present(false),
 m_nextUpdateSystem(0),
@@ -63,10 +66,18 @@ acpHeadlessChicken::stemCreateUI(void)
 {
   acpString name;
   int i = 0;
-  acpView* v = getContentView();
-  acpRowView* r = new acpRowView(v);
-  acpColumnView* c = new acpColumnView(r);
+//  acpView* v = getContentView();
+//  acpRowView* r = new acpRowView(v);
+//  acpColumnView* c = new acpColumnView(r);
   
+  m_pTabs = createTabControl(getContentView());
+  
+  // 40 pin module stuff
+  acpControl* p40pinmodule = m_pTabs->addTab();
+  p40pinmodule->setText("General");
+
+  acpColumnView* c = new acpColumnView(p40pinmodule);
+
   createLabelControl(c, acpControlLabel::kHeading, "USBStem 1.0 Controls");
   
   m_pUserLED = createCheckboxControl(c, "User LED");
@@ -84,6 +95,11 @@ acpHeadlessChicken::stemCreateUI(void)
   m_pGPStatus = createLabelControl(c, acpControlLabel::kBody, "---");
   
   // Show servo controls
+  acpControl* pServos = m_pTabs->addTab();
+  pServos->setText("Servos");
+  c = new acpColumnView(pServos);
+  
+  // Show servo controls
   for (i = 0; i < aGP_NUMSERVOS_USED; i++) {
     m_pServo[i] = new acpStemServo(this, c, aGP_MODULE, i);
     m_pServo[i]->setEnable(false);
@@ -94,8 +110,6 @@ acpHeadlessChicken::stemCreateUI(void)
 
 /////////////////////////////////////////////////////////////////////
 
-#define aCHICKEN_UPDATEMS 1000
-
 bool 
 acpHeadlessChicken::stemUIIdle(void)
 {
@@ -105,9 +119,10 @@ acpHeadlessChicken::stemUIIdle(void)
   
   if (!m_bInited) {
     
-    // Check that a GP is present by sending a debug packet
+    // THe GP 2.0 is much slower than our code. Let's let it catch up
     m_stem.sleep(500);
     
+    // Check that a GP is present by sending a debug packet
     aUInt8 data[2] = {33,44};
     if (m_stem.DEBUG(aGP_MODULE, data, 2)) {
       m_bGP2Present = true;
@@ -131,29 +146,32 @@ acpHeadlessChicken::stemUIIdle(void)
     return bBusy;
   }
   
-  if (m_bInited && !bBusy) {
+  if (m_bInited) {
     
-    // see if analog is updated and then advance if so
-    if (m_analogs[m_updateIndex]->updated()) {
-      do {
-        m_updateIndex++;
-        m_updateIndex %= a40PINSTEM_NUM_A2D;
-      } while (!m_analogs[m_updateIndex]->isEnabled());
-      bBusy = true;
+    switch (m_pTabs->currentTab()) {
+      case aUSBSTEMPANE:
+        // see if analog is updated and then advance if so
+        if (m_analogs[m_updateIndex]->updated()) {
+          do {
+            m_updateIndex++;
+            m_updateIndex %= a40PINSTEM_NUM_A2D;
+          } while (!m_analogs[m_updateIndex]->isEnabled());
+          bBusy = true;
+        }
+        
+        // update when we should
+        if (m_nextUpdateSystem < now) {
+          m_analogs[m_updateIndex]->sendUpdate();
+          m_nextUpdateSystem += aCHICKEN_UPDATEMS;
+        }
+        
+        break;
+        
+      default:
+        break;
     }
     
-    // Update the servos 
-    if (m_bGP2Present && !bBusy) {
-      for (int i = 0; i < aGP_NUMSERVOS_USED; i++) {
-        m_pServo[i]->refresh();
-      }
-    }
-    
-    // update when we should
-    if (m_nextUpdateSystem < now) {
-      m_analogs[m_updateIndex]->sendUpdate();
-      m_nextUpdateSystem += aCHICKEN_UPDATEMS;
-    }
+
     
   }
   
@@ -182,6 +200,41 @@ acpHeadlessChicken::handleValue(acpView* pControl)
   return acpStemApp::handleValue(pControl);
   
 } //  handleValue
+
+/////////////////////////////////////////////////////////////////////
+
+
+bool 
+acpHeadlessChicken::handleSelection(acpView* pControl)
+{
+  
+  // Toggle the show profile plot
+  if (pControl == m_pTabs) {
+    
+    switch (m_pTabs->currentTab()) {
+      case aSERVOPANE:
+        if (m_bGP2Present) {
+          for (int i = 0; i < aGP_NUMSERVOS_USED; i++) {
+            m_pServo[i]->refresh();
+          }
+        }
+        break;
+        
+      default:
+        break;
+    }
+    
+    return true;
+  }
+  
+  // otherwise, hand it off to base class
+  return acpStemApp::handleValue(pControl);
+  
+} //  handleValue
+
+
+// Update the servos 
+
 
 
 /////////////////////////////////////////////////////////////////////

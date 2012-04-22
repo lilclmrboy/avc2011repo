@@ -7,29 +7,6 @@
 bool bDebugHeader = true;
 #endif
 
-// Not sure why this doesn't work. But, it doesn't.
-//#define sgn(x) (x > 0.0001) ? 1.0 : ((x < 0.0001) ? -1.0 : 0.0)
-
-///////////////////////////////////////////////////////////////////////////
-// Sigmoid function
-// Added a tolerance around 0 since it seems that passing the result of 
-// atan2 was giving us some trouble. Is this a hack? Am I clueless?
-// Probably. 
-double sgn(double x);
-
-double sgn(double x) 
-{
-  
-  if (x > 0.0001)
-    return 1.0;
-  
-  if (x < 0.0001)
-    return -1.0;
-  
-  return 0.0;
-  
-}
-
 ///////////////////////////////////////////////////////////////////////////
 // Constructor for the function
 avcMotion::avcMotion() :
@@ -111,37 +88,36 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
 ///////////////////////////////////////////////////////////////////////////
 // Given a new goal Force vector, update the each motor setpoint
 
+#define MAX_TURNANGLE 0.698131701f
+
 aErr
 avcMotion::updateControl(const avcForceVector& potential) 
 {
-  double t = 0.0;
-  double r = 0.0;
-  double v[aMOTOR_NUM] = {0.0, 0.0};
   double magnitude = 0.0;
   double delta = 0.0;
   
   // Make sure you other hackers initialized this first
   if (!m_pStem) {
     m_log->log(ERROR,"avcMotion::updateControl failed. acpStem is NULL\n"
-	       " \tCall avcMotion::init(acpStem *)\n");
+	       " \tCall avcMotion::init(acpStem *)");
     return aErrInitialization;
   }
   
   if (!m_bInit) {
     m_log->log(ERROR,"avcMotion::updateControl failed since uninitialized.\n"
-	       " \tCall avcMotion::init(acpStem *)\n");
+	       " \tCall avcMotion::init(acpStem *)");
     return aErrInitialization;
   }
   
   // Boundary check the input force vectors
   if (potential.x > 1.0 || potential.x < -1.0) {
     m_log->log(ERROR,"avcMotion::updateControl failed.\n"
-	       "\tavcForceVector.x is out of range\n");
+	       "\tavcForceVector.x is out of range");
     return aErrRange;
   }
   if (potential.y > 1.0 || potential.y < -1.0) {
     m_log->log(ERROR,"avcMotion::updateControl failed.\n"
-	       "\tavcForceVector.y is out of range\n");
+	       "\tavcForceVector.y is out of range");
     return aErrRange;
   }
   
@@ -149,66 +125,70 @@ avcMotion::updateControl(const avcForceVector& potential)
   magnitude = sqrt(potential.x * potential.x + potential.y * potential.y);
   delta = atan2(potential.y, potential.x);
   
-  // Straight from the research paper. With some minor adjustments
-  t = (cos(delta) * cos(delta)) * sgn(cos(delta));
-  r = (sin(delta) * sin(delta)) * sgn(sin(delta));
+  if (cos(delta) < 0)
+  	magnitude = magnitude * -1.0;
   
-  // Use the magnitude to scale the velocity
-  v[aMOTOR_LEFT] = magnitude * (t - r);
-  v[aMOTOR_RIGHT] = magnitude * (t + r);
+  if (delta < 0) {
+    //printf("delta is negative\n  delta: %f deltad: %f", delta, aPI*2 + delta);
+    delta += aPI*2 + delta;
+  }
+  	  
+	// The magnitude value directly translates to the gas pedal for the 
+	// rear drive motor.
+	unsigned char servoDrive = (unsigned char)(128 + (127 * magnitude));
+	
+	unsigned char servoSteer = 128;
+  unsigned char steerdelta = 0;
   
-  // Calculate the setpoints for the Moto to go chase
-  // Boundary check the setpoints
-  for (int m = 0; m < aMOTOR_NUM; m++) {
+//  for (delta = 0.0f; delta <= 2*aPI; delta += 0.0314159265f) {
     
-    // calc setpoint bounded by setpoint
-    m_setpoint[m] = v[m] * m_setpointMax;
+  if ((delta >= 0.0f) && (delta < MAX_TURNANGLE)) {
+    steerdelta = (unsigned char)(delta/MAX_TURNANGLE * 128);
+    servoSteer = 128 + steerdelta;
+  }
+  else if ((delta >= MAX_TURNANGLE) && (delta < (aPI - MAX_TURNANGLE))) {
+    steerdelta = 0;
+    servoSteer = 255;
+  }
+  else if ((delta >= (aPI - MAX_TURNANGLE)) && (delta < aPI)) {
+    steerdelta = 128 - (unsigned char)((aPI - delta)/(MAX_TURNANGLE) * 128);
+    servoSteer = 255 - steerdelta;
+  }
+  else if ((delta >= aPI) && (delta < (aPI + MAX_TURNANGLE))) {
+    steerdelta = (unsigned char)((delta - aPI)/(MAX_TURNANGLE) * 128);
+    servoSteer = 128 - steerdelta;
+  }
+  else if ((delta >= (aPI + MAX_TURNANGLE)) && (delta < (aPI*2 - MAX_TURNANGLE))) {
+    steerdelta = 0;
+    servoSteer = 0;
+  }	
+  else if ((delta >= (aPI*2 - MAX_TURNANGLE)) && (delta < aPI*2)) {
+    steerdelta = (unsigned char)((2*aPI - delta)/(MAX_TURNANGLE) * 128);
+    servoSteer = 128 - steerdelta;
+  }
     
-    // Let's only send updates if the new velocity is different then the last
-    // one we sent. No point in doing EXTRA work, right?
-    if (m_setpoint[m] != m_setpointLast[m]) {
-      
-      // Write the values to the scratchpad
-      if (m_pStem->isConnected(STEMCONNECTED_WAIT)) 
-	m_pStem->PAD_IO(aMOTO_MODULE, 
-		      (m == aMOTOR_LEFT) ? aSPAD_MO_MOTION_SETPOINT_LEFT : aSPAD_MO_MOTION_SETPOINT_RIGHT, 
-		      m_setpoint[m]);
-      
-      
-      m_log->log(DEBUG,"avcMotion::updateControl channel: %d setpoint: %d",
-		 m,
-		 m_setpoint[m]);
-      
-    }
+//  printf("delta: %f \tsteerdelta: %d \tservoSteer: %d\n", delta, steerdelta, servoSteer);
     
-    // Store the last setpoint reading for next time with hopes of 
-    // reducing the number of times we send commands to the lower 
-    // control system.
-    m_setpointLast[m] = m_setpoint[m];
-    
-    
-  } // end of for loop
-  
+//  } // end for loop
+	
+	// Send the values to the stem
+	m_pStem->SRV_ABS(2, 0, servoDrive);
+	m_pStem->SRV_ABS(2, 1, servoSteer);
+	m_pStem->SRV_ABS(2, 2, servoSteer);
+	
 #ifdef aDEBUG_MOTMODULE	
   // Show us what we got
   if (bDebugHeader) {
-    m_log->log(DEBUG,"Ux\tUy\t"
-	       "t\tr\tmag\t"
-	       "delta\t"
-	       "vL\tvR\tsetL\tsetR\n");
+    m_log->log(DEBUG,"MotionModule: "
+    	"Ux\tUy\tmag\tdelta\tsrvD\tsrvS");
     bDebugHeader = false;
   }
   
-  m_log->log(DEBUG,"MotionModule: %2.2f\t%2.2f\t"
-	     "%2.2f\t%2.2f\t%2.2f\t"
-	     "%2.2f\t"
-	     "%2.2f\t%2.2f\t"
-	     "%d\t%d\n",
+  m_log->log(DEBUG,"MotionModule: "
+  		"%2.2f\t%2.2f\t%2.2f\t%2.2f\t%d\t%d",
 	     potential.x, potential.y, 
-	     t, r, magnitude,
-	     delta,
-	     v[aMOTOR_LEFT], v[aMOTOR_RIGHT],
-	     m_setpoint[aMOTOR_LEFT], m_setpoint[aMOTOR_RIGHT]);
+	     magnitude, delta,
+	     servoDrive, servoSteer);
   
 #endif	
   
@@ -377,14 +357,14 @@ aErr driveDebug(acpStem *pStem,
     // Grab the vectors that are passed in
     pMotion->updateControl(pVectors[i]);
     
-    pStem->sleep(2000);
+    pStem->sleep(500);
   }
   
-  // Stop the motors
-  pMotion->updateControl(Ufinal);
-  
-  // Let the motors settle before getting out of here
-  pStem->sleep(2000);
+//  // Stop the motors
+//  pMotion->updateControl(Ufinal);
+//  
+//  // Let the motors settle before getting out of here
+//  pStem->sleep(2000);
   
   return aErrNone;
 }
@@ -401,7 +381,7 @@ int driveTests(acpStem *pStem, aSettingFileRef settings)
   avcMotion motion;
   avcForceVector Uresult[10];
   aErr e = aErrNone;
-  float range = 0.4f;
+  float range = 0.1f;
   
   printf("---------------------------------------------------------\n");
   printf("Performing actual motion tests on motModule\n");
@@ -411,39 +391,52 @@ int driveTests(acpStem *pStem, aSettingFileRef settings)
   // initialize the motion class
   e = motion.init(pStem, settings);
   
-  // Now do a test or 2, or 3
-  Uresult[0].x = range;
-  Uresult[0].y = 0;
+  // Do a steering sweep
+  for (float rad = 0; rad < aPI*2; rad += 0.314159265f ) {
+    
+    printf("rad: %f\n", rad);
+    
+    Uresult[0].x = range * cos(rad);
+    Uresult[0].y = range * sin(rad);
+    
+    e = driveDebug(pStem, &motion, Uresult, 1);
+    
+  }
   
-  // Drive backward test
-  Uresult[1].x = -1*range;
-  Uresult[1].y = 0;
+  avcForceVector Ufinal;
+  motion.updateControl(Ufinal);
   
-  // Rotate at slight angle test 1
-  Uresult[2].x = range;
-  Uresult[2].y = range;
+
   
-  // Rotate at slight angle test 2
-  Uresult[3].x = -1*range;
-  Uresult[3].y = -1*range;
+//  // Drive stop
+//  Uresult[1].x = 0;
+//  Uresult[1].y = 0;
+//  
+//  // Rotate at slight angle test 1
+//  Uresult[2].x = range;
+//  Uresult[2].y = range;
+//  
+//  // Rotate at slight angle test 2
+//  Uresult[3].x = 0;
+//  Uresult[3].y = 0;
+//  
+//  // Rotate at slight angle test 3
+//  Uresult[4].x = range;
+//  Uresult[4].y = -1*range;
+//  
+//  // Rotate at slight angle test 4
+//  Uresult[5].x = 0;
+//  Uresult[5].y = 0;
+//  
+//  // Rotate in place
+//  Uresult[6].x = -1*range;
+//  Uresult[6].y = 0;
+//  
+//  // Rotate in place
+//  Uresult[7].x = 0;
+//  Uresult[7].y = 0;
   
-  // Rotate at slight angle test 3
-  Uresult[4].x = -1*range;
-  Uresult[4].y = range;
   
-  // Rotate at slight angle test 4
-  Uresult[5].x = range;
-  Uresult[5].y = -1*range;
-  
-  // Rotate in place
-  Uresult[6].x = 0;
-  Uresult[6].y = -1*range;
-  
-  // Rotate in place
-  Uresult[7].x = 0;
-  Uresult[7].y = range;
-  
-  e = driveDebug(pStem, &motion, Uresult, 8);
   
   return e;
   
@@ -466,23 +459,16 @@ main(int argc,
   
   // Read from a settings file if it exists.
   if (aSettingFile_Create(ioRef, 
-			  128,
-			  "console.config",
+			  "chicken.config",
 			  &settings,
 			  &e))
     throw acpException(e, "creating settings");
   
   // or, maybe command line arguements
   aArguments_Separate(ioRef, settings, NULL, argc, argv);
-  
-  printf("kitty\n");
-  
+    
   avcMotion motion; 
-  
-  motion.init(NULL, settings);
-  
-  return 0;
-  
+
   printf("connecting to stem\n");
   
   // This starts up the stem link processing and is called once to spawn
@@ -507,14 +493,16 @@ main(int argc,
   // Bail if no stem. What's the point little man?
   if (timeout == 10) { return 1; }
   
+	motion.init(&stem, settings);  
+  
   //////////////////////////////////
   // Begin the real actual testing
   // We are connected to the stem now, we can beat on the motion control 
   // module. Ya!!!
-  doTests(&stem, settings);
+  //doTests(&stem, settings);
   
   // Drive forward for a bit
-  //driveTests(&stem, settings);
+  driveTests(&stem, settings);
   
   aIO_MSSleep(ioRef, 1000, NULL);
   
