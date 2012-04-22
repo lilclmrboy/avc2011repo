@@ -95,6 +95,7 @@ avcMotion::updateControl(const avcForceVector& potential)
 {
   double magnitude = 0.0;
   double delta = 0.0;
+  aErr e = aErrNone;
   
   // Make sure you other hackers initialized this first
   if (!m_pStem) {
@@ -139,60 +140,74 @@ avcMotion::updateControl(const avcForceVector& potential)
 	
 	unsigned char servoSteer = 128;
   unsigned char steerdelta = 0;
-  
-//  for (delta = 0.0f; delta <= 2*aPI; delta += 0.0314159265f) {
+
+// Macro used for debugging  motion module
+// Does a full sweep of a full circle to check the values
+#ifdef aDEBUG_MOTMODULE_SWEEP  
+  for (delta = 0.0f; delta <= 2*aPI; delta += 0.0314159265f) {
+#endif
     
-  if ((delta >= 0.0f) && (delta < MAX_TURNANGLE)) {
-    steerdelta = (unsigned char)(delta/MAX_TURNANGLE * 128);
-    servoSteer = 128 + steerdelta;
-  }
-  else if ((delta >= MAX_TURNANGLE) && (delta < (aPI - MAX_TURNANGLE))) {
-    steerdelta = 0;
-    servoSteer = 255;
-  }
-  else if ((delta >= (aPI - MAX_TURNANGLE)) && (delta < aPI)) {
-    steerdelta = 128 - (unsigned char)((aPI - delta)/(MAX_TURNANGLE) * 128);
-    servoSteer = 255 - steerdelta;
-  }
-  else if ((delta >= aPI) && (delta < (aPI + MAX_TURNANGLE))) {
-    steerdelta = (unsigned char)((delta - aPI)/(MAX_TURNANGLE) * 128);
-    servoSteer = 128 - steerdelta;
-  }
-  else if ((delta >= (aPI + MAX_TURNANGLE)) && (delta < (aPI*2 - MAX_TURNANGLE))) {
-    steerdelta = 0;
-    servoSteer = 0;
-  }	
-  else if ((delta >= (aPI*2 - MAX_TURNANGLE)) && (delta < aPI*2)) {
-    steerdelta = (unsigned char)((2*aPI - delta)/(MAX_TURNANGLE) * 128);
-    servoSteer = 128 - steerdelta;
-  }
+    if ((delta >= 0.0f) && (delta < MAX_TURNANGLE)) {
+      steerdelta = (unsigned char)(delta/MAX_TURNANGLE * 128);
+      servoSteer = 128 + steerdelta;
+    }
+    else if ((delta >= MAX_TURNANGLE) && (delta < (aPI - MAX_TURNANGLE))) {
+      steerdelta = 0;
+      servoSteer = 255;
+    }
+    else if ((delta >= (aPI - MAX_TURNANGLE)) && (delta < aPI)) {
+      steerdelta = (unsigned char)((aPI - delta)/(MAX_TURNANGLE) * 128);
+      servoSteer = 128 + steerdelta;
+    }
+    else if ((delta >= aPI) && (delta < (aPI + MAX_TURNANGLE))) {
+      steerdelta = (unsigned char)((delta - aPI)/(MAX_TURNANGLE) * 128);
+      servoSteer = 128 - steerdelta;
+    }
+    else if ((delta >= (aPI + MAX_TURNANGLE)) && (delta < (aPI*2 - MAX_TURNANGLE))) {
+      steerdelta = 0;
+      servoSteer = 0;
+    }	
+    else if ((delta >= (aPI*2 - MAX_TURNANGLE)) && (delta < aPI*2)) {
+      steerdelta = (unsigned char)((2*aPI - delta)/(MAX_TURNANGLE) * 128);
+      servoSteer = 128 - steerdelta;
+    }
+      
+  #ifdef aDEBUG_MOTMODULE	
+    // Show us what we got
+    if (bDebugHeader) {
+      m_log->log(DEBUG,"MotionModule: "
+                 "Ux\tUy\tmag\tdelta\tsrvD\tsrvS\tsDel\trad");
+      bDebugHeader = false;
+    }
     
-//  printf("delta: %f \tsteerdelta: %d \tservoSteer: %d\n", delta, steerdelta, servoSteer);
-    
-//  } // end for loop
-	
-	// Send the values to the stem
-	m_pStem->SRV_ABS(2, 0, servoDrive);
-	m_pStem->SRV_ABS(2, 1, servoSteer);
-	m_pStem->SRV_ABS(2, 2, servoSteer);
-	
-#ifdef aDEBUG_MOTMODULE	
-  // Show us what we got
-  if (bDebugHeader) {
     m_log->log(DEBUG,"MotionModule: "
-    	"Ux\tUy\tmag\tdelta\tsrvD\tsrvS");
-    bDebugHeader = false;
-  }
-  
-  m_log->log(DEBUG,"MotionModule: "
-  		"%2.2f\t%2.2f\t%2.2f\t%2.2f\t%d\t%d",
-	     potential.x, potential.y, 
-	     magnitude, delta,
-	     servoDrive, servoSteer);
-  
-#endif	
-  
-  return aErrNone;
+               "%2.2f\t%2.2f\t%2.2f\t%2.2f\t%d\t%d\t%d\t%f",
+               potential.x, potential.y, 
+               magnitude, delta,
+               servoDrive, servoSteer, steerdelta, delta);
+    
+  #endif	    
+      
+    // Send the values to the stem
+    m_pStem->SRV_ABS(aGP2_MODULE, 0, servoDrive);
+    m_pStem->SRV_ABS(aGP2_MODULE, 1, servoSteer);
+    
+    // Make sure the values made it
+    if (m_pStem->SRV_ABS(aGP2_MODULE, 0) != servoDrive)
+      e = aErrNotReady;
+    
+    if (m_pStem->SRV_ABS(aGP2_MODULE, 1) != servoSteer)
+      e = aErrNotReady;      
+    
+#if aDEBUG_MOTMODULE_SWEEP    
+    
+    // Delay so we can see things happen
+    m_pStem->sleep(50);
+    
+  } // end for loop
+#endif
+
+  return e;
   
 }
 
@@ -399,7 +414,7 @@ int driveTests(acpStem *pStem, aSettingFileRef settings)
     Uresult[0].x = range * cos(rad);
     Uresult[0].y = range * sin(rad);
     
-    e = driveDebug(pStem, &motion, Uresult, 1);
+    //e = driveDebug(pStem, &motion, Uresult, 1);
     
   }
   
