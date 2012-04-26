@@ -1,0 +1,136 @@
+/* ************************************************************************** */
+/* Filename: avc2011.tea */
+
+/* ************************************************************************** */
+/* MACROS and Defines. Used in TEA and C++ sources */
+
+#define aSLICE 500
+#define STEMCONNECTED_WAIT 50
+
+//////////////////////////////////////////////
+// IR Sensors
+
+//#define aDEBUG_IRPOLLING
+
+#define IR_TIMESLICE 20
+
+#define IR_MIN_THRESHOLD 50
+#define IR_MAX_THRESHOLD 511
+
+#define IR_CENTER_MIN_THRES -600
+
+#define IR_UPPER_BOUND 0x8000
+
+// At a 30 degree angle from the straight ahead direction 
+#define IR_LEFT_ID 0
+#define IR_LEFT_ANGLE_COSINE 70 // was 86
+#define IR_LEFT_ANGLE_SINE 70 // was 50
+
+// At a -30 (aka 270) degree angle from the straight ahead direction 
+#define IR_RIGHT_ID 1
+#define IR_RIGHT_ANGLE_COSINE 70
+#define IR_RIGHT_ANGLE_SINE -70
+
+#define IR_CENTER_ID 2
+#define IR_CENTER_ANGLE_COSINE 100
+#define IR_CENTER_ANGLE_SINE 0
+
+#define IR_NUMBER_RANGERS 3
+
+//////////////////////////////////////////////
+//RC Control variables
+// Tick rate value for neutral.
+#define aRC_NEUTRAL 948
+#define aRC_ENABLE_THRESHOLD 800
+
+// Divisor for scaling pwm range to setpoing range.
+#define aSETPOINT_DIVISOR 560 // max setpoint aprox 45
+#define aDEADBAND 6 //deadband for controller, +- from neutral
+
+#define aGP2_MODULE 2
+#define aMOTO_MODULE 4
+#define GPS_MODULE (char) 0xD0
+#define CMPS_MODULE (char) 0xC0
+
+// Somewhere, we probably do this.
+#define LINK_BAUDRATE 38400
+
+//IIC bus speed index, and value for gps.  
+#define IIC_SPD_VAL_INDEX 3
+#define IIC_400Khz  1
+
+#define aMOTOR_NUM 2
+#define aMOTOR_LEFT 0
+#define aMOTOR_RIGHT 1
+
+// This is the millisecond time for accelerating to new velocity
+#define aACCELRATION_TIME 70
+
+#define aMOTOR_SETPOINT_MAX 40
+
+#define aDEBUG
+
+// Scratchpad Locations are located on the GP 2.0
+// Data Bytes stored in scratchpad
+#define aSPAD_GP2_GPMONITOR_SHUTDOWN 0
+#define aSPAD_GP2_GPS_ISACTIVE 4
+
+// Data Ints stored in scratchpad. These are 2 bytes long.
+#define aSPAD_GP2_REPULSIVE_UX 10
+#define aSPAD_GP2_REPULSIVE_UY 12
+
+#define aSPAD_GP2_SONAR_REPULSIVE_UX 14
+#define aSPAD_GP2_SONAR_REPULSIVE_UY 16
+
+// GPS and Compass Scratchpad slots.
+// 4 bytes minute from start of day UTC, and seconds in minute.
+#define aSPAD_GP2_GPS_MIN 18
+#define aSPAD_GP2_GPS_SEC 20
+// Lat and lon are 6 bytes.
+#define aSPAD_GP2_GPS_LAT 22
+#define aSPAD_GP2_GPS_LON 28
+//speed and heading are 4 bytes
+#define aSPAD_GP2_GPS_SPD 34
+#define aSPAD_GP2_GPS_HD 38
+
+// Two byte compass data
+#define aSPAD_GP2_CMPS_HD 42
+#define aSPAD_GP2_ACC_X 44
+#define aSPAD_GP2_ACC_Y 46
+#define aSPAD_GP2_ACC_Z 48
+
+/* ************************************************************************** */
+// Scratchpad Locations are located on the Moto 1.0
+
+// Double byte values (aka, int)
+#define aSPAD_MO_MOTION_SETPOINT_RIGHT 0
+#define aSPAD_MO_MOTION_SETPOINT_LEFT 2
+#define aSPAD_MO_MOTION_RAMPACC_TIME 4
+
+#define aSPAD_MO_MOTION_RCSET_LEFT 6
+#define aSPAD_MO_MOTION_RCSET_RIGHT 8
+#define aSPAD_MO_MOTION_RCENABLE 10
+
+/* ************************************************************************** */
+/* Information Specific to the GP module */
+/* Processes on the GP Module */
+#define aIR_POLLING_GP2_PROCESS 1
+#define aLOC_POLLING_GP2_PROCESS 3
+
+/* Slots on the GP Module */
+#define aIR_POLLING_GP2_SLOT 0
+#define aLOC_POLLING_GP2_SLOT 2
+
+#define aGP2_DIG_IO_RC_LEFT 3
+#define aGP2_DIG_IO_RC_RIGHT 2
+#define aGP2_DIG_IO_RC_ENABLE 1
+
+/* ************************************************************************** */
+/* Information Specific to the Moto module */
+/* Processes on the Moto Module */
+#define aMOTION_UPDATING_MO_PROCESS 0
+#define aSONAR_POLLING_MOTO_PROCESS 1
+
+/* Slots on the Moto Module */
+#define aMOTION_UPDATING_MO_SLOT 0
+#define aSONAR_POLLING_MOTO_SLOT 1
