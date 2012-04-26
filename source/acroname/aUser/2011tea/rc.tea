@@ -1,0 +1,60 @@
+#include avc2011Defs.tea
+
+int read_LeftRC() { 
+  int val=0; 
+    asm { 
+      /* configure digital IO pin as */ 
+      /* pulse width timer for high pulse input */ 
+      pushlb 25 
+      popbm aPortDigital+ aGP2_DIG_IO_RC_LEFT*aPortDigitalBlockSize+ aOffsetDigitalConfig 
+      /* take pulse measurement */ 
+      pushms aPortDigital+ aGP2_DIG_IO_RC_LEFT*aPortDigitalBlockSize+ aOffsetDigitalPTime 
+      popss 2 
+     } 
+   return val; 
+} 
+
+/* ************************************************************************** */
+int read_RightRC() { 
+  int val=0; 
+    asm { 
+      /* configure digital IO pin as */ 
+      /* pulse width timer for high pulse input */ 
+      pushlb 25 
+      popbm aPortDigital+ aGP2_DIG_IO_RC_RIGHT*aPortDigitalBlockSize+ aOffsetDigitalConfig 
+      /* take pulse measurement */ 
+      pushms aPortDigital+ aGP2_DIG_IO_RC_RIGHT*aPortDigitalBlockSize+ aOffsetDigitalPTime 
+      popss 2 
+     } 
+   return val; 
+}
+
+/* ************************************************************************** */
+int read_RCEnable() { 
+  int val=0; 
+    asm { 
+      /* configure digital IO pin as */ 
+      /* pulse width timer for high pulse input */ 
+      pushlb 25 
+      popbm aPortDigital+ aGP2_DIG_IO_RC_ENABLE*aPortDigitalBlockSize+ aOffsetDigitalConfig 
+      /* take pulse measurement */ 
+      pushms aPortDigital+ aGP2_DIG_IO_RC_ENABLE*aPortDigitalBlockSize+ aOffsetDigitalPTime 
+      popss 2 
+     } 
+   return val; 
+}
+
+/* ************************************************************************** */
+int rcWindow(int value) {
+	int result = 0;
+	
+	// Neutral servo count should be off set to 0.
+	result = (value - aRC_NEUTRAL) * 100 / aSETPOINT_DIVISOR;
+	
+	// Put a bird, errr, a cap on it.
+	if (result < aDEADBAND && result > -aDEADBAND)
+		result = 0;
+	
+	return result;
+
+}

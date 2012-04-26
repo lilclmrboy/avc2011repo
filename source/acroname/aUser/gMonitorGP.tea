@@ -1,124 +1,28 @@
 /* ************************************************************************** */
 /* GP 2.0 monitoring file */
 
-#include "avc2011.tea"
+#include "avc2012Defs.tea"
+#include <aCore.tea>
+#include <aPrint.tea>
+#include <aMulti.tea>
+#include <aPad.tea>
+#include <aBus.tea>
+#include <aDig.tea>
 #include "rc.tea"
-
-
-/* ************************************************************************** */
-/* 1.) Configure scatchpad values
- */
-void init() {
-	
-	/* Configure scratchpad values */
-	aPad_WriteChar(aSPAD_GP2_GPMONITOR_SHUTDOWN,0);
-	
-	/* Zero out other placehoder readings */
-	aPad_WriteInt(aSPAD_GP2_REPULSIVE_UX,0);
-	aPad_WriteInt(aSPAD_GP2_REPULSIVE_UY,0);
-	aPad_WriteInt(aSPAD_GP2_SONAR_REPULSIVE_UX,0);
-	aPad_WriteInt(aSPAD_GP2_SONAR_REPULSIVE_UY,0);
-	aPad_WriteInt(aSPAD_GP2_GPS_MIN, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_SEC, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_LAT, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_LAT+2, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_LAT+4, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_LON, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_LON+2, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_LON+4, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_SPD, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_SPD+2, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_HD, 0);
-	aPad_WriteInt(aSPAD_GP2_GPS_HD+2, 0);
-	aPad_WriteInt(aSPAD_GP2_CMPS_HD, 0);
-	aPad_WriteInt(aSPAD_GP2_ACC_X, 0);
-	aPad_WriteInt(aSPAD_GP2_ACC_Y, 0);
-	aPad_WriteInt(aSPAD_GP2_ACC_Z, 0);
-	
-	/* Set other non zero defaults */
-	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RAMPACC_TIME, aACCELRATION_TIME);	
-	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 0);
-	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_RIGHT, 0);
-	aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_LEFT, 0);
-	
-}
-
-/* ************************************************************************** */
-void shutdown() {
-	
-	aPrint_String("gMonitorGP shutdown");
-	
-	/* Clean up billy! */
-	aPrint_String("irSensors shutdown");
-	aPrint_Char('\n');
-	aCore_Sleep(1000);
-	
-	aMulti_Kill(aIR_POLLING_GP2_PROCESS);
-	
-	/* Clean up billy! */
-	aPrint_String("locSensors shutdown");
-	aPrint_Char('\n');
-	aCore_Sleep(1000);
-	
-	aMulti_Kill(aLOC_POLLING_GP2_PROCESS);	
-	
-	/* Clean up billy! */
-	aPrint_String("motionUpdate shutdown");
-	aPrint_Char('\n');
-	aCore_Sleep(1000);
-	
-	aBus_Multi_Kill(aMOTO_MODULE, aMOTION_UPDATING_MO_PROCESS);
-	
-	/* Clean up billy! */
-	aPrint_String("sonarSensors shutdown");
-	aPrint_Char('\n');
-	aCore_Sleep(1000);
-	
-	aBus_Multi_Kill(aMOTO_MODULE, aSONAR_POLLING_MOTO_PROCESS);
-	
-	/* stall for a second to let all the op codes return */
-	aCore_Sleep(1000);
-	
-}
 
 /* ************************************************************************** */
 void main()
 {
 	
-	/* Values to measure the digital pulse timing */
-	int RCRight = 0;
-	int RCLeft = 0;
-	int RCRightLast = 0;
-	int RCLeftLast = 0;
-	
 	char bDebugInfo = 1;
-	char bRCModeEnabled = 0;
-	char bLinkDownReflex = 0;
-	
-	char bManualOverride = 0;
-	
-	/* Initailize the system */
-	init();
-	
+	int throt = 0;
 	aPrint_String("gMonitorGP launched");
 	aPrint_Char('\n');
 	aCore_Sleep(2000);
 	aPrint_Char('\n');
 	
-	/* Spawn the IR polling thread */
-	aMulti_Spawn(aIR_POLLING_GP2_SLOT, aIR_POLLING_GP2_PROCESS);
-	
-	/* Spawn the location polling thread */
-	//aMulti_Spawn(aLOC_POLLING_GP2_SLOT, aLOC_POLLING_GP2_PROCESS);
-	
-	/* Spawn the motion updating thread */
-	aBus_Multi_Spawn(aMOTO_MODULE, aMOTION_UPDATING_MO_SLOT, aMOTION_UPDATING_MO_PROCESS);
-	
-	/* Spawn the sonar updating thread */
-	//aBus_Multi_Spawn(aMOTO_MODULE, aSONAR_POLLING_MOTO_SLOT, aSONAR_POLLING_MOTO_PROCESS);
-	
 	// Do monitor relevant things. Bookkeeping, coordinating, etc. 
-	while (!aPad_ReadChar(aSPAD_GP2_GPMONITOR_SHUTDOWN)) {
+	while (1) {
 		
 		// Debugging for servo pulse measurement to use RC remote control over
 		// riding for motion testing.	
@@ -129,74 +33,12 @@ void main()
 			bDebugInfo = 0;
 		}
 		
-		// We will assume autonomous control
-		bRCModeEnabled = 0;
-		bLinkDownReflex = 0;
+		throt = read_throtRC();
+		aPrint_IntDec(throt);
+		aPrint_Char('\n');
 		
-		// See if the transmitter is turned on
-		if (read_RCEnable() > aRC_ENABLE_THRESHOLD) {
-//			aPrint_Char('A');
-//			aPrint_Char('\n');
-//			aCore_Sleep(1000);
-			bRCModeEnabled = 1;
-		}
-		
-		// See if the pad has been set from a reflex or anything else
-		if(!bRCModeEnabled && aBus_ReadPadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE)) {
-//			aPrint_Char('B');
-//			aPrint_Char('\n');
-//			aCore_Sleep(1000);    
-			bLinkDownReflex = 1;
-		}
-		
-		// RC remote manual over ride
-		if (bRCModeEnabled) {
-			
-//			aPrint_Char('C');
-//			aPrint_Char('\n');
-//			aCore_Sleep(1000);  
-			
-			// Read the pulse timer for the digital input pins
-			RCLeft = read_LeftRC();
-			RCLeft = rcWindow(RCLeft);
-			RCRight = read_RightRC();
-			RCRight = rcWindow(RCRight);
-			
-			aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 1);
-			
-		} 
-		else {
-			
-//			aPrint_Char('D');
-//			aPrint_Char('\n');
-//			aCore_Sleep(1000);  
-			
-			RCLeft = 0;
-			RCRight = 0;
-			
-			aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE, 0);
-			
-		}
-		
-		// Update the scratchpad on the moto
-		// This should reduce the number of scratchpad writes to the Moto
-		if (RCRight != RCRightLast) {
-			aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_RIGHT, RCRight);
-			RCRightLast = RCRight;
-		}
-		
-		// This should reduce the number of scratchpad writes to the Moto
-		if (RCLeft != RCLeftLast) {
-			aBus_WritePadInt(aMOTO_MODULE, aSPAD_MO_MOTION_RCSET_LEFT, RCLeft);
-			RCLeftLast = RCLeft;
-		}
-		
-		/* stall for a timeslice */
-		aCore_Sleep(aSLICE);
+		//aCore_Sleep(aSLICE);
 		
 	} // end pseudo infinite while loop
-	
-	// clean up and shutdown
-	shutdown();
 	
 } // end of main
