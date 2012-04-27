@@ -1,0 +1,77 @@
+/* ************************************************************************** */
+/* GP 2.0 monitoring file */
+
+#include "avc2012Defs.tea"
+#include <aCore.tea>
+#include <aPrint.tea>
+#include <aServo.tea>
+#include <aPad.tea>
+#include "rc.tea"
+
+
+/* ************************************************************************** */
+/* 1.) Configure scatchpad values
+ */
+void init() {
+	
+	/* Configure servo values */
+	
+	aServo_SetConfig(0, 15);
+	aServo_SetConfig(1, 15);
+	
+}
+
+/* ************************************************************************** */
+void main()
+{
+	
+	char bDebugInfo = 1;
+	int throt = SERVO_NEUT;
+	int steer = SERVO_NEUT;
+	int enable = 0;
+	
+	aPrint_String("Motion output launched");
+	aPrint_Char('\n');
+	aCore_Sleep(2000);
+	aPrint_Char('\n');
+
+	init();
+	
+	// Do motion relevant things. 
+	while (1) {
+		
+		// Debugging for servo pulse measurement to use RC remote control over
+		// riding for motion testing.	
+		if (bDebugInfo) {
+			aPrint_String("motion loop launched.");
+			aPrint_Char('\n');
+			aCore_Sleep(1000);
+			bDebugInfo = 0;
+		}
+
+		enable = RCEnabled();
+		if(aPad_ReadChar(RCPAD_ENABLE)) {
+			aPrint_Char('\n');
+			aCore_Sleep(1000);
+			throt = aPad_ReadInt(RCPAD_THROT);
+			steer = aPad_ReadInt(RCPAD_STEER);
+			
+	  } else {
+		  throt = aPad_ReadInt(AUTPAD_THROT);
+			steer = aPad_ReadInt(AUTPAD_STEER);
+		}
+		
+		aPrint_String("T: ");
+		aPrint_IntDec(throt);
+		aPrint_Char('\n');
+
+			
+		aPrint_String("S: ");
+		aPrint_IntDec(steer);
+		aPrint_Char('\n');
+		
+		aCore_Sleep(aSLICE);
+		
+	} // end while loop
+	
+} // end of main

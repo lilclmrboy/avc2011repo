@@ -15,46 +15,58 @@ int read_throtRC() {
 } 
 
 /* ************************************************************************** */
-//int read_RightRC() { 
-//  int val=0; 
-//    asm { 
-      /* configure digital IO pin as */ 
-      /* pulse width timer for high pulse input */ 
-//      pushlb 25 
-//      popbm aPortDigital+ aGP2_DIG_IO_RC_RIGHT*aPortDigitalBlockSize+ aOffsetDigitalConfig 
-      /* take pulse measurement */ 
-//      pushms aPortDigital+ aGP2_DIG_IO_RC_RIGHT*aPortDigitalBlockSize+ aOffsetDigitalPTime 
-//      popss 2 
-//     } 
-//   return val; 
-//}
+int read_steerRC() { 
+  int val=0; 
+  asm { 
+    /* configure digital IO pin as */ 
+    /* pulse width timer for high pulse input */ 
+    pushlb 25 
+    popbm aPortDigital+ DIG_STEER*aPortDigitalBlockSize+ aOffsetDigitalConfig 
+    /* take pulse measurement */ 
+    pushms aPortDigital+ DIG_STEER*aPortDigitalBlockSize+ aOffsetDigitalPTime 
+    popss 2 
+  } 
+  return val; 
+}
 
 /* ************************************************************************** */
-//int read_RCEnable() { 
-//  int val=0; 
-//    asm { 
-      /* configure digital IO pin as */ 
-      /* pulse width timer for high pulse input */ 
-//      pushlb 25 
-//      popbm aPortDigital+ aGP2_DIG_IO_RC_ENABLE*aPortDigitalBlockSize+ aOffsetDigitalConfig 
-      /* take pulse measurement */ 
-//      pushms aPortDigital+ aGP2_DIG_IO_RC_ENABLE*aPortDigitalBlockSize+ aOffsetDigitalPTime 
-//      popss 2 
-//     } 
-//   return val; 
-//}
+int read_RCEnable() { 
+  int val=0; 
+  asm { 
+    /* configure digital IO pin as */ 
+    /* pulse width timer for high pulse input */ 
+    pushlb 25 
+    popbm aPortDigital+ DIG_RCENABLE*aPortDigitalBlockSize+ aOffsetDigitalConfig 
+    /* take pulse measurement */ 
+    pushms aPortDigital+ DIG_RCENABLE*aPortDigitalBlockSize+ aOffsetDigitalPTime 
+    popss 2 
+  } 
+  return val; 
+}
 
 /* ************************************************************************** */
-//int rcWindow(int value) {
-//	int result = 0;
+char RCEnabled() { 
+  int val=0; 
+  val = read_RCEnable();
+	if(val > 944)
+		return 1;
+	return 0; 
+}
+
+/* ************************************************************************** */
+int rcWindow(int value) {
+	int result = 0;
 	
 	// Neutral servo count should be off set to 0.
-//	result = (value - aRC_NEUTRAL) * 100 / aSETPOINT_DIVISOR;
+	result = (value - MIN_DUTY) / SERVO_DIV;
 	
 	// Put a bird, errr, a cap on it.
-//	if (result < aDEADBAND && result > -aDEADBAND)
-//		result = 0;
+	if (result < SERVO_MIN)
+		result = SERVO_MIN;
 	
-//	return result;
+	if (result > SERVO_MAX)
+		result = SERVO_MAX;
+	
+	return result;
 
-//}
+}
