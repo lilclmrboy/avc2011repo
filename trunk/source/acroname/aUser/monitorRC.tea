@@ -11,15 +11,42 @@
 #include "rc.tea"
 
 /* ************************************************************************** */
+/* 1.) Configure scatchpad values
+ */
+void init() {
+	
+	/* Configure scratchpad values */
+	aPad_WriteChar(RCPAD_ENABLE, 0);
+	
+	/* Zero out servo pad values readings */
+	aPad_WriteInt(RCPAD_THROT, SERVO_NEUT);
+	aPad_WriteInt(RCPAD_STEER, SERVO_NEUT);
+	
+	aPad_WriteInt(AUTPAD_THROT, SERVO_NEUT);
+	aPad_WriteInt(AUTPAD_STEER, SERVO_NEUT);
+	
+	
+	
+	
+}
+
+
+/* ************************************************************************** */
 void main()
 {
 	
 	char bDebugInfo = 1;
 	int throt = 0;
+	int steer = 0;
+	int pThrot = 0;
+	int	pSteer = 0;
+	
 	aPrint_String("gMonitorGP launched");
 	aPrint_Char('\n');
 	aCore_Sleep(2000);
 	aPrint_Char('\n');
+	
+	init();
 	
 	// Do monitor relevant things. Bookkeeping, coordinating, etc. 
 	while (1) {
@@ -32,13 +59,23 @@ void main()
 			aCore_Sleep(1000);
 			bDebugInfo = 0;
 		}
+
+		aPad_WriteChar(RCPAD_ENABLE, RCEnabled()); 
 		
 		throt = read_throtRC();
-		aPrint_IntDec(throt);
-		aPrint_Char('\n');
+		if(throt != pThrot) {
+			aPad_WriteInt(RCPAD_THROT, rcWindow(throt));
+			pThrot = throt;
+		}
 		
-		//aCore_Sleep(aSLICE);
+		steer = read_steerRC();
+		if(steer != pSteer) {
+			aPad_WriteInt(RCPAD_STEER, rcWindow(steer));
+			pSteer = steer;
+		}
 		
-	} // end pseudo infinite while loop
+		aCore_Sleep(aSLICE);
+		
+	} // end while loop
 	
 } // end of main
