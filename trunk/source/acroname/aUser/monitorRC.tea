@@ -2,6 +2,7 @@
 /* GP 2.0 monitoring file */
 
 #include "avc2012Defs.tea"
+#include <aServo.tea>
 #include <aCore.tea>
 #include <aPrint.tea>
 #include <aMulti.tea>
@@ -19,13 +20,12 @@ void init() {
 	aPad_WriteChar(RCPAD_ENABLE, 0);
 	
 	/* Zero out servo pad values readings */
-	aPad_WriteInt(RCPAD_THROT, SERVO_NEUT);
-	aPad_WriteInt(RCPAD_STEER, SERVO_NEUT);
 	
 	aPad_WriteInt(AUTPAD_THROT, SERVO_NEUT);
 	aPad_WriteInt(AUTPAD_STEER, SERVO_NEUT);
 	
-	
+	//aServo_SetConfig(THROT_SERVO, RAMP_SERVO_SPD);
+	//aServo_SetConfig(STEER_SERVO, RAMP_SERVO_SPD);
 	
 	
 }
@@ -35,11 +35,11 @@ void init() {
 void main()
 {
 	
-	char bDebugInfo = 1;
-	int throt = 0;
-	int steer = 0;
-	int pThrot = 0;
-	int	pSteer = 0;
+	int throt = SERVO_NEUT;
+	int steer = SERVO_NEUT;
+	int pThrot = SERVO_NEUT;
+	int pSteer = SERVO_NEUT;
+	char enable = 0;
 	
 	aPrint_String("gMonitorGP launched");
 	aPrint_Char('\n');
@@ -53,25 +53,45 @@ void main()
 		
 		// Debugging for servo pulse measurement to use RC remote control over
 		// riding for motion testing.	
-		if (bDebugInfo) {
-			aPrint_String("RC remote monitor launched.");
-			aPrint_Char('\n');
-			aCore_Sleep(1000);
-			bDebugInfo = 0;
-		}
+#ifdef aDEBUG_TEA
+		aPrint_String("RC remote monitor launched.");
+		aPrint_Char('\n');
+		aCore_Sleep(1000);
+#endif
 
 		aPad_WriteChar(RCPAD_ENABLE, RCEnabled()); 
 		
-		throt = read_throtRC();
+		if(RCEnabled()) {
+		  throt = rcWindow(read_throtRC());
+		  steer = rcWindow(read_steerRC());
+		
+		} else {
+		  throt = aPad_ReadInt(AUTPAD_THROT);
+		  steer = aPad_ReadInt(AUTPAD_STEER);
+		}
+		  
 		if(throt != pThrot) {
-			aPad_WriteInt(RCPAD_THROT, rcWindow(throt));
-			pThrot = throt;
+		  aServo_SetAbsolute(THROT_SERVO, 
+				     (unsigned char) throt);
+		  pThrot = throt;
+#ifdef aDEBUG_TEA		  
+		  aPrint_String("T: ");
+		  aPrint_IntDec(throt);
+		  aPrint_Char('\n');
+#endif		  
+		  
 		}
 		
-		steer = read_steerRC();
+		
 		if(steer != pSteer) {
-			aPad_WriteInt(RCPAD_STEER, rcWindow(steer));
-			pSteer = steer;
+		  aServo_SetAbsolute(STEER_SERVO, 
+				     (unsigned char) steer);
+		  pSteer = steer;
+#ifdef aDEBUG_TEA		  
+		  aPrint_String("S: ");
+		  aPrint_IntDec(steer);
+		  aPrint_Char('\n');
+#endif		  
 		}
 		
 		aCore_Sleep(aSLICE);
