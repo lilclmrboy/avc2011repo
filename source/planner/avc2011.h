@@ -16,12 +16,8 @@
 
 // Project specific headers
 #include "avc2011Structs.h"
-#include "avc2011Defs.tea"
+#include "avc2012Defs.tea"
 #include "logger.h"
-
-#define aGP_MODULE 2
-#define aGP_NUMSERVOS_USED 3
-
 
 // Utilites
 #ifdef aDEBUG_H
@@ -63,5 +59,9 @@
 
 // degree of Longitude per meter
 #define aLON_PER_METER 0.000011710448481
+
+// Maximum turn angle
+#define MAX_TURNANGLE 0.698131701f
+
 
 #endif //_avc2011_H_
