@@ -192,6 +192,11 @@ avcMotion::updateControl(const avcForceVector& potential)
     m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt16) servoDrive);
     m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, (aUInt16) servoSteer);
     
+    // Make sure the reading took
+    if ((m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT + 1) != servoDrive) || 
+      (m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER + 1) != servoSteer))
+      e = aErrNotReady;
+    
 #if aDEBUG_MOTMODULE_SWEEP    
     
     // Delay so we can see things happen
