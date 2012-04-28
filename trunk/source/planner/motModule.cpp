@@ -88,8 +88,6 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
 ///////////////////////////////////////////////////////////////////////////
 // Given a new goal Force vector, update the each motor setpoint
 
-#define MAX_TURNANGLE 0.698131701f
-
 aErr
 avcMotion::updateControl(const avcForceVector& potential) 
 {
@@ -136,9 +134,9 @@ avcMotion::updateControl(const avcForceVector& potential)
   	  
 	// The magnitude value directly translates to the gas pedal for the 
 	// rear drive motor.
-	unsigned char servoDrive = (unsigned char)(128 + (127 * magnitude));
+	unsigned char servoDrive = (unsigned char)(SERVO_NEUT + (127 * magnitude));
 	
-	unsigned char servoSteer = 128;
+	unsigned char servoSteer = SERVO_NEUT;
   unsigned char steerdelta = 0;
 
 // Macro used for debugging  motion module
@@ -148,28 +146,28 @@ avcMotion::updateControl(const avcForceVector& potential)
 #endif
     
     if ((delta >= 0.0f) && (delta < MAX_TURNANGLE)) {
-      steerdelta = (unsigned char)(delta/MAX_TURNANGLE * 128);
-      servoSteer = 128 + steerdelta;
+      steerdelta = (unsigned char)(delta/MAX_TURNANGLE * SERVO_NEUT);
+      servoSteer = SERVO_NEUT + steerdelta;
     }
     else if ((delta >= MAX_TURNANGLE) && (delta < (aPI - MAX_TURNANGLE))) {
-      steerdelta = 0;
-      servoSteer = 255;
+      steerdelta = SERVO_MIN;
+      servoSteer = SERVO_MAX;
     }
     else if ((delta >= (aPI - MAX_TURNANGLE)) && (delta < aPI)) {
-      steerdelta = (unsigned char)((aPI - delta)/(MAX_TURNANGLE) * 128);
-      servoSteer = 128 + steerdelta;
+      steerdelta = (unsigned char)((aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
+      servoSteer = SERVO_NEUT + steerdelta;
     }
     else if ((delta >= aPI) && (delta < (aPI + MAX_TURNANGLE))) {
-      steerdelta = (unsigned char)((delta - aPI)/(MAX_TURNANGLE) * 128);
-      servoSteer = 128 - steerdelta;
+      steerdelta = (unsigned char)((delta - aPI)/(MAX_TURNANGLE) * SERVO_NEUT);
+      servoSteer = SERVO_NEUT - steerdelta;
     }
     else if ((delta >= (aPI + MAX_TURNANGLE)) && (delta < (aPI*2 - MAX_TURNANGLE))) {
-      steerdelta = 0;
-      servoSteer = 0;
+      steerdelta = SERVO_MIN;
+      servoSteer = SERVO_MIN;
     }	
     else if ((delta >= (aPI*2 - MAX_TURNANGLE)) && (delta < aPI*2)) {
-      steerdelta = (unsigned char)((2*aPI - delta)/(MAX_TURNANGLE) * 128);
-      servoSteer = 128 - steerdelta;
+      steerdelta = (unsigned char)((2*aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
+      servoSteer = SERVO_NEUT - steerdelta;
     }
       
   #ifdef aDEBUG_MOTMODULE	
@@ -189,20 +187,15 @@ avcMotion::updateControl(const avcForceVector& potential)
   #endif	    
       
     // Send the values to the stem
-    m_pStem->SRV_ABS(aGP2_MODULE, 0, servoDrive);
-    m_pStem->SRV_ABS(aGP2_MODULE, 1, servoSteer);
+        
     
-    // Make sure the values made it
-    if (m_pStem->SRV_ABS(aGP2_MODULE, 0) != servoDrive)
-      e = aErrNotReady;
-    
-    if (m_pStem->SRV_ABS(aGP2_MODULE, 1) != servoSteer)
-      e = aErrNotReady;      
+    m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt16) servoDrive);
+    m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, (aUInt16) servoSteer);
     
 #if aDEBUG_MOTMODULE_SWEEP    
     
     // Delay so we can see things happen
-    m_pStem->sleep(50);
+    m_pStem->sleep(aSLICE);
     
   } // end for loop
 #endif
@@ -270,15 +263,6 @@ int doTests(acpStem *pStem, aSettingFileRef settings) {
     Uresult.x += 0.1;
   } // end while loop
   
-  // Turn off the motors.
-  pStem->PAD_IO(aMOTO_MODULE, 
-		aSPAD_MO_MOTION_SETPOINT_RIGHT, 
-		0);
-  
-  pStem->PAD_IO(aMOTO_MODULE, 
-		aSPAD_MO_MOTION_SETPOINT_LEFT, 
-		0);
-  
   pStem->sleep(1000);
   
   ///////////////////////////////////////////////////
@@ -292,16 +276,7 @@ int doTests(acpStem *pStem, aSettingFileRef settings) {
     e = motion.updateControl(Uresult);
     pStem->sleep(1000);
     Uresult.y += 0.1;
-  } // end while loop
-  
-  // Turn off the motors.
-  pStem->PAD_IO(aMOTO_MODULE, 
-		aSPAD_MO_MOTION_SETPOINT_RIGHT, 
-		0);
-  
-  pStem->PAD_IO(aMOTO_MODULE, 
-		aSPAD_MO_MOTION_SETPOINT_LEFT, 
-		0);
+  } // end while loo
   
   pStem->sleep(1000);
   

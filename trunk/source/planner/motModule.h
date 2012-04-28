@@ -9,6 +9,8 @@
 
 #include "avc2011.h"
 
+#define aMOTOR_NUM 2
+
 class avcMotion {
 
 public:
@@ -22,12 +24,6 @@ public:
 	// Updates the wheel velocity setpoints with a desired
 	// force vector. 
 	aErr updateControl(const avcForceVector& potential);
-	
-	// Gives other folks the last setpoint value we calculated for the motor
-	// motor should be: aMOTOR_LEFT or aMOTOR_RIGHT
-	short inline getSetpointMotor(const unsigned char motor) 
-		{ return m_setpoint[motor]; };
-	
 	
 private: 
 	
