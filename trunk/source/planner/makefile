@@ -37,6 +37,7 @@ CFLAGS += -DaDEBUG_H\
 	 -I$(PREFIX)acroname/aSystem \
 	 -I$(PREFIX)acroname/aUser
 CFLAGS += -m32 -Wall -Werror
+CFLAGS += -Woverloaded-virtual
 LFLAGS = -Wl,-rpath,.
 LFLAGS += -Wl,-rpath,@loader_path/. 
 LFLAGS += -Wl,-rpath,@loader_path/../cgi-bin/ 
@@ -90,6 +91,12 @@ motModuleTest : $(OBJ)
 	$(CC) -c $(CFLAGS) logger.cpp -o $(OBJ)/logger.o
 	$(CC) -c $(CFLAGS) -DaDEBUG_MOTMODULE motModule.cpp -o $(OBJ)/motModule.o
 	$(CC) -g $(CFLAGS) -DaDEBUG_MOTMODULE $(LFLAGS) $(OBJ)/motModule.o $(OBJ)/logger.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/motModuleTest
+  
+.PHONY : repulsiveForceTest
+repulsiveForceTest : $(OBJ)
+	$(CC) -c $(CFLAGS) logger.cpp -o $(OBJ)/logger.o
+	$(CC) -c $(CFLAGS) -DaDEBUG_FREPULSIVE repulsiveForces.cpp -o $(OBJ)/repulsiveForces.o
+	$(CC) -g $(CFLAGS) -DaDEBUG_FREPULSIVE $(LFLAGS) $(OBJ)/repulsiveForces.o $(OBJ)/logger.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/repulsiveForcesTest  
 
 .PHONY : loggerTest
 loggerTest : $(OBJ)
