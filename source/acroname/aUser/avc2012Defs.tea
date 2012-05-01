@@ -1,7 +1,8 @@
 /* ************************************************************************** */
 /* Filename: avc2012Defs.tea */
 
-
+#ifndef _avc2012Defs_tea_
+#define _avc2012Defs_tea_
 
 ///////////////////////////////////////////////////////////////////////////////
 // General defines
@@ -9,7 +10,10 @@
 //#define aDEBUG_TEA
 
 #define aSLICE        25
+#define STEMCONNECTED_WAIT 50
+
 #define aSERVO_MODULE 2
+#define aUSBSTEM_MODULE 40
 
 ///////////////////////////////////////////////////////////////////////////////
 // Remote control inputs
@@ -50,7 +54,14 @@
 #define RCPAD_ENABLE  4
 
 ///////////////////////////////////////////////////////////////////////////////
-// Autonomous control pad vals
+// Scratch Pads
 
+// Autonomous control pad addresses
 #define AUTPAD_THROT   6
 #define AUTPAD_STEER   8
+
+// USB stem sensor pad addresses
+#define aSPAD_USB_REPULSIVE_UX 1
+#define aSPAD_USB_REPULSIVE_UY 2
+
+#endif // _avc2012Defs_tea_
