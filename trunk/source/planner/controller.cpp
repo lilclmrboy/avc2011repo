@@ -71,9 +71,8 @@ avcController::init(const int argc, const char* argv[]) {
 	aErr e = aErrNone;
 	
 	PlaySound("okay.wav");
-	
-	if (aSettingFile_Create(m_ioRef, 
-				128,
+
+	if (aSettingFile_Create(m_ioRef,
 				"planner.config",
 				&m_settings,
 				&e))
@@ -134,27 +133,27 @@ avcController::getRepulsiveVector(avcForceVector& r) {
 	avcForceVector ir;
 	
 		
-	temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX) << 8; 
+	temp = m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_USB_REPULSIVE_UX) << 8; 
 	m_stem.sleep(10);
-	temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UX+1);
+	temp |= m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_USB_REPULSIVE_UX+1);
 	m_stem.sleep(10);
 	ir.x = (double) temp / 32767.0;
 	
-	temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY) << 8; 
+	temp = m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_USB_REPULSIVE_UY) << 8; 
 	m_stem.sleep(10);
-	temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_REPULSIVE_UY+1);
+	temp |= m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_USB_REPULSIVE_UY+1);
 	m_stem.sleep(10);
 	ir.y = (double) temp / 32767.0;
 	
 	
 	// Sonar sensors repulsive
 	
-	//temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX) << 8; 
-	//temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX+1);
+	//temp = m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX) << 8; 
+	//temp |= m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX+1);
 	//sonar.x = (double) temp / 32767.0;
 	
-	//temp = m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY) << 8; 
-	//temp |= m_stem.PAD_IO(aGP2_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY+1);
+	//temp = m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY) << 8; 
+	//temp |= m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY+1);
 	//sonar.y = (double) temp / 32767.0;
 		
 	
@@ -189,7 +188,7 @@ avcController::run(void) {
 	while (m_stem.isConnected(STEMCONNECTED_WAIT)) {
 		
 		// Read the scratchpad for the RC enable bit
-		int rcswitch = m_stem.PAD_IO(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE + 1);
+		int rcswitch = m_stem.PAD_IO(aSERVO_MODULE, DIG_RCENABLE + 1);
 	  
 		// When we get set automatic mode, we expect a value of 0
 		if (rcswitch) {
@@ -243,7 +242,7 @@ avcController::run(void) {
 	while (aErrNone ==checkAndWaitForStem())  {
 		
 		// When we get set automatic mode, we expect a value of 0
-		if (m_stem.PAD_IO(aMOTO_MODULE, aSPAD_MO_MOTION_RCENABLE + 1)) {
+		if (m_stem.PAD_IO(aSERVO_MODULE, DIG_RCENABLE + 1)) {
 			
 			if (!bManualOverride) {
 				PlaySound("retarded.wav");
@@ -263,8 +262,8 @@ avcController::run(void) {
 				PlaySound("ohgodherewego.wav");
 			
 				//Lets clear the encoders to zero.
-				m_stem.MO_ENC32(aMOTO_MODULE, aMOTOR_RIGHT, 0);
-				m_stem.MO_ENC32(aMOTO_MODULE, aMOTOR_LEFT, 0);
+				m_stem.MO_ENC32(aSERVO_MODULE, AUTPAD_THROT, SERVO_NEUT);
+				m_stem.MO_ENC32(aSERVO_MODULE, AUTPAD_STEER, SERVO_NEUT);
 			}
 			
 			bManualOverride = false;
