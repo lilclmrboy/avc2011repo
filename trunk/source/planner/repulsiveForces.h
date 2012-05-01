@@ -32,12 +32,18 @@ public:
 protected:
   avcForceVector m_force;
   
+  // Singleton access to logger class
+  logger *m_log;
+  
 private:
   
   aIOLib m_ioRef;
   
   // Our controller owns this too. We'll let them delete this.
   acpStem *m_pStem;
+  
+  // Local setting file reference
+  aSettingFileRef m_settings;
   
 }; // end class avcRepulsiveForce
 
@@ -62,31 +68,32 @@ public:
 class avcRepulsiveForces {
   
 public:
-	avcRepulsiveForces(void);
-	~avcRepulsiveForces(void);
-	
-	// Must call this first before doing any updates. Failure to do so will
-	// cause all calls on updateControl to return an error.
-	aErr init(acpStem *pStem, aSettingFileRef settings);
-	
+  avcRepulsiveForces(void);
+  ~avcRepulsiveForces(void);
+  
+  // Must call this first before doing any updates. Failure to do so will
+  // cause all calls on updateControl to return an error.
+  aErr init(acpStem *pStem, aSettingFileRef settings);
+  
   // Returns the resultant force vector
-	aErr getForceResultant(avcForceVector *pForceVector);
-	
+  aErr getForceResultant(avcForceVector *pForceVector);
+  
 private: 
-	
-	aIOLib m_ioRef;
-	
-	// Our controller owns this too. We'll let them delete this.
-	acpStem *m_pStem;
-	
-	//Our controller owns this we'll let them delete.	
-	aSettingFileRef m_settings;
-	logger *m_log;
-	
-	bool m_bInit;
+  
+  aIOLib m_ioRef;
+  
+  // Our controller owns this too. We'll let them delete this.
+  acpStem *m_pStem;
+  
+  //Our controller owns this we'll let them delete.	
+  aSettingFileRef m_settings;
+  logger *m_log;
+  
+  bool m_bInit;
+  int m_nForces;
   
   avcRepulsiveForce *m_pForces[10];
-
+  
 };
 
 #endif //_repulsiveForces_H_
