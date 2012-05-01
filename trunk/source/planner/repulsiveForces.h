@@ -15,6 +15,7 @@
 class avcRepulsiveForce {
   
 public:
+  avcRepulsiveForce(void){};
   avcRepulsiveForce(acpStem *pStem, const char * settingFileName);
   ~avcRepulsiveForce(void);
   
@@ -46,8 +47,7 @@ private:
 class avcGP2D12 : public avcRepulsiveForce {
   
 public:
-  avcGP2D12(acpStem *pStem, const char * settingFileName) :
-    avcRepulsiveForce(pStem, settingFileName) {};
+  avcGP2D12(acpStem *pStem, const char * settingFileName);
   
   ~avcGP2D12(void){};
   
