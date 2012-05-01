@@ -242,7 +242,7 @@ avcController::run(void) {
 	while (aErrNone ==checkAndWaitForStem())  {
 		
 		// When we get set automatic mode, we expect a value of 0
-		if (m_stem.PAD_IO(aSERVO_MODULE, DIG_RCENABLE + 1)) {
+		if (m_stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE + 1)) {
 			
 			if (!bManualOverride) {
 				PlaySound("retarded.wav");
