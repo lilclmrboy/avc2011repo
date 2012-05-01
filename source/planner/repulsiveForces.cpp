@@ -18,6 +18,46 @@ bool bDebugHeader = true;
 //}
 
 ///////////////////////////////////////////////////////////////////////////
+// generalized repulisive force constructor
+avcRepulsiveForce::avcRepulsiveForce(acpStem *pStem, 
+				     const char * settingFileName)
+{
+  aErr e = aErrNone;
+  
+  // Create aIO library reference
+  aIO_GetLibRef(&m_ioRef, &e);
+  
+  // Grab the pointer to the Stem
+  m_pStem = pStem;
+  
+  // Create setting file reference based on a specific config file
+  // name
+  aSettingFile_Create(m_ioRef, settingFileName, &m_settings, 
+  
+}
+
+///////////////////////////////////////////////////////////////////////////
+// generalized repulisive force destructor
+avcRepulsiveForce::~avcRepulsiveForce(void)
+{
+  
+  aErr e = aErrNone;
+  
+  // Clean up the library reference
+  aIO_ReleaseLibRef(m_ioRef, &e);
+  
+}
+
+///////////////////////////////////////////////////////////////////////////
+// GP2D12 constructor
+avcGP2D12::avcGP2D12(acpStem *pStem, const char * settingFileName) :
+  avcRepulsiveForce(pStem, settingFileName)
+{
+  
+  
+}
+
+///////////////////////////////////////////////////////////////////////////
 // GP2D12 sensor update
 aErr
 avcGP2D12::update(void) {

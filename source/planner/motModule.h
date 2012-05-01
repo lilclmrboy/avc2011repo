@@ -8,6 +8,7 @@
 #define _motModule_H_
 
 #include "avc2011.h"
+#include "avc2012Defs.tea"
 
 #define aMOTOR_NUM 2
 
