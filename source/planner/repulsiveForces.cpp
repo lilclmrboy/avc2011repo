@@ -32,7 +32,7 @@ avcRepulsiveForce::avcRepulsiveForce(acpStem *pStem,
   
   // Create setting file reference based on a specific config file
   // name
-  aSettingFile_Create(m_ioRef, settingFileName, &m_settings, 
+  aSettingFile_Create(m_ioRef, settingFileName, &m_settings, &e);
   
 }
 
@@ -42,6 +42,9 @@ avcRepulsiveForce::~avcRepulsiveForce(void)
 {
   
   aErr e = aErrNone;
+  
+  // Clean up the setting file reference
+  aSettingFile_Destroy(m_ioRef, m_settings, &e);
   
   // Clean up the library reference
   aIO_ReleaseLibRef(m_ioRef, &e);
@@ -64,7 +67,8 @@ avcGP2D12::update(void) {
   
   aErr e = aErrNone;
   
-  // Take a reading from the stem. 
+  // Take a reading from the stem.
+  m_log->log(INFO, "Reading GP2D12 sensor");
   
   return e;
   
@@ -79,6 +83,9 @@ avcRepulsiveForces::avcRepulsiveForces(void) :
 {
   
   aErr e = aErrNone;
+  
+  // Get access to the logger class
+  m_log = logger::getInstance();
   
   // Create a aIO reference to manipulate settings file reference
   if(aIO_GetLibRef(&m_ioRef, &e)) 
@@ -116,7 +123,11 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
   m_log = logger::getInstance();
   m_log->log(INFO, "Repulsive Force Module initialized");
   
-  for (int i = 0; i < 10; i++)
+  // Number of forces (aka, sensors)
+  m_nForces = 1;
+  
+  // Set all the sensors to zero
+  for (int i = 0; i < m_nForces; i++)
     m_pForces[i] = NULL;
   
   // Set up the actual sensors that we are working with
@@ -135,19 +146,35 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
 aErr
 avcRepulsiveForces::getForceResultant(avcForceVector *pForceVector) 
 {
+  
   aErr e = aErrNone;
   
   // Make sure you other hackers initialized this first
   if (!m_pStem || !m_bInit) {
     m_log->log(ERROR,"%s::%s failed. acpStem is NULL"
-         " or class not intialized\n"
+	       " or class not intialized\n"
 	       " \tCall %s::%s(acpStem *)", 
                __FILE__, __PRETTY_FUNCTION__,
                __FILE__, __PRETTY_FUNCTION__);
     return aErrInitialization;
   }
   
-  m_log->log(INFO, "[%s] %s: running", __FILE__, __PRETTY_FUNCTION__);
+  // Set the passed in force vector to zero, aka nothing
+  pForceVector->x = 0.0f;
+  pForceVector->y = 0.0f;
+  
+  // Update the sensor readings
+  for (int i = 0; i < m_nForces; i++) {
+    m_pForces[i]->update();
+  }
+  
+  // Add up all the forces
+  // use an operator class
+  //
+
+  m_log->log(INFO, "[%s] %s: URx=%f \tURy=%f", 
+	     __FILE__, __PRETTY_FUNCTION__,
+	     pForceVector->x, pForceVector->y);
   
   return e;
   
