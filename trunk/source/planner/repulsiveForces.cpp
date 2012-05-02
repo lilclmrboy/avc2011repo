@@ -10,17 +10,27 @@ bool bDebugHeader = true;
 
 ///////////////////////////////////////////////////////////////////////////
 // Operator function to add repulsive vector forces together
+// Boundary check the force addition
 const avcRepulsiveForce& avcRepulsiveForce::operator+=(const avcRepulsiveForce& rhs)
 {
   m_force.x += rhs.m_force.x;
+  
+  m_force.x = m_force.x > 1.0 ? 1.0 : m_force.x;
+  m_force.x = m_force.x < -1.0 ? -1.0 : m_force.x;
+  
   m_force.y += rhs.m_force.y;
+  
+  m_force.y = m_force.y > 1.0 ? 1.0 : m_force.y;
+  m_force.y = m_force.y < -1.0 ? -1.0 : m_force.y;
+  
   return *this;
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // generalized repulisive force constructor
 avcRepulsiveForce::avcRepulsiveForce(acpStem *pStem, 
-				     const char * settingFileName)
+                                     const char * settingFileName) :
+  m_theta(0.0f)
 {
   aErr e = aErrNone;
   
@@ -34,6 +44,18 @@ avcRepulsiveForce::avcRepulsiveForce(acpStem *pStem,
   // name
   aSettingFile_Create(m_ioRef, settingFileName, &m_settings, &e);
   
+  // Get the theta value from settings
+  aSettingFile_GetFloat(m_ioRef, m_settings, 
+                        aREPULSIVE_THETA_KEY, &m_theta, 
+                        aREPULSIVE_THETA_DEFAULT, &e);
+  
+  // Get the human readable description
+  char *pDescription;
+  aSettingFile_GetString(m_ioRef, m_settings, 
+                         "description", &pDescription, 
+                         "Sensor", &e);
+  m_description = pDescription;
+  
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -44,21 +66,44 @@ avcRepulsiveForce::~avcRepulsiveForce(void)
   aErr e = aErrNone;
   
   // Clean up the setting file reference
-  aSettingFile_Destroy(m_ioRef, m_settings, &e);
+  if (m_settings)
+    aSettingFile_Destroy(m_ioRef, m_settings, &e);
   
   // Clean up the library reference
-  aIO_ReleaseLibRef(m_ioRef, &e);
+  if (m_ioRef)
+    aIO_ReleaseLibRef(m_ioRef, &e);
   
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // GP2D12 constructor
 avcGP2D12::avcGP2D12(acpStem *pStem, const char * settingFileName) :
-  avcRepulsiveForce(pStem, settingFileName)
+  avcRepulsiveForce(pStem, settingFileName),
+  m_a2dport(0)
 {
+  
+  aIOLib ioRef;
+  aSettingFileRef settings;
+  aErr e = aErrNone;
+  
+  // Create aIO library reference
+  aIO_GetLibRef(&ioRef, &e);
   
   // Get a handle on the logger instance
   m_log = logger::getInstance();
+  
+  // Create setting file reference based on a specific config file
+  // name
+  aSettingFile_Create(ioRef, settingFileName, &settings, &e);
+  
+  // Get the port that the sensor is attached to
+  int a2dport = 0;
+  aSettingFile_GetInt(m_ioRef, m_settings, "port", &a2dport, 0, &e);
+  m_a2dport = (unsigned char) a2dport;
+  
+  // Clean up the setting file and ioRef
+  aSettingFile_Destroy(ioRef, settings, &e);
+  aIO_ReleaseLibRef(ioRef, &e);
   
 }
 
@@ -70,14 +115,18 @@ avcGP2D12::update(void) {
   aErr e = aErrNone;
   float reading = 0.0f;
   
-  // Take a reading from the stem.
-  //m_log->log(INFO, "Reading GP2D12 sensor");
-  m_log->log(INFO, "Updating GP2D12 ranger");
-  
   // Read from the Stem
-  reading = m_pStem->A2D_RD(aSERVO_MODULE, 0);
+  reading = m_pStem->A2D_RD(aSERVO_MODULE, m_a2dport);
   
-  m_log->log(INFO, "A2D reading %f", reading);
+  // Get the x and y components
+  // This is repulsive, so we want to go backwards
+  m_force.x = cos(m_theta + aPI) * reading;
+  m_force.y = sin(m_theta + aPI) * reading;
+  
+  m_log->log(INFO, "%s on CH%d: %f Rx: %f Ry: %f", 
+             (const char *) m_description,
+             m_a2dport,
+             reading, m_force.x, m_force.y);
   
   return e;
   
@@ -109,8 +158,10 @@ avcRepulsiveForces::~avcRepulsiveForces(void)
   
   aErr e = aErrNone;
   
-  if (aIO_ReleaseLibRef(m_ioRef, &e))
-    throw acpException(e, "unable to destroy settings");
+  if (m_ioRef) {
+    if (aIO_ReleaseLibRef(m_ioRef, &e))
+      throw acpException(e, "unable to destroy settings");
+  }
   
 }
 
@@ -133,7 +184,7 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
   m_log->log(INFO, "Repulsive Force Module initialized");
   
   // Number of forces (aka, sensors)
-  m_nForces = 1;
+  m_nForces = 2;
   
   // Set all the sensors to zero
   printf("setting all forces to NULL\n");
@@ -142,6 +193,7 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
   
   // Set up the actual sensors that we are working with
   m_pForces[0] = new avcGP2D12(pStem, "gp2d12a.config");
+  m_pForces[1] = new avcGP2D12(pStem, "gp2d12b.config");
   
   printf("created forces\n");
   
@@ -156,10 +208,11 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
 // Given a new goal Force vector, update the each motor setpoint
 
 aErr
-avcRepulsiveForces::getForceResultant(avcForceVector *pForceVector) 
+avcRepulsiveForces::getForceResultant(avcForceVector *pU) 
 {
   
   aErr e = aErrNone;
+  avcRepulsiveForce Uresult;
   
   // Make sure you other hackers initialized this first
   if (!m_pStem || !m_bInit) {
@@ -171,22 +224,25 @@ avcRepulsiveForces::getForceResultant(avcForceVector *pForceVector)
     return aErrInitialization;
   }
   
-  // Set the passed in force vector to zero, aka nothing
-  pForceVector->x = 0.0f;
-  pForceVector->y = 0.0f;
-  
-  // Update the sensor readings
-  for (int i = 0; i < m_nForces; i++) {
+  // Update the sensor readings for all the sensors we care about
+  int i = 0;
+  do {
     m_pForces[i]->update();
-  }
+    
+    // Add the new force
+    Uresult += *m_pForces[i]; 
+    
+  } while (m_pForces[++i] != NULL);
   
-  // Add up all the forces
-  // use an operator class
-  //
 
-  m_log->log(INFO, "[%s] %s: URx=%f \tURy=%f", 
+  // Copy information we care about into the passed in 
+  // force vector
+  pU->x = Uresult.getUx();
+  pU->y = Uresult.getUy();
+
+  m_log->log(INFO, "[%s] %s: URx=%f URy=%f", 
 	     __FILE__, __PRETTY_FUNCTION__,
-	     pForceVector->x, pForceVector->y);
+	     pU->x, pU->y);
   
   return e;
   
@@ -254,7 +310,10 @@ main(int argc,
   
   avcForceVector Urepulsive;
   
-  frepulsive.getForceResultant(&Urepulsive);
+  for (int i = 0; i < 10; i++) {
+    frepulsive.getForceResultant(&Urepulsive);
+    stem.sleep(500);
+  }
   
   aIO_MSSleep(ioRef, 1000, NULL);
   

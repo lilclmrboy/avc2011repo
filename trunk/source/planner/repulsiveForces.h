@@ -8,6 +8,9 @@
 
 #include "avc2011.h"
 
+#define aREPULSIVE_THETA_KEY     "theta"
+#define aREPULSIVE_THETA_DEFAULT 0.0f
+
 ///////////////////////////////////////////////////////////////
 // Class definition for a singular repulsive force
 // Generalized so that we can have different classes for 
@@ -15,7 +18,11 @@
 class avcRepulsiveForce {
   
 public:
-  avcRepulsiveForce(void){};
+  avcRepulsiveForce(void) : 
+    m_ioRef(NULL),
+    m_settings(NULL),
+    m_theta(0.0f)
+  {};
   avcRepulsiveForce(acpStem *pStem, const char * settingFileName);
   ~avcRepulsiveForce(void);
   
@@ -28,6 +35,9 @@ public:
   
   // Operator function to add repulsive forces
   const avcRepulsiveForce& operator+=(const avcRepulsiveForce& rhs);
+  
+  inline double getUx(void) { return m_force.x; };
+  inline double getUy(void) { return m_force.y; };
   
 protected:
   avcForceVector m_force;
@@ -43,6 +53,12 @@ protected:
   // Local setting file reference
   aSettingFileRef m_settings;
   
+  // Theta position of sensor
+  float m_theta;
+  
+  // Human readable description of sensor
+  acpString m_description;
+  
 }; // end class avcRepulsiveForce
 
 //////////////////////////////////////////////////////////////
@@ -52,10 +68,13 @@ class avcGP2D12 : public avcRepulsiveForce {
   
 public:
   avcGP2D12(acpStem *pStem, const char * settingFileName);
-  
   ~avcGP2D12(void){};
   
   aErr update(void);
+  
+private:
+  
+  unsigned char m_a2dport;
   
 }; // end class avcGP2D12
 
