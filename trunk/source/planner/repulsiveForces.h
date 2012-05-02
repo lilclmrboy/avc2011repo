@@ -24,18 +24,16 @@ public:
   // into a useful value for our system.
   // How we get this reading from the Stem (or others)
   // may be different for sensors
-  virtual aErr update(void) = 0;
+  virtual aErr update(void) { return aErrNone; }
   
   // Operator function to add repulsive forces
-  //const avcRepulsiveForce& operator+=(const avcRepulsiveForce& rhs);
+  const avcRepulsiveForce& operator+=(const avcRepulsiveForce& rhs);
   
 protected:
   avcForceVector m_force;
   
   // Singleton access to logger class
   logger *m_log;
-  
-private:
   
   aIOLib m_ioRef;
   
