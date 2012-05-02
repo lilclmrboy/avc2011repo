@@ -98,6 +98,13 @@ repulsiveForceTest : $(OBJ)
 	$(CC) -c $(CFLAGS) -DaDEBUG_FREPULSIVE repulsiveForces.cpp -o $(OBJ)/repulsiveForces.o
 	$(CC) -g $(CFLAGS) -DaDEBUG_FREPULSIVE $(LFLAGS) $(OBJ)/repulsiveForces.o $(OBJ)/logger.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/repulsiveForcesTest  
 
+.PHONY : posTest
+posTest : $(OBJ)
+	$(CC) -c $(CFLAGS) logger.cpp -o $(OBJ)/logger.o
+	$(CC) -c $(CFLAGS) mat_math.cpp -o $(OBJ)/mat_math.o
+	$(CC) -c $(CFLAGS) -DaDEBUG_FLOC locModule.cpp -o $(OBJ)/locModule.o
+	$(CC) -g $(CFLAGS) -DaDEBUG_FLOC $(LFLAGS) $(OBJ)/mat_math.o $(OBJ)/locModule.o $(OBJ)/logger.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/posTest 
+
 .PHONY : loggerTest
 loggerTest : $(OBJ)
 	$(CC) -c $(CFLAGS) -DaDEBUG_LOGGER logger.cpp -o $(OBJ)/logger.o

@@ -10,12 +10,12 @@ bool bDebugHeader = true;
 
 ///////////////////////////////////////////////////////////////////////////
 // Operator function to add repulsive vector forces together
-//avcRepulsiveForce avcRepulsiveForce::operator+=(const avcRepulsiveForce& rhs)
-//{
-//  m_force.x += rhs.m_force.x;
-//  m_force.y += rhs.m_force.y;
-//  return *this;
-//}
+const avcRepulsiveForce& avcRepulsiveForce::operator+=(const avcRepulsiveForce& rhs)
+{
+  m_force.x += rhs.m_force.x;
+  m_force.y += rhs.m_force.y;
+  return *this;
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // generalized repulisive force constructor
@@ -57,6 +57,8 @@ avcGP2D12::avcGP2D12(acpStem *pStem, const char * settingFileName) :
   avcRepulsiveForce(pStem, settingFileName)
 {
   
+  // Get a handle on the logger instance
+  m_log = logger::getInstance();
   
 }
 
@@ -66,9 +68,16 @@ aErr
 avcGP2D12::update(void) {
   
   aErr e = aErrNone;
+  float reading = 0.0f;
   
   // Take a reading from the stem.
-  m_log->log(INFO, "Reading GP2D12 sensor");
+  //m_log->log(INFO, "Reading GP2D12 sensor");
+  m_log->log(INFO, "Updating GP2D12 ranger");
+  
+  // Read from the Stem
+  reading = m_pStem->A2D_RD(aSERVO_MODULE, 0);
+  
+  m_log->log(INFO, "A2D reading %f", reading);
   
   return e;
   
@@ -127,11 +136,14 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
   m_nForces = 1;
   
   // Set all the sensors to zero
+  printf("setting all forces to NULL\n");
   for (int i = 0; i < m_nForces; i++)
     m_pForces[i] = NULL;
   
   // Set up the actual sensors that we are working with
   m_pForces[0] = new avcGP2D12(pStem, "gp2d12a.config");
+  
+  printf("created forces\n");
   
   // Set the flag to inidicate that we have been properly initialized
   m_bInit = true;
