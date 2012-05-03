@@ -124,28 +124,36 @@ avcGP2D12::update(void) {
   float reading = 0.0f;
   float distance = 0.0f;
   float force_distance = 0.0f;
+  float a1 = -36.8421f;
+  float k = 94.7368f;
   
   // Read from the Stem. This is normalized from 0.0 to 1.0
   // The a2d on the BrainStem GP is 0 to 5V
   // 
-  //reading = m_pStem->A2D_RD(aSERVO_MODULE, m_a2dport);
-  reading = m_pStem->A2D(6, m_a2dport);
+  reading = m_pStem->A2D_RD(aSERVO_MODULE, m_a2dport) * 5.0f;
+  //reading = m_pStem->A2D_RD(6, m_a2dport);
   
   // Calculate the distance
   // Function derived from datasheet figure 5
-  distance = (20.0f / reading) - 0.42f;
+  if (reading < 0.001f) reading = 0.001f;
+  
+  // Calculate a rough linear fit in meters
+  distance = (a1 * reading + k) / 100.0f;
+  
+  // We can't get a negative distance
+  if (distance < 0.0f) distance = 0.0f;
   
   // Get the force distance and normalize it
   // when things are detected very close, we want a very large force
   // when they are far away, we want small force effects 
   force_distance = (m_radiusMax - distance) / m_radiusMax;
-  
+    
   // Get the x and y components
   // This is repulsive, so we want to go backwards
   m_force.x = cos(m_theta + aPI) * force_distance;
   m_force.y = sin(m_theta + aPI) * force_distance;
   
-  m_log->log(INFO, "%s on CH%d: %f (%f cm) [%f] Rx: %f Ry: %f", 
+  m_log->log(INFO, "%s CH%d: %f (%f cm) [%f] Rx: %f Ry: %f", 
              (const char *) m_description,
              m_a2dport,
              reading,
@@ -213,12 +221,17 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
   
   // Set all the sensors to zero
   printf("setting all forces to NULL\n");
-  for (int i = 0; i < m_nForces; i++)
+  for (int i = 0; i < aREPULSIVE_MAX_SENSORS; i++)
     m_pForces[i] = NULL;
   
   // Set up the actual sensors that we are working with
-  m_pForces[0] = new avcGP2D12(pStem, "gp2d12a.config");
-  m_pForces[1] = new avcGP2D12(pStem, "gp2d12b.config");
+  acpString sensor_cfg;
+  
+  sensor_cfg.format("%s0.config", aREPULSIVE_SENSOR_CONFIG_PREFIX);  
+  m_pForces[0] = new avcGP2D12(pStem, sensor_cfg);
+  
+  sensor_cfg.format("%s1.config", aREPULSIVE_SENSOR_CONFIG_PREFIX);
+  m_pForces[1] = new avcGP2D12(pStem, sensor_cfg);
   
   printf("created forces\n");
   
@@ -265,9 +278,9 @@ avcRepulsiveForces::getForceResultant(avcForceVector *pU)
   pU->x = Uresult.getUx();
   pU->y = Uresult.getUy();
 
-  m_log->log(INFO, "[%s] %s: URx=%f URy=%f", 
-	     __FILE__, __PRETTY_FUNCTION__,
-	     pU->x, pU->y);
+//  m_log->log(INFO, "[%s] %s: URx=%f URy=%f", 
+//	     __FILE__, __PRETTY_FUNCTION__,
+//	     pU->x, pU->y);
   
   return e;
   
@@ -331,13 +344,12 @@ main(int argc,
   // Bail if no stem. What's the point little man?
   if (timeout == 10) { return 1; }
   
-	frepulsive.init(&stem, settings);
-  
+  frepulsive.init(&stem, settings);
   avcForceVector Urepulsive;
   
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 200; i++) {
     frepulsive.getForceResultant(&Urepulsive);
-    stem.sleep(500);
+    stem.sleep(100);
   }
   
   aIO_MSSleep(ioRef, 1000, NULL);
