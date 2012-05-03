@@ -30,7 +30,8 @@ const avcRepulsiveForce& avcRepulsiveForce::operator+=(const avcRepulsiveForce& 
 // generalized repulisive force constructor
 avcRepulsiveForce::avcRepulsiveForce(acpStem *pStem, 
                                      const char * settingFileName) :
-  m_theta(0.0f)
+  m_theta(aREPULSIVE_THETA_DEFAULT),
+  m_radiusMax(aREPULSIVE_RADIUS_DEFAULT)
 {
   aErr e = aErrNone;
   
@@ -52,9 +53,14 @@ avcRepulsiveForce::avcRepulsiveForce(acpStem *pStem,
   // Get the human readable description
   char *pDescription;
   aSettingFile_GetString(m_ioRef, m_settings, 
-                         "description", &pDescription, 
-                         "Sensor", &e);
+                         aREPULSIVE_DESCRIPTION_KEY, &pDescription, 
+                         aREPULSIVE_DESCRIPTION_DEFAULT, &e);
   m_description = pDescription;
+  
+  // Get the force radius that we care about
+  aSettingFile_GetFloat(m_ioRef, m_settings, 
+                        aREPULSIVE_RADIUS_KEY, &m_radiusMax, 
+                        aREPULSIVE_RADIUS_DEFAULT, &e);
   
 }
 
@@ -79,7 +85,7 @@ avcRepulsiveForce::~avcRepulsiveForce(void)
 // GP2D12 constructor
 avcGP2D12::avcGP2D12(acpStem *pStem, const char * settingFileName) :
   avcRepulsiveForce(pStem, settingFileName),
-  m_a2dport(0)
+  m_a2dport(aREPULSIVE_GP2D12_PORT_DEFAULT)
 {
   
   aIOLib ioRef;
@@ -98,7 +104,9 @@ avcGP2D12::avcGP2D12(acpStem *pStem, const char * settingFileName) :
   
   // Get the port that the sensor is attached to
   int a2dport = 0;
-  aSettingFile_GetInt(m_ioRef, m_settings, "port", &a2dport, 0, &e);
+  aSettingFile_GetInt(m_ioRef, m_settings, 
+                      aREPULSIVE_GP2D12_PORT_KEY, &a2dport, 
+                      aREPULSIVE_GP2D12_PORT_DEFAULT, &e);
   m_a2dport = (unsigned char) a2dport;
   
   // Clean up the setting file and ioRef
@@ -114,19 +122,36 @@ avcGP2D12::update(void) {
   
   aErr e = aErrNone;
   float reading = 0.0f;
+  float distance = 0.0f;
+  float force_distance = 0.0f;
   
-  // Read from the Stem
-  reading = m_pStem->A2D_RD(aSERVO_MODULE, m_a2dport);
+  // Read from the Stem. This is normalized from 0.0 to 1.0
+  // The a2d on the BrainStem GP is 0 to 5V
+  // 
+  //reading = m_pStem->A2D_RD(aSERVO_MODULE, m_a2dport);
+  reading = m_pStem->A2D(6, m_a2dport);
+  
+  // Calculate the distance
+  // Function derived from datasheet figure 5
+  distance = (20.0f / reading) - 0.42f;
+  
+  // Get the force distance and normalize it
+  // when things are detected very close, we want a very large force
+  // when they are far away, we want small force effects 
+  force_distance = (m_radiusMax - distance) / m_radiusMax;
   
   // Get the x and y components
   // This is repulsive, so we want to go backwards
-  m_force.x = cos(m_theta + aPI) * reading;
-  m_force.y = sin(m_theta + aPI) * reading;
+  m_force.x = cos(m_theta + aPI) * force_distance;
+  m_force.y = sin(m_theta + aPI) * force_distance;
   
-  m_log->log(INFO, "%s on CH%d: %f Rx: %f Ry: %f", 
+  m_log->log(INFO, "%s on CH%d: %f (%f cm) [%f] Rx: %f Ry: %f", 
              (const char *) m_description,
              m_a2dport,
-             reading, m_force.x, m_force.y);
+             reading,
+             distance,
+             force_distance,
+             m_force.x, m_force.y);
   
   return e;
   
@@ -310,7 +335,7 @@ main(int argc,
   
   avcForceVector Urepulsive;
   
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 2; i++) {
     frepulsive.getForceResultant(&Urepulsive);
     stem.sleep(500);
   }
