@@ -20,6 +20,10 @@
 #define aREPULSIVE_GP2D12_PORT_KEY      "port"
 #define aREPULSIVE_GP2D12_PORT_DEFAULT  0
 
+#define aREPULSIVE_SENSOR_CONFIG_PREFIX "sensor_"
+
+#define aREPULSIVE_MAX_SENSORS          10
+
 ///////////////////////////////////////////////////////////////
 // Class definition for a singular repulsive force
 // Generalized so that we can have different classes for 
@@ -121,7 +125,7 @@ private:
   bool m_bInit;
   int m_nForces;
   
-  avcRepulsiveForce *m_pForces[10];
+  avcRepulsiveForce *m_pForces[aREPULSIVE_MAX_SENSORS];
   
 };
 
