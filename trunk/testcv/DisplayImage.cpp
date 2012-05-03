@@ -31,13 +31,27 @@ int main( int argc, char** argv )
 	
 	 namedWindow( "converted", CV_WINDOW_AUTOSIZE );
 	
+	vector<Point2f> frame1_features;
+	int number_of_feature_rows = 20;
+	int number_of_feature_cols = 20;
+	int number_of_features = number_of_feature_rows * number_of_feature_cols;
+	int height_inc = frame_size.height / number_of_feature_rows;
+	int width_inc = frame_size.width / number_of_feature_cols;
+	// Fill the initial feature vector.
+	for (int i = 1; i < number_of_feature_rows; i++) {
+		for (int j = 1; j < number_of_feature_cols; j++) {
+			frame1_features.push_back(Point2f(width_inc * j, height_inc * i));
+		}
+	}
+	
+	
 	for(;;) {
 		Mat tmpM;
 		
 		Mat frame, frame1, frame1_1c, frame2_1c, pyramid1, pyramid2;
         
-		vector<Point2f> frame1_features;
-		int number_of_features = 100;
+		
+		
 		vector<Point2f> frame2_features;
 		vector<float> err;
 		vector<uchar> status;
@@ -51,9 +65,6 @@ int main( int argc, char** argv )
 		cap >> frame;
 		
 		cvtColor(frame, frame2_1c, CV_BGR2GRAY);
-		
-		goodFeaturesToTrack(frame1_1c, frame1_features, number_of_features, .01, 100.0);
-		feats = true;
 		
 		calcOpticalFlowPyrLK(frame1_1c, frame2_1c, 
 												 frame1_features, frame2_features, status, err);
