@@ -8,8 +8,17 @@
 
 #include "avc2011.h"
 
-#define aREPULSIVE_THETA_KEY     "theta"
-#define aREPULSIVE_THETA_DEFAULT 0.0f
+#define aREPULSIVE_THETA_KEY            "theta"
+#define aREPULSIVE_THETA_DEFAULT        0.0f
+
+#define aREPULSIVE_RADIUS_KEY           "repulsive_radius"
+#define aREPULSIVE_RADIUS_DEFAULT       1.0f
+
+#define aREPULSIVE_DESCRIPTION_KEY      "description"
+#define aREPULSIVE_DESCRIPTION_DEFAULT  "Sensor"
+
+#define aREPULSIVE_GP2D12_PORT_KEY      "port"
+#define aREPULSIVE_GP2D12_PORT_DEFAULT  0
 
 ///////////////////////////////////////////////////////////////
 // Class definition for a singular repulsive force
@@ -55,6 +64,9 @@ protected:
   
   // Theta position of sensor
   float m_theta;
+  
+  // Max force radius that we care about
+  float m_radiusMax;
   
   // Human readable description of sensor
   acpString m_description;
