@@ -152,7 +152,8 @@ avcGP2D12::update(void) {
   // This is repulsive, so we want to go backwards
   m_force.x = cos(m_theta + aPI) * force_distance;
   m_force.y = sin(m_theta + aPI) * force_distance;
-  
+
+#ifdef aDEBUG_FREPULSIVE
   m_log->log(INFO, "%s CH%d: %f (%f cm) [%f] Rx: %f Ry: %f", 
              (const char *) m_description,
              m_a2dport,
@@ -160,6 +161,7 @@ avcGP2D12::update(void) {
              distance,
              force_distance,
              m_force.x, m_force.y);
+#endif
   
   return e;
   
@@ -278,10 +280,10 @@ avcRepulsiveForces::getForceResultant(avcForceVector *pU)
   pU->x = Uresult.getUx();
   pU->y = Uresult.getUy();
 
-//  m_log->log(INFO, "[%s] %s: URx=%f URy=%f", 
-//	     __FILE__, __PRETTY_FUNCTION__,
-//	     pU->x, pU->y);
-  
+  m_log->log(INFO, "[%s] %s: URx=%f URy=%f", 
+	     __FILE__, __PRETTY_FUNCTION__,
+	     pU->x, pU->y);
+
   return e;
   
 }
