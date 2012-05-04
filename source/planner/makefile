@@ -66,10 +66,11 @@ endif
 OBJECTS = \
 			$(OBJ)/planner.o \
 			$(OBJ)/controller.o \
-      $(OBJ)/motModule.o \
+			$(OBJ)/motModule.o \
 			$(OBJ)/logger.o \
-      $(OBJ)/locModule.o \
-			$(OBJ)/mat_math.o
+			$(OBJ)/locModule.o \
+			$(OBJ)/mat_math.o \
+			$(OBJ)/repulsiveForces.o
 
 .PHONY : app
 app : $(OBJ) $(BIN)/$(APP)

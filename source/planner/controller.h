@@ -51,6 +51,7 @@
 #include "aStem.h"
 #include "avc2012Defs.tea"
 #include "avc2011Structs.h"
+#include "repulsiveForces.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // We may want to move this out somewhere or into it's own seperate class
@@ -80,6 +81,7 @@ private:
 	avcMotion m_mot;
 	avcPlanner m_planner;
 	avcPosition m_pos;
+	avcRepulsiveForces m_repulse;
 	//avcLogger m_logger; 
 	acpStem m_stem;
 	aIOLib m_ioRef;

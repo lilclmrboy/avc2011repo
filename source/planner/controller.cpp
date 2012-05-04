@@ -73,7 +73,7 @@ avcController::init(const int argc, const char* argv[]) {
 	PlaySound("okay.wav");
 
 	if (aSettingFile_Create(m_ioRef,
-				"planner.config",
+				"chicken.config",
 				&m_settings,
 				&e))
 		throw acpException(e, "creating settings");
@@ -116,6 +116,7 @@ avcController::init(const int argc, const char* argv[]) {
 		// Don't forget to init the modules :)
 		e = m_mot.init(&m_stem, m_settings);
 		e = m_pos.init(&m_stem, m_settings);
+		e = m_repulse.init(&m_stem, m_settings);
 		e = m_planner.init(m_ioRef, m_settings);
 		if (!m_pos.getGPSQuality())
 			m_pos.setPosition(m_planner.getFirstMapPoint());
@@ -181,6 +182,9 @@ avcController::run(void) {
 	avcStateVector pos;
 	avcForceVector rv;
 	aErr e = aErrNone;
+    avcRepulsiveForces frepulsive; 
+
+
 	
 	//////////////////////////////////////////////
 	m_log->log(INFO, "Checking for the go signal\n");
@@ -279,7 +283,7 @@ avcController::run(void) {
 		// What we need to do is:
 		//  1.) Read the scratchpad x and y value
 		//  2.) Convert them into a normalized float value
-		getRepulsiveVector(rv);
+		m_repulse.getForceResultant(&rv);
 		m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
 		
 		//e = m_mot.updateControl(rv);

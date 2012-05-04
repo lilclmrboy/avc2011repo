@@ -422,7 +422,7 @@ avcPlanner::normalizeForceVector(avcForceVector *pForceVector) {
 	
 	//check input parameter
 	CHECK_ARG_RETURN(m_logger, pForceVector);
-	
+  
 	//calculate the vector magnitude
 	double mag = sqrt( (pForceVector->x * pForceVector->x) +
 					   (pForceVector->y * pForceVector->y) );
@@ -457,7 +457,15 @@ void
 avcPlanner::loadMap(const char* mapfile) {
 
   FILE* map;
+  int numberOfMapPoints=0;
   map = fopen(mapfile, "r");
+  
+  if (map == NULL){
+    char path[PATH_MAX];
+    getcwd(path, PATH_MAX);
+    m_logger->log(ERROR, "Map file not found: %s/%s", path, mapfile);
+  }
+    
   if (map != NULL)  {
     //empty the current map vector.
     m_waypoints.clear();
@@ -468,6 +476,7 @@ avcPlanner::loadMap(const char* mapfile) {
       sscanf(pointstr, "%le, %le, %le", &x, &y, &h);
       m_logger->log(INFO, "adding waypoint(%le, %le, %le) to map.", x, y, h);
       m_waypoints.push_back(avcWaypointVector(x, y, h));
+      numberOfMapPoints++;
     }
     //make sure there is at least one waypoint
     if (!m_waypoints.size()) {
@@ -476,6 +485,9 @@ avcPlanner::loadMap(const char* mapfile) {
   } else {
     m_waypoints.push_back(avcWaypointVector(0.0,0.0,0.0));
   }
+  
+  m_logger->log(INFO, "Added %d points to the map", numberOfMapPoints);
+  
 } 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -500,7 +512,6 @@ main(int argc,
 	
 	// Read from a settings file if it exists.
 	if (aSettingFile_Create(ioRef, 
-													128,
 													"console.config",
 													&settings,
 													&e))
@@ -513,9 +524,10 @@ main(int argc,
 	log->append(tempVector1, INFO);
 	planner.normalizeForceVector(&tempVector1);
 	log->append(tempVector1, INFO);
+	planner.normalizeForceVector(&tempVector1);
+	log->append(tempVector1, INFO);
 	
 	avcForceVector tempVector2 = avcForceVector(1.0e-12, 1.0e-12);
-	log->append(tempVector2);
 	planner.normalizeForceVector(&tempVector2);
 	log->append(tempVector2, INFO);
 	
