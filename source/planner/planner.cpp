@@ -70,7 +70,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	aSettingFile_GetFloat (ioRef, settings,
 						 aKEY_MAX_UNPASSED_DISTANCE,
 						 &maxUnPassedDistanceToWaypoint,
-						 2.0,
+						 0.5,
 						 &e);
 	// Copy flag to member variable.
 	m_maxUnPassedDistanceToWaypoint = maxUnPassedDistanceToWaypoint;
@@ -98,7 +98,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	aSettingFile_GetString(ioRef, settings,
 				aKEY_TRACKFILE,
 				&pFile,
-				"map.track",
+				"maps/NStest.track",
 				&e);
 	
         loadMap(pFile);
@@ -161,7 +161,7 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 	motivationVector.y = motivationVector.y >  1.0 ?  1.0 : motivationVector.y;
 	motivationVector.y = motivationVector.y < -1.0 ? -1.0 : motivationVector.y;
 	
-	m_logger->log(INFO, "Goal\t%e\t%e\tRepulse\t%e\t%e", goal.x, goal.y, repulse.x, repulse.y);
+	m_logger->log(INFO, "Goal\t%1.3f\t%1.3f\tRepulse\t%1.3f\t%1.3f", goal.x, goal.y, repulse.x, repulse.y);
 	
 	//may want to re-normalize here (with zero magnitude option)
 	if (1 == m_normalizeMotivationVector) {
@@ -232,7 +232,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		return aErrNone;
 	}
 	
-	m_logger->log(INFO, "curPos: %.8e,%.8e,%e\ttarPos: %.8e,%.8e", pos.x, pos.y, pos.h, m_waypoints[firstUnpassedWaypoint].state.x, m_waypoints[firstUnpassedWaypoint].state.y);
+	//m_logger->log(INFO, "curPos: %.8e,%.8e,%e\ttarPos: %.8e,%.8e", pos.x, pos.y, pos.h, m_waypoints[firstUnpassedWaypoint].state.x, m_waypoints[firstUnpassedWaypoint].state.y);
 	
 	// compute a dimensional vector between the current position and
 	// the next waypoint
@@ -397,11 +397,12 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	if (dist < m_maxUnPassedDistanceToWaypoint) {
 		//pGoalForceVec->x *= dist/m_maxUnPassedDistanceToWaypoint;
 		//pGoalForceVec->y *= dist/m_maxUnPassedDistanceToWaypoint;
+    m_logger->log(INFO, "Within maxUnPassedDistanceToWaypoint; must be at end of map. Did we win?");
 		pGoalForceVec->x *= 0.5;
 		pGoalForceVec->y *= 0.5;
 	}
 	
-	m_logger->log(INFO, "dist: %e\tbearing(deg): %e\theading(deg): %e", dist, unwrapAngleDeg(headingToNextStateRad*RAD_TO_DEG), unwrapAngleDeg(goalHeading*RAD_TO_DEG));
+	m_logger->log(INFO, "dist: %3.2f\tbearing(deg): %3.2f\theading(deg): %3.2f", dist, unwrapAngleDeg(headingToNextStateRad*RAD_TO_DEG), unwrapAngleDeg(goalHeading*RAD_TO_DEG));
 	//m_logger->log(INFO, "goal.x: %e\tgoal.y: %e", pGoalForceVec->x, pGoalForceVec->y);
 	
 
@@ -541,55 +542,44 @@ main(int argc,
 		log->log(INFO, "%.1f unwrapped is %.1f", angles[i], planner.unwrapAngleDeg(angles[i]));
 	}
 	
+  
+  
 	log->log(INFO, "\n\nTesting calcPolarVectorBetweenStates()");
+  log->log(INFO, "Loading acroSquare track");
+  planner.loadMap("maps/acroSquare.track");
+  log->log(INFO, "Adding dummy last point to map");
+  planner.m_waypoints.push_back(planner.m_waypoints[4].state);
 	double r, theta;
 	planner.calcPolarVectorBetweenStates(planner.m_waypoints[0].state, planner.m_waypoints[1].state, &r, &theta);
-	log->log(INFO, "R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+	log->log(INFO, "From 0 to 1, R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+  planner.calcPolarVectorBetweenStates(planner.m_waypoints[1].state, planner.m_waypoints[2].state, &r, &theta);
+	log->log(INFO, "From 1 to 2, R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+  planner.calcPolarVectorBetweenStates(planner.m_waypoints[2].state, planner.m_waypoints[3].state, &r, &theta);
+	log->log(INFO, "From 2 to 3, R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
 	planner.calcPolarVectorBetweenStates(planner.m_waypoints[3].state, planner.m_waypoints[4].state, &r, &theta);
-	log->log(INFO, "R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+	log->log(INFO, "From 3 to 4, R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
 	planner.calcPolarVectorBetweenStates(planner.m_waypoints[4].state, planner.m_waypoints[5].state, &r, &theta);
-	log->log(INFO, "R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
+	log->log(INFO, "From 4 to 5, R, theta is %.2e, %.5f", r, planner.unwrapAngleDeg(theta * RAD_TO_DEG));
 
 
 	
 	log->log(INFO, "\n\nTesting calcPolarVectorBetweenStates()");
 	planner.calcForceVectorBetweenStates(planner.m_waypoints[0].state, planner.m_waypoints[1].state, &tempVector1);
 	log->append(tempVector1, INFO);
-	planner.calcForceVectorBetweenStates(planner.m_waypoints[3].state, planner.m_waypoints[4].state, &tempVector1);
+  planner.calcForceVectorBetweenStates(planner.m_waypoints[1].state, planner.m_waypoints[2].state, &tempVector1);
+  log->append(tempVector1, INFO);
+  planner.calcForceVectorBetweenStates(planner.m_waypoints[2].state, planner.m_waypoints[3].state, &tempVector1);
+  log->append(tempVector1, INFO);
+  planner.calcForceVectorBetweenStates(planner.m_waypoints[3].state, planner.m_waypoints[4].state, &tempVector1);
 	log->append(tempVector1, INFO);
 	planner.calcForceVectorBetweenStates(planner.m_waypoints[4].state, planner.m_waypoints[5].state, &tempVector1);
 	log->append(tempVector1, INFO);
 
-	/*
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02664202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02665202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02666202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02667202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02668202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02669202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02670202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02671202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02672202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02673202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02674202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02675202181311,0));//
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02674202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02673202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02672202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02671202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02670202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02669202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02668202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02667202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02666202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02665202181311,0));
-	 planner.m_waypoints.push_back(avcWaypointVector(-105.241227814428,40.02664202181311,0));*/
-	
-	planner.loadMap("map.track");
 	
 	log->log(INFO, "\n\nTest planner with N-S state vectors and one waypoint");
+  log->log(INFO, "Loading NS track");
+  planner.loadMap("maps/NStest.track");
 	log->log(INFO, "Robot will be pushed north while facing north");
-	
 	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
 	planner.getMotivation(avcStateVector(-105.241227814428,40.02665202181311,0), avcForceVector(0.0,0.0));
 	planner.getMotivation(avcStateVector(-105.241227814428,40.02666202181311,0), avcForceVector(0.0,0.0));
@@ -602,7 +592,7 @@ main(int argc,
 	planner.getMotivation(avcStateVector(-105.241227814428,40.02673202181311,0), avcForceVector(0.0,0.0));
 	planner.getMotivation(avcStateVector(-105.241227814428,40.02674202181311,0), avcForceVector(0.0,0.0));
 	planner.getMotivation(avcStateVector(-105.241227814428,40.02675202181311,0), avcForceVector(0.0,0.0));
-	
+	log->log(INFO, "\n\nRobot will be pushed south while facing north");
 	planner.getMotivation(avcStateVector(-105.241227814428,40.02674202181311,0), avcForceVector(0.0,0.0));
 	planner.getMotivation(avcStateVector(-105.241227814428,40.02673202181311,0), avcForceVector(0.0,0.0));
 	planner.getMotivation(avcStateVector(-105.241227814428,40.02672202181311,0), avcForceVector(0.0,0.0));
@@ -616,33 +606,12 @@ main(int argc,
 	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
 	
 	
-	log->log(INFO, "\n\nRobot will be pushed south while facing north");
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02663202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02662202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02661202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02660202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02659202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02658202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02657202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02656202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02655202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02654202181311,0), avcForceVector(0.0,0.0));
-	
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02655202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02656202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02657202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02658202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02659202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02660202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02661202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02662202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02663202181311,0), avcForceVector(0.0,0.0));
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
-
-	
-	log->log(INFO, "\n\nRobot will be pushed southeast while facing north");
-	planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
+	log->log(INFO, "\n\n");
+  log->log(INFO, "Creating dummy 1 point map");
+  planner.m_waypoints.clear();
+  planner.m_waypoints.push_back(avcStateVector(-105.241227814428,40.02664202181311,0));
+  log->log(INFO, "Robot try to drive northeast while facing north (faking motion to the SW)");
+	//planner.getMotivation(avcStateVector(-105.241227814428,40.02664202181311,0), avcForceVector(0.0,0.0));
 	planner.getMotivation(avcStateVector(-105.241237814428,40.02663202181311,0), avcForceVector(0.0,0.0));
 	planner.getMotivation(avcStateVector(-105.241247814428,40.02662202181311,0), avcForceVector(0.0,0.0));
 	planner.getMotivation(avcStateVector(-105.241257814428,40.02661202181311,0), avcForceVector(0.0,0.0));
