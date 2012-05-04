@@ -132,43 +132,13 @@ avcMotion::updateControl(const avcForceVector& potential)
     delta += aPI*2 + delta;
   }
   	  
-	// The magnitude value directly translates to the gas pedal for the 
-	// rear drive motor.
-	unsigned char servoDrive = (unsigned char)(SERVO_NEUT + (127 * magnitude));
-	
-	unsigned char servoSteer = SERVO_NEUT;
-  unsigned char steerdelta = 0;
+    // The magnitude value directly translates to the gas pedal for the 
+    // rear drive motor.
+    unsigned char servoDrive = (unsigned char)(SERVO_NEUT + (127 * magnitude));
+    unsigned char servoSteer = SERVO_NEUT;
 
-// Macro used for debugging  motion module
-// Does a full sweep of a full circle to check the values
-#ifdef aDEBUG_MOTMODULE_SWEEP  
-  for (delta = 0.0f; delta <= 2*aPI; delta += 0.0314159265f) {
-#endif
-    
-    if ((delta >= 0.0f) && (delta < MAX_TURNANGLE)) {
-      steerdelta = (unsigned char)(delta/MAX_TURNANGLE * SERVO_NEUT);
-      servoSteer = SERVO_NEUT + steerdelta;
-    }
-    else if ((delta >= MAX_TURNANGLE) && (delta < (aPI - MAX_TURNANGLE))) {
-      steerdelta = SERVO_MIN;
-      servoSteer = SERVO_MAX;
-    }
-    else if ((delta >= (aPI - MAX_TURNANGLE)) && (delta < aPI)) {
-      steerdelta = (unsigned char)((aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
-      servoSteer = SERVO_NEUT + steerdelta;
-    }
-    else if ((delta >= aPI) && (delta < (aPI + MAX_TURNANGLE))) {
-      steerdelta = (unsigned char)((delta - aPI)/(MAX_TURNANGLE) * SERVO_NEUT);
-      servoSteer = SERVO_NEUT - steerdelta;
-    }
-    else if ((delta >= (aPI + MAX_TURNANGLE)) && (delta < (aPI*2 - MAX_TURNANGLE))) {
-      steerdelta = SERVO_MIN;
-      servoSteer = SERVO_MIN;
-    }	
-    else if ((delta >= (aPI*2 - MAX_TURNANGLE)) && (delta < aPI*2)) {
-      steerdelta = (unsigned char)((2*aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
-      servoSteer = SERVO_NEUT - steerdelta;
-    }
+    // Update the servo values
+    updateServoValues(magnitude, delta, &servoDrive, &servoSteer);
       
   #ifdef aDEBUG_MOTMODULE	
     // Show us what we got
@@ -208,6 +178,58 @@ avcMotion::updateControl(const avcForceVector& potential)
   return e;
   
 }
+
+///////////////////////////////////////////////////////////////////////////
+// Update servo positioning information
+bool
+avcMotion::updateServoValues(const double magnitude, 
+			     const double delta, 
+			     aUInt16 *pServoDrive, 
+			     aUInt16 *pServoSteer)
+{
+
+  bool bFinished = true;
+  unsigned char servoSteer = SERVO_NEUT;
+  unsigned char steerdelta = 0;
+  
+  // The magnitude value directly translates to the gas pedal for the 
+  // rear drive motor.
+  unsigned char servoDrive = (unsigned char)(SERVO_NEUT + (127 * magnitude));
+  
+  // See how things should unfold
+  if ((delta >= 0.0f) && (delta < MAX_TURNANGLE)) {
+    steerdelta = (unsigned char)(delta/MAX_TURNANGLE * SERVO_NEUT);
+    servoSteer = SERVO_NEUT + steerdelta;
+  }
+  else if ((delta >= MAX_TURNANGLE) && (delta < (aPI - MAX_TURNANGLE))) {
+    steerdelta = SERVO_MIN;
+    servoSteer = SERVO_MAX;
+  }
+  else if ((delta >= (aPI - MAX_TURNANGLE)) && (delta < aPI)) {
+    steerdelta = (unsigned char)((aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
+    servoSteer = SERVO_NEUT + steerdelta;
+  }
+  else if ((delta >= aPI) && (delta < (aPI + MAX_TURNANGLE))) {
+    steerdelta = (unsigned char)((delta - aPI)/(MAX_TURNANGLE) * SERVO_NEUT);
+    servoSteer = SERVO_NEUT - steerdelta;
+  }
+  else if ((delta >= (aPI + MAX_TURNANGLE)) && (delta < (aPI*2 - MAX_TURNANGLE))) {
+    steerdelta = SERVO_MIN;
+    servoSteer = SERVO_MIN;
+  }	
+  else if ((delta >= (aPI*2 - MAX_TURNANGLE)) && (delta < aPI*2)) {
+    steerdelta = (unsigned char)((2*aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
+    servoSteer = SERVO_NEUT - steerdelta;
+  }
+  
+  // Copy the values into our results
+  *pServoDrive = (aUInt16) servoDrive;
+  *pServoSteer = (aUInt16) servoSteer;
+  
+  return bFinished;
+  
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 // This section is for isolating and debugging this module. 
