@@ -22,6 +22,10 @@
 
 #define aREPULSIVE_SENSOR_CONFIG_PREFIX "sensor_"
 
+#define aREPULSIVE_DELAY_KEY            "repulsive_delay"
+#define aREPULSIVE_DELAY_DEFAULT        10
+
+
 #define aREPULSIVE_MAX_SENSORS          10
 
 ///////////////////////////////////////////////////////////////
@@ -98,7 +102,7 @@ private:
 /////////////////////////////////////////////////////////////////////////
 // This is the base class that handles all the repulsive force
 // management on the robot system.
-class avcRepulsiveForces {
+class avcRepulsiveForces : public acpRunable {
   
 public:
   avcRepulsiveForces(void);
@@ -110,6 +114,12 @@ public:
   
   // Returns the resultant force vector
   aErr getForceResultant(avcForceVector *pForceVector);
+  
+  // acpRunable virtual
+  void step (const double time);
+  
+  // acpThread run handle
+  int run(void);
   
 private: 
   
@@ -124,8 +134,14 @@ private:
   
   bool m_bInit;
   int m_nForces;
+  unsigned long m_threadDelay;
+  
+  avcForceVector m_RepulsiveResult;
   
   avcRepulsiveForce *m_pForces[aREPULSIVE_MAX_SENSORS];
+  
+  // Handle on thread object
+  acpThread* m_pThread;
   
 };
 

@@ -130,8 +130,12 @@ avcGP2D12::update(void) {
   // Read from the Stem. This is normalized from 0.0 to 1.0
   // The a2d on the BrainStem GP is 0 to 5V
   // 
+  
+#ifdef aDEBUG_FREPULSIVE // Using Symonym, right???
+  reading = m_pStem->A2D(6, m_a2dport) * 5.0f;
+#else
   reading = m_pStem->A2D_RD(aSERVO_MODULE, m_a2dport) * 5.0f;
-  //reading = m_pStem->A2D_RD(6, m_a2dport);
+#endif
   
   // Calculate the distance
   // Function derived from datasheet figure 5
@@ -172,7 +176,9 @@ avcGP2D12::update(void) {
 avcRepulsiveForces::avcRepulsiveForces(void) :
   m_pStem(NULL),
   m_settings(NULL),
-  m_bInit(false)
+  m_bInit(false),
+  m_threadDelay(aREPULSIVE_DELAY_DEFAULT),
+  m_pThread(NULL)
 {
   
   aErr e = aErrNone;
@@ -192,6 +198,10 @@ avcRepulsiveForces::~avcRepulsiveForces(void)
 {
   
   aErr e = aErrNone;
+  
+  // Destroy the thread object if created
+  if (m_pThread)
+    delete m_pThread;
   
   if (m_ioRef) {
     if (aIO_ReleaseLibRef(m_ioRef, &e))
@@ -213,6 +223,11 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
   
   // Grab the pointer to the settings
   m_settings = settings;
+  
+  // Get the delay value for the thread polling
+  aSettingFile_GetULong(m_ioRef, m_settings, 
+                        aREPULSIVE_DELAY_KEY, &m_threadDelay, 
+                        aREPULSIVE_DELAY_DEFAULT, &e);
   
   // Get access to the logger class
   m_log = logger::getInstance();
@@ -240,6 +255,12 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
   // Set the flag to inidicate that we have been properly initialized
   m_bInit = true;
   
+  m_log->log(INFO, "Starting thread process");
+  
+  // Fire off the thread
+  m_pThread = acpOSFactory::thread("repForce");
+  m_pThread->start(this);
+  
   return e;
   
 }
@@ -252,39 +273,77 @@ avcRepulsiveForces::getForceResultant(avcForceVector *pU)
 {
   
   aErr e = aErrNone;
-  avcRepulsiveForce Uresult;
-  
-  // Make sure you other hackers initialized this first
-  if (!m_pStem || !m_bInit) {
-    m_log->log(ERROR,"%s::%s failed. acpStem is NULL"
-	       " or class not intialized\n"
-	       " \tCall %s::%s(acpStem *)", 
-               __FILE__, __PRETTY_FUNCTION__,
-               __FILE__, __PRETTY_FUNCTION__);
-    return aErrInitialization;
-  }
-  
-  // Update the sensor readings for all the sensors we care about
-  int i = 0;
-  do {
-    m_pForces[i]->update();
-    
-    // Add the new force
-    Uresult += *m_pForces[i]; 
-    
-  } while (m_pForces[++i] != NULL);
-  
 
   // Copy information we care about into the passed in 
   // force vector
-  pU->x = Uresult.getUx();
-  pU->y = Uresult.getUy();
+  pU->x = m_RepulsiveResult.x;
+  pU->y = m_RepulsiveResult.y;
 
   m_log->log(INFO, "[%s] %s: URx=%f URy=%f", 
 	     __FILE__, __PRETTY_FUNCTION__,
 	     pU->x, pU->y);
 
   return e;
+  
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Time step for thread?
+
+void
+avcRepulsiveForces::step (const double time) 
+{
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Thread run handle
+
+int
+avcRepulsiveForces::run(void) 
+{
+  
+  while (!m_pThread->isDone()) {
+    bool bIdle = true;
+    
+    // Update all the sensors since we are not busy
+#ifdef aDEBUG_FREPULSIVE    
+    m_log->log(INFO, "Updating rforce run thread");
+#endif
+    
+    // Make sure you other hackers initialized this first
+    if (!m_pStem || !m_bInit) {
+      m_log->log(ERROR,"%s::%s failed. acpStem is NULL"
+                 " or class not intialized\n"
+                 " \tCall %s::%s(acpStem *)", 
+                 __FILE__, __PRETTY_FUNCTION__,
+                 __FILE__, __PRETTY_FUNCTION__);
+      return aErrInitialization;
+    }
+    
+    // Update the sensor readings for all the sensors we care about
+    avcRepulsiveForce Uresult;
+    int i = 0;
+    do {
+      m_pForces[i]->update();
+      
+      // Add the new force
+      Uresult += *m_pForces[i]; 
+      
+    } while (m_pForces[++i] != NULL);
+    
+    m_RepulsiveResult.x = Uresult.getUx();
+    m_RepulsiveResult.y = Uresult.getUy();
+    
+    // handle any messages first
+    if (m_pThread->handleMessage())
+      bIdle = false;
+    
+    // yield if nothing is happening
+    if (bIdle)
+      m_pThread->yield(m_threadDelay);
+  }
+  
+  return 0;
   
 }
 
@@ -349,12 +408,12 @@ main(int argc,
   frepulsive.init(&stem, settings);
   avcForceVector Urepulsive;
   
-  for (int i = 0; i < 200; i++) {
+  for (int i = 0; i < 100; i++) {
     frepulsive.getForceResultant(&Urepulsive);
-    stem.sleep(100);
+    stem.sleep(50);
   }
   
-  aIO_MSSleep(ioRef, 1000, NULL);
+  aIO_MSSleep(ioRef, 100, NULL);
   
   //////////////////////////////////
   // Clean up and get outta here. Run Forrest, RUN!!!
