@@ -8,6 +8,14 @@
 
 #include "avc2011.h"
 
+// Sensor types that we have been using
+//typedef enum SensorType 
+//{
+//  gp2d12 = 0, // 0
+//  gp2y0a21ky, // 1
+//  gp2y0a710k  // 2
+//};
+
 #define aREPULSIVE_THETA_KEY            "theta"
 #define aREPULSIVE_THETA_DEFAULT        0.0f
 
@@ -17,16 +25,20 @@
 #define aREPULSIVE_DESCRIPTION_KEY      "description"
 #define aREPULSIVE_DESCRIPTION_DEFAULT  "Sensor"
 
+#define aREPULSIVE_SENSORTYPE_KEY       "type"
+#define aREPULSIVE_SENSORTYPE_DEFAULT   "gp2d12"
+
 #define aREPULSIVE_GP2D12_PORT_KEY      "port"
 #define aREPULSIVE_GP2D12_PORT_DEFAULT  0
 
 #define aREPULSIVE_SENSOR_CONFIG_PREFIX "sensor_"
 
 #define aREPULSIVE_DELAY_KEY            "repulsive_delay"
-#define aREPULSIVE_DELAY_DEFAULT        10
-
+#define aREPULSIVE_DELAY_DEFAULT        33
 
 #define aREPULSIVE_MAX_SENSORS          10
+
+#define aREPULSIVE_SENSOR_NUM           4
 
 ///////////////////////////////////////////////////////////////
 // Class definition for a singular repulsive force
@@ -38,7 +50,7 @@ public:
   avcRepulsiveForce(void) : 
     m_ioRef(NULL),
     m_settings(NULL),
-    m_theta(0.0f)
+    m_theta(aREPULSIVE_THETA_DEFAULT)
   {};
   avcRepulsiveForce(acpStem *pStem, const char * settingFileName);
   ~avcRepulsiveForce(void);
@@ -79,6 +91,12 @@ protected:
   // Human readable description of sensor
   acpString m_description;
   
+  // Human readable actual name of sensor
+  acpString m_typeName;
+  
+  // Sensor a2d port that it may be attached to
+  unsigned char m_a2dport;
+  
 }; // end class avcRepulsiveForce
 
 //////////////////////////////////////////////////////////////
@@ -87,16 +105,27 @@ protected:
 class avcGP2D12 : public avcRepulsiveForce {
   
 public:
-  avcGP2D12(acpStem *pStem, const char * settingFileName);
+  avcGP2D12(acpStem *pStem, const char * settingFileName)
+  : avcRepulsiveForce(pStem, settingFileName) {};
   ~avcGP2D12(void){};
   
   aErr update(void);
   
-private:
-  
-  unsigned char m_a2dport;
-  
 }; // end class avcGP2D12
+
+//////////////////////////////////////////////////////////////
+// Model specific sensor class for a Sharp GP2Y0A710K
+// as an example
+class avcGP2Y0A710K : public avcRepulsiveForce {
+  
+public:
+  avcGP2Y0A710K(acpStem *pStem, const char * settingFileName)
+  : avcRepulsiveForce(pStem, settingFileName) {};
+  ~avcGP2Y0A710K(void){};
+  
+  aErr update(void);
+  
+}; // end class avcGP2Y0A710K
 
 
 /////////////////////////////////////////////////////////////////////////
