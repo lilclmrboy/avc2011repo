@@ -31,9 +31,13 @@ const avcRepulsiveForce& avcRepulsiveForce::operator+=(const avcRepulsiveForce& 
 avcRepulsiveForce::avcRepulsiveForce(acpStem *pStem, 
                                      const char * settingFileName) :
   m_theta(aREPULSIVE_THETA_DEFAULT),
-  m_radiusMax(aREPULSIVE_RADIUS_DEFAULT)
+  m_radiusMax(aREPULSIVE_RADIUS_DEFAULT),
+  m_a2dport(aREPULSIVE_GP2D12_PORT_DEFAULT)
 {
   aErr e = aErrNone;
+  
+  // Get a handle on the logger instance
+  m_log = logger::getInstance();
   
   // Create aIO library reference
   aIO_GetLibRef(&m_ioRef, &e);
@@ -50,6 +54,13 @@ avcRepulsiveForce::avcRepulsiveForce(acpStem *pStem,
                         aREPULSIVE_THETA_KEY, &m_theta, 
                         aREPULSIVE_THETA_DEFAULT, &e);
   
+  char *pType;
+  aSettingFile_GetString(m_ioRef, m_settings, 
+                         aREPULSIVE_SENSORTYPE_KEY, &pType, 
+                         aREPULSIVE_SENSORTYPE_DEFAULT, &e);
+  m_typeName = pType;
+  m_typeName.lowercase();
+  
   // Get the human readable description
   char *pDescription;
   aSettingFile_GetString(m_ioRef, m_settings, 
@@ -61,6 +72,13 @@ avcRepulsiveForce::avcRepulsiveForce(acpStem *pStem,
   aSettingFile_GetFloat(m_ioRef, m_settings, 
                         aREPULSIVE_RADIUS_KEY, &m_radiusMax, 
                         aREPULSIVE_RADIUS_DEFAULT, &e);
+  
+  // Get the port that the sensor is attached to
+  int a2dport = 0;
+  aSettingFile_GetInt(m_ioRef, m_settings, 
+                      aREPULSIVE_GP2D12_PORT_KEY, &a2dport, 
+                      aREPULSIVE_GP2D12_PORT_DEFAULT, &e);
+  m_a2dport = (unsigned char) a2dport;
   
 }
 
@@ -82,40 +100,6 @@ avcRepulsiveForce::~avcRepulsiveForce(void)
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// GP2D12 constructor
-avcGP2D12::avcGP2D12(acpStem *pStem, const char * settingFileName) :
-  avcRepulsiveForce(pStem, settingFileName),
-  m_a2dport(aREPULSIVE_GP2D12_PORT_DEFAULT)
-{
-  
-  aIOLib ioRef;
-  aSettingFileRef settings;
-  aErr e = aErrNone;
-  
-  // Create aIO library reference
-  aIO_GetLibRef(&ioRef, &e);
-  
-  // Get a handle on the logger instance
-  m_log = logger::getInstance();
-  
-  // Create setting file reference based on a specific config file
-  // name
-  aSettingFile_Create(ioRef, settingFileName, &settings, &e);
-  
-  // Get the port that the sensor is attached to
-  int a2dport = 0;
-  aSettingFile_GetInt(m_ioRef, m_settings, 
-                      aREPULSIVE_GP2D12_PORT_KEY, &a2dport, 
-                      aREPULSIVE_GP2D12_PORT_DEFAULT, &e);
-  m_a2dport = (unsigned char) a2dport;
-  
-  // Clean up the setting file and ioRef
-  aSettingFile_Destroy(ioRef, settings, &e);
-  aIO_ReleaseLibRef(ioRef, &e);
-  
-}
-
-///////////////////////////////////////////////////////////////////////////
 // GP2D12 sensor update
 aErr
 avcGP2D12::update(void) {
@@ -129,8 +113,7 @@ avcGP2D12::update(void) {
   
   // Read from the Stem. This is normalized from 0.0 to 1.0
   // The a2d on the BrainStem GP is 0 to 5V
-  // 
-  
+    
 #ifdef aDEBUG_FREPULSIVE // Using Symonym, right???
   reading = m_pStem->A2D(6, m_a2dport) * 5.0f;
 #else
@@ -158,7 +141,66 @@ avcGP2D12::update(void) {
   m_force.y = sin(m_theta + aPI) * force_distance;
 
 #ifdef aDEBUG_FREPULSIVE
-  m_log->log(INFO, "%s CH%d: %f (%f cm) [%f] Rx: %f Ry: %f", 
+  
+  m_log->log(INFO, "%s %s CH%d: %f (%f cm) [%f] Rx: %f Ry: %f",
+             (const char *) m_typeName,
+             (const char *) m_description,
+             m_a2dport,
+             reading,
+             distance,
+             force_distance,
+             m_force.x, m_force.y);
+#endif
+  
+  return e;
+  
+}
+
+///////////////////////////////////////////////////////////////////////////
+// GP2Y0A710K sensor update
+aErr
+avcGP2Y0A710K::update(void) {
+  
+  aErr e = aErrNone;
+  float reading = 0.0f;
+  float distance = 0.0f;
+  float force_distance = 0.0f;
+  float a1 = 1.0f;
+  float k = 0.0f;
+    
+  // Read from the Stem. This is normalized from 0.0 to 1.0
+  // The a2d on the BrainStem GP is 0 to 5V
+  
+#ifdef aDEBUG_FREPULSIVE // Using Symonym, right???
+  reading = m_pStem->A2D(6, m_a2dport) * 5.0f;
+#else
+  reading = m_pStem->A2D_RD(aSERVO_MODULE, m_a2dport) * 5.0f;
+#endif
+  
+  // Calculate the distance
+  // Function derived from datasheet figure 5
+  if (reading < 0.001f) reading = 0.001f;
+  
+  // Calculate a rough linear fit in meters
+  distance = (a1 * reading + k) / 100.0f;
+  
+  // We can't get a negative distance
+  if (distance < 0.0f) distance = 0.0f;
+  
+  // Get the force distance and normalize it
+  // when things are detected very close, we want a very large force
+  // when they are far away, we want small force effects 
+  force_distance = (m_radiusMax - distance) / m_radiusMax;
+  
+  // Get the x and y components
+  // This is repulsive, so we want to go backwards
+  m_force.x = cos(m_theta + aPI) * force_distance;
+  m_force.y = sin(m_theta + aPI) * force_distance;
+  
+#ifdef aDEBUG_FREPULSIVE
+  
+  m_log->log(INFO, "%s %s CH%d: %f (%f cm) [%f] Rx: %f Ry: %f",
+             (const char *) m_typeName,
              (const char *) m_description,
              m_a2dport,
              reading,
@@ -217,6 +259,7 @@ aErr
 avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
   
   aErr e = aErrNone;
+  int i = 0;
   
   // Grab the pointer to the Stem. 
   m_pStem = pStem;
@@ -234,24 +277,58 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
   m_log->log(INFO, "Repulsive Force Module initialized");
   
   // Number of forces (aka, sensors)
-  m_nForces = 2;
+  m_nForces = aREPULSIVE_SENSOR_NUM;
   
   // Set all the sensors to zero
   printf("setting all forces to NULL\n");
-  for (int i = 0; i < aREPULSIVE_MAX_SENSORS; i++)
+  for (i = 0; i < aREPULSIVE_MAX_SENSORS; i++)
     m_pForces[i] = NULL;
   
-  // Set up the actual sensors that we are working with
-  acpString sensor_cfg;
-  
-  sensor_cfg.format("%s0.config", aREPULSIVE_SENSOR_CONFIG_PREFIX);  
-  m_pForces[0] = new avcGP2D12(pStem, sensor_cfg);
-  
-  sensor_cfg.format("%s1.config", aREPULSIVE_SENSOR_CONFIG_PREFIX);
-  m_pForces[1] = new avcGP2D12(pStem, sensor_cfg);
-  
-  printf("created forces\n");
-  
+  // walk through the number of sensors we want to use
+  for (i = 0; i < aREPULSIVE_SENSOR_NUM; i++) {
+    
+    acpString sensor_cfg;
+    aSettingFileRef localSettings = NULL;
+    
+    sensor_cfg.format("%s%d.config", aREPULSIVE_SENSOR_CONFIG_PREFIX, i);
+    
+    // Read from a setting file reference to learn what type of sensor 
+    // we should be working with. 
+    aSettingFile_Create(m_ioRef, sensor_cfg, &localSettings, &e);
+    
+    // Type of sensor that we are using
+    char *pType;
+    aSettingFile_GetString(m_ioRef, localSettings, 
+                           aREPULSIVE_SENSORTYPE_KEY, &pType, 
+                           "gp2d12", &e);
+    
+    // Set what kind of sensor we are using
+    acpString typeString(pType);
+    
+    // Set it to lowercase
+    typeString.lowercase();
+    
+    printf("Creating a %s sensor model from %s\n", 
+           (const char *) typeString,
+           (const char *) sensor_cfg);
+    
+    // Set the string to all lowercase
+    if (typeString == "gp2d12" 
+        || typeString == "gp2y0a21ky")
+      m_pForces[i] = new avcGP2D12(pStem, sensor_cfg);
+    else if  (typeString == "gp2y0a710k")
+      m_pForces[i] = new avcGP2Y0A710K(pStem, sensor_cfg);
+    else {
+      m_log->log(INFO, "Sensor type \"%s\" has no class definition",
+                 (const char *)typeString);
+    }
+    
+    
+    // Destroy the local settings file reference
+    aSettingFile_Destroy(m_ioRef, localSettings, &e);
+    
+  } // end of for loop for each sensor type
+    
   // Set the flag to inidicate that we have been properly initialized
   m_bInit = true;
   
@@ -408,7 +485,7 @@ main(int argc,
   frepulsive.init(&stem, settings);
   avcForceVector Urepulsive;
   
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 10; i++) {
     frepulsive.getForceResultant(&Urepulsive);
     stem.sleep(50);
   }
