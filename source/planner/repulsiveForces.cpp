@@ -114,11 +114,7 @@ avcGP2D12::update(void) {
   // Read from the Stem. This is normalized from 0.0 to 1.0
   // The a2d on the BrainStem GP is 0 to 5V
     
-#ifdef aDEBUG_FREPULSIVE // Using Symonym, right???
-  reading = m_pStem->A2D(6, m_a2dport) * 5.0f;
-#else
   reading = m_pStem->A2D_RD(aSERVO_MODULE, m_a2dport) * 5.0f;
-#endif
   
   // Calculate the distance
   // Function derived from datasheet figure 5
@@ -143,7 +139,7 @@ avcGP2D12::update(void) {
 #ifdef aDEBUG_FREPULSIVE
   
   m_log->log(INFO, "%s %s CH%d: %f (%f cm) [%f] Rx: %f Ry: %f",
-             (const char *) m_typeName,
+             "",
              (const char *) m_description,
              m_a2dport,
              reading,
@@ -167,15 +163,12 @@ avcGP2Y0A710K::update(void) {
   float force_distance = 0.0f;
   float a1 = 1.0f;
   float k = 0.0f;
+  
+  printf("fuck ya\n");
     
   // Read from the Stem. This is normalized from 0.0 to 1.0
   // The a2d on the BrainStem GP is 0 to 5V
-  
-#ifdef aDEBUG_FREPULSIVE // Using Symonym, right???
-  reading = m_pStem->A2D(6, m_a2dport) * 5.0f;
-#else
   reading = m_pStem->A2D_RD(aSERVO_MODULE, m_a2dport) * 5.0f;
-#endif
   
   // Calculate the distance
   // Function derived from datasheet figure 5
@@ -197,10 +190,10 @@ avcGP2Y0A710K::update(void) {
   m_force.x = cos(m_theta + aPI) * force_distance;
   m_force.y = sin(m_theta + aPI) * force_distance;
   
-#ifdef aDEBUG_FREPULSIVE
+#ifdef aDEBUG_FREPULSIVEZ
   
   m_log->log(INFO, "%s %s CH%d: %f (%f cm) [%f] Rx: %f Ry: %f",
-             (const char *) m_typeName,
+             "",
              (const char *) m_description,
              m_a2dport,
              reading,
@@ -383,7 +376,7 @@ avcRepulsiveForces::run(void)
     bool bIdle = true;
     
     // Update all the sensors since we are not busy
-#ifdef aDEBUG_FREPULSIVE    
+#ifdef aDEBUG_FREPULSIVEZ    
     m_log->log(INFO, "Updating rforce run thread");
 #endif
     
@@ -431,6 +424,8 @@ avcRepulsiveForces::run(void)
 // > make repulsiveForceTest
 #ifdef aDEBUG_FREPULSIVE
 
+#include "motModule.h"
+
 ////////////////////////////////////////
 // main testing routine for motModule 
 int 
@@ -456,7 +451,8 @@ main(int argc,
   // or, maybe command line arguements
   aArguments_Separate(ioRef, settings, NULL, argc, argv);
     
-  avcRepulsiveForces frepulsive; 
+  avcRepulsiveForces frepulsive;
+  avcMotion motion;
 
   printf("connecting to stem\n");
   
@@ -483,11 +479,16 @@ main(int argc,
   if (timeout == 10) { return 1; }
   
   frepulsive.init(&stem, settings);
+  motion.init(&stem, settings);
   avcForceVector Urepulsive;
   
-  for (int i = 0; i < 10; i++) {
+  for (;;) {//int i = 0; i < 50; i++) {
     frepulsive.getForceResultant(&Urepulsive);
-    stem.sleep(50);
+    
+    Urepulsive.x += 0.25;
+    
+    motion.updateControl(Urepulsive);
+    stem.sleep(250);
   }
   
   aIO_MSSleep(ioRef, 100, NULL);

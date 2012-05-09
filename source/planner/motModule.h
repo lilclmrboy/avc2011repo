@@ -26,7 +26,7 @@ public:
   // force vector. 
   aErr updateControl(const avcForceVector& potential);
 
-#ifdef aDEBUG_MOTMODULE	  
+#ifdef aDEBUG_MOTMODULEZ  
   inline void testUpdateServoValues(const double magnitude, 
 			       const double delta, 
 			       aUInt16 *pServoDrive, 
@@ -52,10 +52,10 @@ private:
   bool m_bInit;
   
   
-  bool updateServoValues(const double magnitude, 
-			 const double delta, 
-			 aUInt8 *pServoDrive, 
-			 aUInt8 *pServoSteer);
+//  bool updateServoValues(const double magnitude, 
+//			 const double delta, 
+//			 aUInt8 *pServoDrive, 
+//			 aUInt8 *pServoSteer);
   
 };
 
