@@ -130,3 +130,5 @@ clean :
 	rm -f $(BIN)/loggerTest
 	rm -f $(BIN)/MatrixTest	
 	rm -f $(BIN)/plannerTest	
+	rm -f $(BIN)/repulsiveForceTest
+
