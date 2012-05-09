@@ -11,7 +11,7 @@
 #include "avc2012Defs.tea"
 
 #define aMOTOR_NUM                          2
-#define aMOTMODULE_THROTTLE_WINDOW_KEY      "motmodule_throttle"
+#define aMOTMODULE_THROTTLE_WINDOW_KEY      "speedscale"
 #define aMOTMODULE_THROTTLE_WINDOW_DEFAULT  0.05f
 
 class avcMotion {
