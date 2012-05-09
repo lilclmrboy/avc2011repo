@@ -10,11 +10,11 @@ bool bDebugHeader = true;
 ///////////////////////////////////////////////////////////////////////////
 // Constructor for the function
 avcMotion::avcMotion() :
-m_pStem(NULL),
-m_settings(NULL),
-m_setpointMax(aMOTOR_SETPOINT_MAX),
-m_bInit(false)
-
+  m_pStem(NULL),
+  m_settings(NULL),
+  m_setpointMax(aMOTOR_SETPOINT_MAX),
+  m_bInit(false),
+  m_fThrottleWindow(aMOTMODULE_THROTTLE_WINDOW_DEFAULT)
 {
   
   aErr e = aErrNone;
@@ -68,6 +68,15 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
 		      &setpoint,
 		      aMOTOR_SETPOINT_MAX,
 		      &e);
+  
+  // Get the throttle max threshold as a percentage
+  aSettingFile_GetFloat(m_ioRef, m_settings, 
+                        aMOTMODULE_THROTTLE_WINDOW_KEY, &m_fThrottleWindow, 
+                        aMOTMODULE_THROTTLE_WINDOW_DEFAULT, &e);
+  
+  // Boundary check the throttle window
+  m_fThrottleWindow = m_fThrottleWindow < 0.0f ? 0.0f : m_fThrottleWindow;
+  m_fThrottleWindow = m_fThrottleWindow > 1.0f ? 1.0f : m_fThrottleWindow;
   
   // Copy this into our member variable. Our setpoint is bounded by a 
   // 2 byte value. Short is enough. Likely even transition to an 
@@ -132,10 +141,12 @@ avcMotion::updateControl(const avcForceVector& potential)
     delta += aPI*2 + delta;
   }
   	  
-    // The magnitude value directly translates to the gas pedal for the 
-    // rear drive motor.
-    unsigned char servoDrive = (unsigned char)(SERVO_NEUT + (127 * magnitude));
-    unsigned char servoSteer = SERVO_NEUT;
+  // The magnitude value directly translates to the gas pedal for the 
+  // rear drive motor.
+  // Scale the change window by the throttle window setpoint value
+  unsigned char servoDrive = (unsigned char)(SERVO_NEUT 
+					     + (127 * m_fThrottleWindow * magnitude));
+  unsigned char servoSteer = SERVO_NEUT;
 
     // Update the servo values
   // The magnitude value directly translates to the gas pedal for the 
@@ -168,7 +179,7 @@ avcMotion::updateControl(const avcForceVector& potential)
     servoSteer = SERVO_NEUT - steerdelta;
   }
       
-  #ifdef aDEBUG_MOTMODULEZ	
+  #ifdef aDEBUG_MOTMODULE	
     // Show us what we got
     if (bDebugHeader) {
       m_log->log(DEBUG,"MotionModule: "
@@ -206,57 +217,6 @@ avcMotion::updateControl(const avcForceVector& potential)
   return e;
   
 }
-
-///////////////////////////////////////////////////////////////////////////
-// Update servo positioning information
-//bool
-//avcMotion::updateServoValues(const double magnitude, 
-//			     const double delta, 
-//			     aUInt16 *pServoDrive, 
-//			     aUInt16 *pServoSteer)
-//{
-//
-//  bool bFinished = true;
-//  unsigned char servoSteer = SERVO_NEUT;
-//  unsigned char steerdelta = 0;
-//  
-//  // The magnitude value directly translates to the gas pedal for the 
-//  // rear drive motor.
-//  unsigned char servoDrive = (unsigned char)(SERVO_NEUT + (127 * magnitude));
-//  
-//  // See how things should unfold
-//  if ((delta >= 0.0f) && (delta < MAX_TURNANGLE)) {
-//    steerdelta = (unsigned char)(delta/MAX_TURNANGLE * SERVO_NEUT);
-//    servoSteer = SERVO_NEUT + steerdelta;
-//  }
-//  else if ((delta >= MAX_TURNANGLE) && (delta < (aPI - MAX_TURNANGLE))) {
-//    steerdelta = SERVO_MIN;
-//    servoSteer = SERVO_MAX;
-//  }
-//  else if ((delta >= (aPI - MAX_TURNANGLE)) && (delta < aPI)) {
-//    steerdelta = (unsigned char)((aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
-//    servoSteer = SERVO_NEUT + steerdelta;
-//  }
-//  else if ((delta >= aPI) && (delta < (aPI + MAX_TURNANGLE))) {
-//    steerdelta = (unsigned char)((delta - aPI)/(MAX_TURNANGLE) * SERVO_NEUT);
-//    servoSteer = SERVO_NEUT - steerdelta;
-//  }
-//  else if ((delta >= (aPI + MAX_TURNANGLE)) && (delta < (aPI*2 - MAX_TURNANGLE))) {
-//    steerdelta = SERVO_MIN;
-//    servoSteer = SERVO_MIN;
-//  }	
-//  else if ((delta >= (aPI*2 - MAX_TURNANGLE)) && (delta < aPI*2)) {
-//    steerdelta = (unsigned char)((2*aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
-//    servoSteer = SERVO_NEUT - steerdelta;
-//  }
-//  
-//  // Copy the values into our results
-//  *pServoDrive = (aUInt16) servoDrive;
-//  *pServoSteer = (aUInt16) servoSteer;
-//  
-//  return bFinished;
-//  
-//}
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -426,7 +386,7 @@ int driveTests(acpStem *pStem, aSettingFileRef settings)
   avcMotion motion;
   avcForceVector Uresult[10];
   aErr e = aErrNone;
-  float range = 0.1f;
+//  float range = 0.1f;
   
   printf("---------------------------------------------------------\n");
   printf("Performing actual motion tests on motModule\n");
@@ -437,14 +397,19 @@ int driveTests(acpStem *pStem, aSettingFileRef settings)
   e = motion.init(pStem, settings);
   
   // Do a steering sweep
-  for (float rad = 0; rad < aPI*2; rad += 0.314159265f ) {
+//  for (float rad = 0; rad < aPI*2; rad += 0.314159265f ) {
+  for (int i = 0; i < 1; i++ ) {
+      
+//    Uresult[0].x = range * cos(rad);
+//    Uresult[0].y = range * sin(rad);
     
-    printf("rad: %f\n", rad);
+    Uresult[0].x = 1.0;
+    Uresult[0].y = 0.0;
     
-    Uresult[0].x = range * cos(rad);
-    Uresult[0].y = range * sin(rad);
+    Uresult[1].x = -1.0;
+    Uresult[1].y = 0.0;
     
-    //e = driveDebug(pStem, &motion, Uresult, 1);
+    e = driveDebug(pStem, &motion, Uresult, 2);
     
   }
   

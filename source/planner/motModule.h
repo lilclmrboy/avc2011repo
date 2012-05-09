@@ -10,7 +10,9 @@
 #include "avc2011.h"
 #include "avc2012Defs.tea"
 
-#define aMOTOR_NUM 2
+#define aMOTOR_NUM                          2
+#define aMOTMODULE_THROTTLE_WINDOW_KEY      "motmodule_throttle"
+#define aMOTMODULE_THROTTLE_WINDOW_DEFAULT  0.05f
 
 class avcMotion {
   
@@ -25,15 +27,6 @@ public:
   // Updates the wheel velocity setpoints with a desired
   // force vector. 
   aErr updateControl(const avcForceVector& potential);
-
-#ifdef aDEBUG_MOTMODULEZ  
-  inline void testUpdateServoValues(const double magnitude, 
-			       const double delta, 
-			       aUInt16 *pServoDrive, 
-			       aUInt16 *pServoSteer)
-  { updateServoValues(magnitude, delta, pServoDrive, pServoSteer); };
-#endif
-  
   
 private: 
   
@@ -50,12 +43,8 @@ private:
   short m_setpointLast[aMOTOR_NUM];
   
   bool m_bInit;
+  float m_fThrottleWindow;
   
-  
-//  bool updateServoValues(const double magnitude, 
-//			 const double delta, 
-//			 aUInt8 *pServoDrive, 
-//			 aUInt8 *pServoSteer);
   
 };
 
