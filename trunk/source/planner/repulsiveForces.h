@@ -38,7 +38,7 @@
 
 #define aREPULSIVE_MAX_SENSORS          10
 
-#define aREPULSIVE_SENSOR_NUM           4
+#define aREPULSIVE_SENSOR_NUM           2
 
 ///////////////////////////////////////////////////////////////
 // Class definition for a singular repulsive force

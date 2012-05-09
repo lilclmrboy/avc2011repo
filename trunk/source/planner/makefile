@@ -97,7 +97,8 @@ motModuleTest : $(OBJ)
 repulsiveForceTest : $(OBJ)
 	$(CC) -c $(CFLAGS) logger.cpp -o $(OBJ)/logger.o
 	$(CC) -c $(CFLAGS) -DaDEBUG_FREPULSIVE repulsiveForces.cpp -o $(OBJ)/repulsiveForces.o
-	$(CC) -g $(CFLAGS) -DaDEBUG_FREPULSIVE $(LFLAGS) $(OBJ)/repulsiveForces.o $(OBJ)/logger.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/repulsiveForcesTest  
+	$(CC) -c $(CFLAGS) motModule.cpp -o $(OBJ)/motModule.o
+	$(CC) -g $(CFLAGS) -DaDEBUG_FREPULSIVE $(LFLAGS) $(OBJ)/motModule.o $(OBJ)/repulsiveForces.o $(OBJ)/logger.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/repulsiveForceTest
 
 .PHONY : posTest
 posTest : $(OBJ)
