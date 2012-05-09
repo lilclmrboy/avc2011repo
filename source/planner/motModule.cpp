@@ -503,7 +503,7 @@ main(int argc,
   // Bail if no stem. What's the point little man?
   if (timeout == 10) { return 1; }
   
-	motion.init(&stem, settings);  
+  motion.init(&stem, settings);  
   
   //////////////////////////////////
   // Begin the real actual testing
@@ -512,7 +512,20 @@ main(int argc,
   //doTests(&stem, settings);
   
   // Drive forward for a bit
-  driveTests(&stem, settings);
+  //driveTests(&stem, settings);
+  
+  // Set the encoder to zero
+  stem.MO_ENC32(4, 0, 0);
+  aInt32 encoder  = 0;
+  
+  // Encoder read tests
+  while (1) {
+    encoder = stem.MO_ENC32(4, 0);
+    
+    printf("enc: %d\n", encoder);
+    
+    stem.sleep(250);
+  }
   
   aIO_MSSleep(ioRef, 1000, NULL);
   

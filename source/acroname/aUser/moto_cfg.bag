@@ -1,0 +1,17 @@
+/* moto_cfg.bag */
+
+/* Set the router */
+4 18 1 6
+
+/* Save the router settings */
+4 19
+
+/* Set the motion channel 0 to pwm encoder */
+4 63 0 0 0x03 0x04
+
+/* Save the motion channel information */
+4 64
+
+/* Reset the module */
+4 24
+

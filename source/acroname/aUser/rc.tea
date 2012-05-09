@@ -1,4 +1,7 @@
-#include avc2012Defs.tea
+#include "avc2012.tea"
+
+#include <aServo.tea>
+
 
 int read_throtRC() { 
   int val=0; 
@@ -56,6 +59,7 @@ char RCEnabled() {
 /* ************************************************************************** */
 int rcWindow(int value) {
 	int result = 0;
+	int db = 0;
 	
 	// Neutral servo count should be off set to 0.
 	result = (value - MIN_DUTY) / SERVO_DIV;
@@ -66,6 +70,13 @@ int rcWindow(int value) {
 	
 	if (result > SERVO_MAX)
 		result = SERVO_MAX;
+	  
+	db = result - SERVO_NEUT;
+	if(db < 0)
+	    db = -db;
+	    
+	if (db < SERVO_DEADBAND)
+	  result = SERVO_NEUT;
 	
 	return result;
 
