@@ -53,7 +53,7 @@ public:
     m_theta(aREPULSIVE_THETA_DEFAULT)
   {};
   avcRepulsiveForce(acpStem *pStem, const char * settingFileName);
-  ~avcRepulsiveForce(void);
+  virtual ~avcRepulsiveForce(void);
   
   // Update the repulsive force
   // Virtual function to map and scale the raw sensor data reading

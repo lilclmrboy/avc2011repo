@@ -46,10 +46,10 @@
 
 // Physical dimension keys, and default values.
 #define aKEY_WHEEL_RADIUS "wheel_radius"
-#define aWHEEL_RADIUS 0.0762 /* radius of wheel in meters (6 inches) */
+#define aWHEEL_RADIUS 0.0762f /* radius of wheel in meters (6 inches) */
 
 #define aKEY_WHEEL_TRACK "wheel_track"
-#define aWHEEL_TRACK 0.162 /* distance in meters between contact point of wheel. */
+#define aWHEEL_TRACK 0.162f /* distance in meters between contact point of wheel. */
 
 #define aKEY_ENCTICK_PER_REV "encoder_ticks"
 #define aENCTICKS	400

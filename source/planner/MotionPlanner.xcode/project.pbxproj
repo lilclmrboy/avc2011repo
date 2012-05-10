@@ -1,0 +1,289 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		27DC348E155B65A30029F72C /* controller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC3485155B65A30029F72C /* controller.cpp */; };
+		27DC348F155B65A30029F72C /* locModule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC3486155B65A30029F72C /* locModule.cpp */; };
+		27DC3490155B65A30029F72C /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC3487155B65A30029F72C /* logger.cpp */; };
+		27DC3491155B65A30029F72C /* mat_math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC3488155B65A30029F72C /* mat_math.cpp */; };
+		27DC3493155B65A30029F72C /* motModule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC348A155B65A30029F72C /* motModule.cpp */; };
+		27DC3495155B65A30029F72C /* planner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC348C155B65A30029F72C /* planner.cpp */; };
+		27DC3496155B65A30029F72C /* repulsiveForces.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC348D155B65A30029F72C /* repulsiveForces.cpp */; };
+		27DC34EE155B68880029F72C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC34E9155B68880029F72C /* main.cpp */; };
+		F02F6D7D0F9F9855008CD09B /* aIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F02F6D7C0F9F9855008CD09B /* aIO.framework */; };
+		F02F6D810F9F987B008CD09B /* aStem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F02F6D7F0F9F987B008CD09B /* aStem.framework */; };
+		F02F6D820F9F987B008CD09B /* aUtil.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F02F6D800F9F987B008CD09B /* aUtil.framework */; };
+		F02F6EF3100409F1004DE0FE /* aMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F02F6EF2100409F1004DE0FE /* aMath.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8DD76F690486A84900D96B5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		27DC3485155B65A30029F72C /* controller.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = controller.cpp; sourceTree = "<group>"; };
+		27DC3486155B65A30029F72C /* locModule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = locModule.cpp; sourceTree = "<group>"; };
+		27DC3487155B65A30029F72C /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger.cpp; sourceTree = "<group>"; };
+		27DC3488155B65A30029F72C /* mat_math.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mat_math.cpp; sourceTree = "<group>"; };
+		27DC3489155B65A30029F72C /* matTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = matTest.cpp; sourceTree = "<group>"; };
+		27DC348A155B65A30029F72C /* motModule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = motModule.cpp; sourceTree = "<group>"; };
+		27DC348B155B65A30029F72C /* mrand.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mrand.c; sourceTree = "<group>"; };
+		27DC348C155B65A30029F72C /* planner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = planner.cpp; sourceTree = "<group>"; };
+		27DC348D155B65A30029F72C /* repulsiveForces.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = repulsiveForces.cpp; sourceTree = "<group>"; };
+		27DC34E5155B68880029F72C /* avc2011.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avc2011.h; sourceTree = "<group>"; };
+		27DC34E6155B68880029F72C /* avc2011Structs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avc2011Structs.h; sourceTree = "<group>"; };
+		27DC34E7155B68880029F72C /* locModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = locModule.h; sourceTree = "<group>"; };
+		27DC34E8155B68880029F72C /* logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = logger.h; sourceTree = "<group>"; };
+		27DC34E9155B68880029F72C /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		27DC34EA155B68880029F72C /* mat_math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mat_math.h; sourceTree = "<group>"; };
+		27DC34EB155B68880029F72C /* motModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = motModule.h; sourceTree = "<group>"; };
+		27DC34EC155B68880029F72C /* mrand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mrand.h; sourceTree = "<group>"; };
+		27DC34ED155B68880029F72C /* planner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = planner.h; sourceTree = "<group>"; };
+		F0262F530FE05ABA0002726A /* aIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aIO.h; path = ../acroname/aInclude/aIO.h; sourceTree = SOURCE_ROOT; };
+		F0262F540FE05ABA0002726A /* aUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aUtil.h; path = ../acroname/aInclude/aUtil.h; sourceTree = SOURCE_ROOT; };
+		F0262F710FE05B4B0002726A /* aStem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aStem.h; path = ../acroname/aInclude/aStem.h; sourceTree = SOURCE_ROOT; };
+		F02F6D720F9F960B008CD09B /* MotionPlanner */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MotionPlanner; sourceTree = BUILT_PRODUCTS_DIR; };
+		F02F6D7C0F9F9855008CD09B /* aIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aIO.framework; path = ../acroname/aBinary/aIO.framework; sourceTree = SOURCE_ROOT; };
+		F02F6D7F0F9F987B008CD09B /* aStem.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aStem.framework; path = ../acroname/aBinary/aStem.framework; sourceTree = SOURCE_ROOT; };
+		F02F6D800F9F987B008CD09B /* aUtil.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aUtil.framework; path = ../acroname/aBinary/aUtil.framework; sourceTree = SOURCE_ROOT; };
+		F02F6EF2100409F1004DE0FE /* aMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aMath.framework; path = ../acroname/aBinary/aMath.framework; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76F660486A84900D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F02F6D7D0F9F9855008CD09B /* aIO.framework in Frameworks */,
+				F02F6D810F9F987B008CD09B /* aStem.framework in Frameworks */,
+				F02F6D820F9F987B008CD09B /* aUtil.framework in Frameworks */,
+				F02F6EF3100409F1004DE0FE /* aMath.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* macx_aGarciaApp */ = {
+			isa = PBXGroup;
+			children = (
+				F0262F520FE05A910002726A /* aInclude */,
+				08FB7795FE84155DC02AAC07 /* source */,
+				F02F6D7C0F9F9855008CD09B /* aIO.framework */,
+				F02F6EF2100409F1004DE0FE /* aMath.framework */,
+				F02F6D7F0F9F987B008CD09B /* aStem.framework */,
+				F02F6D800F9F987B008CD09B /* aUtil.framework */,
+				F02F6D730F9F960B008CD09B /* Products */,
+			);
+			name = macx_aGarciaApp;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* source */ = {
+			isa = PBXGroup;
+			children = (
+				27DC34E5155B68880029F72C /* avc2011.h */,
+				27DC34E6155B68880029F72C /* avc2011Structs.h */,
+				27DC34E7155B68880029F72C /* locModule.h */,
+				27DC34E8155B68880029F72C /* logger.h */,
+				27DC34E9155B68880029F72C /* main.cpp */,
+				27DC34EA155B68880029F72C /* mat_math.h */,
+				27DC34EB155B68880029F72C /* motModule.h */,
+				27DC34EC155B68880029F72C /* mrand.h */,
+				27DC34ED155B68880029F72C /* planner.h */,
+				27DC3485155B65A30029F72C /* controller.cpp */,
+				27DC3486155B65A30029F72C /* locModule.cpp */,
+				27DC3487155B65A30029F72C /* logger.cpp */,
+				27DC3488155B65A30029F72C /* mat_math.cpp */,
+				27DC3489155B65A30029F72C /* matTest.cpp */,
+				27DC348A155B65A30029F72C /* motModule.cpp */,
+				27DC348B155B65A30029F72C /* mrand.c */,
+				27DC348C155B65A30029F72C /* planner.cpp */,
+				27DC348D155B65A30029F72C /* repulsiveForces.cpp */,
+			);
+			name = source;
+			sourceTree = "<group>";
+		};
+		F0262F520FE05A910002726A /* aInclude */ = {
+			isa = PBXGroup;
+			children = (
+				F0262F530FE05ABA0002726A /* aIO.h */,
+				F0262F710FE05B4B0002726A /* aStem.h */,
+				F0262F540FE05ABA0002726A /* aUtil.h */,
+			);
+			name = aInclude;
+			sourceTree = "<group>";
+		};
+		F02F6D730F9F960B008CD09B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F02F6D720F9F960B008CD09B /* MotionPlanner */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76F620486A84900D96B5E /* MotionPlanner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "MotionPlanner" */;
+			buildPhases = (
+				8DD76F640486A84900D96B5E /* Sources */,
+				8DD76F660486A84900D96B5E /* Frameworks */,
+				8DD76F690486A84900D96B5E /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MotionPlanner;
+			productInstallPath = "$(HOME)/bin";
+			productName = macx_aGarciaApp;
+			productReference = F02F6D720F9F960B008CD09B /* MotionPlanner */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "MotionPlanner" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 08FB7794FE84155DC02AAC07 /* macx_aGarciaApp */;
+			productRefGroup = F02F6D730F9F960B008CD09B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8DD76F620486A84900D96B5E /* MotionPlanner */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76F640486A84900D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				27DC348E155B65A30029F72C /* controller.cpp in Sources */,
+				27DC348F155B65A30029F72C /* locModule.cpp in Sources */,
+				27DC3490155B65A30029F72C /* logger.cpp in Sources */,
+				27DC3491155B65A30029F72C /* mat_math.cpp in Sources */,
+				27DC3493155B65A30029F72C /* motModule.cpp in Sources */,
+				27DC3495155B65A30029F72C /* planner.cpp in Sources */,
+				27DC3496155B65A30029F72C /* repulsiveForces.cpp in Sources */,
+				27DC34EE155B68880029F72C /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB923308733DC60010E9CD /* aBinary */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				INSTALL_PATH = /usr/local/bin;
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/.";
+				OTHER_LDFLAGS = "-lm";
+				PRODUCT_NAME = MotionPlanner;
+			};
+			name = aBinary;
+		};
+		1DEB923708733DC60010E9CD /* aBinary */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
+				GCC_TREAT_NONCONFORMANT_CODE_ERRORS_AS_WARNINGS = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
+				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
+				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				GCC_WARN_MISSING_PARENTHESES = YES;
+				GCC_WARN_MULTIPLE_DEFINITION_TYPES_FOR_SELECTOR = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_PROTOTYPE_CONVERSION = YES;
+				GCC_WARN_SHADOW = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				GCC_WARN_STRICT_SELECTOR_MATCH = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNKNOWN_PRAGMAS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_PARAMETER = NO;
+				GCC_WARN_UNUSED_VALUE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../acroname/aInclude,
+					../acroname/aSource,
+					../acroname/aUser,
+					../acroname/aSystem,
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-D",
+					aUNIX,
+					"-D",
+					aMACX,
+				);
+				SDKROOT = macosx10.6;
+			};
+			name = aBinary;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "MotionPlanner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923308733DC60010E9CD /* aBinary */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = aBinary;
+		};
+		1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "MotionPlanner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923708733DC60010E9CD /* aBinary */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = aBinary;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

@@ -1,0 +1,159 @@
+// !$*UTF8*$!
+{
+	08FB7793FE84155DC02AAC07 /* Project object */ = {
+		activeBuildConfigurationName = aBinary;
+		activeExecutable = F02F6D740F9F960B008CD09B /* aGarciaApp */;
+		activeTarget = 8DD76F620486A84900D96B5E /* aGarciaApp */;
+		addToTargets = (
+			8DD76F620486A84900D96B5E /* aGarciaApp */,
+		);
+		codeSenseManager = F02F6D600F9F936A008CD09B /* Code sense */;
+		executables = (
+			F02F6D740F9F960B008CD09B /* aGarciaApp */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					341,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					419,
+					60,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 268866699;
+			PBXWorkspaceStateSaveDate = 268866699;
+		};
+		sourceControlManager = F02F6D5F0F9F936A008CD09B /* Source Control */;
+		userBuildSettings = {
+			OBJROOT = ./macx_aGarciaApp_Data;
+			SYMROOT = ../../acroname;
+		};
+	};
+	8DD76F620486A84900D96B5E /* aGarciaApp */ = {
+		activeExec = 0;
+		executables = (
+			F02F6D740F9F960B008CD09B /* aGarciaApp */,
+		);
+	};
+	F0262F530FE05ABA0002726A /* aIO.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {805, 10738}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 2985}";
+			sepNavWindowFrame = "{{61, 344}, {864, 1187}}";
+		};
+	};
+	F0262F540FE05ABA0002726A /* aUtil.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {805, 13538}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 2960}";
+			sepNavWindowFrame = "{{84, 323}, {864, 1187}}";
+		};
+	};
+	F0262F710FE05B4B0002726A /* aStem.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {805, 5754}}";
+			sepNavSelRange = "{7842, 37}";
+			sepNavVisRange = "{6813, 1837}";
+			sepNavWindowFrame = "{{38, 365}, {864, 1187}}";
+		};
+	};
+	F02F6D5F0F9F936A008CD09B /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+	};
+	F02F6D600F9F936A008CD09B /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	F02F6D690F9F9433008CD09B /* aGarciaApp.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {805, 3066}}";
+			sepNavSelRange = "{2496, 0}";
+			sepNavVisRange = "{1330, 2452}";
+			sepNavWindowFrame = "{{1160, 163}, {864, 1187}}";
+		};
+	};
+	F02F6D6C0F9F947E008CD09B /* acpGarcia.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {439, 9912}}";
+			sepNavSelRange = "{4857, 0}";
+			sepNavVisRange = "{4597, 376}";
+			sepNavWindowFrame = "{{1125, 167}, {674, 1178}}";
+		};
+	};
+	F02F6D6D0F9F947E008CD09B /* acpGarcia.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {438, 2352}}";
+			sepNavSelRange = "{4478, 0}";
+			sepNavVisRange = "{3719, 1608}";
+			sepNavWindowFrame = "{{840, 439}, {492, 1037}}";
+		};
+	};
+	F02F6D740F9F960B008CD09B /* aGarciaApp */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = aGarciaApp;
+		savedGlobals = {
+		};
+		sourceDirectories = (
+		);
+	};
+}
