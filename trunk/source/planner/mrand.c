@@ -28,16 +28,20 @@
       double vector zget, execute
           mrandgt(zget, stream);
       where mrandgt is void function.  */
-
+#include "math.h"
 #include "mrand_seeds.h"
+#include "mrand.h"
+
 #define norm   2.328306549295728e-10  /* 1.0/(m1+1) */
 #define norm2  2.328318825240738e-10  /* 1.0/(m2+1) */
 #define m1     4294967087.0
 #define m2     4294944443.0
+extern double sqrt(double);
+extern double ln(double);
 
 /* Generate the next normal random variate */
 double normrand(void) {
-	double u1, u2i, v1, v2, w, y;
+	double u1, u2, v1, v2, w, y;
 	do {
 		u1 = mrand(50);
 		u2 = mrand(1050);
@@ -63,11 +67,11 @@ double mrand(int stream)
            s20 = drng[stream][3], s21 = drng[stream][4], s22 = drng[stream][5];
 
     p = 1403580.0 * s11 - 810728.0 * s10;
-    k = p / m1;  p -= k*m1;  if (p < 0.0) p += m1;
+    k = (long) (p / m1);  p -= (double) k * m1;  if (p < 0.0) p += m1;
     s10 = s11;   s11 = s12;  s12 = p;
 
     p = 527612.0 * s22 - 1370589.0 * s20;
-    k = p / m2;  p -= k*m2;  if (p < 0.0) p += m2;
+    k = (long) (p / m2);  p -= (double) k * m2;  if (p < 0.0) p += m2;
     s20 = s21;   s21 = s22;  s22 = p; 
 
     drng[stream][0] = s10;  drng[stream][1] = s11;  drng[stream][2] = s12;

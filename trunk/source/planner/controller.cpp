@@ -44,7 +44,7 @@ int PlaySound(const char * file)
 avcController::avcController(void) : 
 m_settings(NULL),
 m_ioRef(NULL),
-m_lithium(0.2) 
+m_lithium(0.2f) 
 {
 	aErr e;
 	
@@ -84,7 +84,7 @@ avcController::init(const int argc, const char* argv[]) {
 	aSettingFile_GetFloat (m_ioRef,m_settings,
 						 "speedscale",
 						 &m_lithium,
-						 .2,
+						 0.2f,
 						 &e);
 
 	
@@ -198,7 +198,7 @@ avcController::run(void) {
 		if (rcswitch) {
 			printf("."); fflush(stdout);
 		  
-		  int temp = random() % 5;
+		  int temp = (int) random() % 5;
 		  
 		  switch (temp) {               
 		    case 1:
@@ -230,7 +230,7 @@ avcController::run(void) {
 			break;
 		}
 		
-		int extradelay = random() % 1000;
+		int extradelay = (int) random() % 1000;
 	  
 		// Wait for 1600 msec (long enough for clucking to finish
 		m_stem.sleep(500 + extradelay);

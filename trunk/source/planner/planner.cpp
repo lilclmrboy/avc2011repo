@@ -70,7 +70,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	aSettingFile_GetFloat (ioRef, settings,
 						 aKEY_MAX_UNPASSED_DISTANCE,
 						 &maxUnPassedDistanceToWaypoint,
-						 0.5,
+						 0.5f,
 						 &e);
 	// Copy flag to member variable.
 	m_maxUnPassedDistanceToWaypoint = maxUnPassedDistanceToWaypoint;
@@ -79,7 +79,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	aSettingFile_GetFloat (ioRef, settings,
 						 aKEY_MIN_UNPASSED_DISTANCE,
 						 &minUnPassedDistanceToWaypoint,
-						 .5,
+						 0.5f,
 						 &e);
 	// Copy flag to member variable.
 	m_minUnPassedDistanceToWaypoint = minUnPassedDistanceToWaypoint;

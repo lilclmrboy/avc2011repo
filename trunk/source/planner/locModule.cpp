@@ -38,10 +38,11 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		throw acpException(e, "getting wheel track from settings");
 	m_wheelTrk = fSetVar;
 
-	if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_ENCTICK_PER_REV,  
-			&fSetVar, aENCTICKS, &e)) 
+	int iSetVar;
+	if(aSettingFile_GetInt(m_ioRef, m_settings, aKEY_ENCTICK_PER_REV,  
+			&iSetVar, aENCTICKS, &e)) 
 		throw acpException(e, "getting encoder ticks per rev from settings");	
-	m_ticksPerRev = fSetVar;
+		m_ticksPerRev = iSetVar;
 
 	if (m_pStem && m_pStem->isConnected()) {
 		/*lets do some initialization. First we need to find out
@@ -231,7 +232,7 @@ avcPosition::getGPSTimeSec(void) {
 bool 
 avcPosition::getGPSQuality(void) {
 
-  aUInt8 value = 0;
+  unsigned char value = 0;
   m_pStem->IIC_RD(GPS_MODULE, 33, 1, &value);
   m_logger->log(INFO, "Quality value: %d", value);
 	return !!(value);
