@@ -21,8 +21,7 @@ public:
 		m_P(3,3),
 		m_Q(3,3),
 		m_W(3,3),
-		m_rEncoder(0),
-		m_lEncoder(0),
+		m_Encoder(0),
 		m_wheelRd(0.07626),
 		m_wheelCf(0.479),
 		m_wheelTrk(0.15),
@@ -45,8 +44,7 @@ public:
 		m_P(3,3),
 		m_Q(3,3),
 		m_W(3,3),
-		m_rEncoder(0),
-		m_lEncoder(0),
+		m_Encoder(0),
 		m_wheelRd(0.07626),
 		m_wheelCf(0.479),
 		m_wheelTrk(0.15),
@@ -103,8 +101,7 @@ private:
 	Matrix m_P;
 	Matrix m_Q;
 	Matrix m_W;	
-	int m_rEncoder;
-	int m_lEncoder;
+	int m_Encoder;
 	double m_wheelRd; //wheel radius	
 	double m_wheelCf; //wheel circumference
 	double m_wheelTrk; //wheel track, or dist between contact points.

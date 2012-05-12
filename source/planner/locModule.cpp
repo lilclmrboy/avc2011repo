@@ -105,109 +105,111 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 void 
 avcPosition::updateState() {
 	
-//	//Grab the clock.
-//	long int curClock = clock();
-//	long tmElapsed = (curClock - m_curClock) * 1000 / CLOCKS_PER_SEC;
-//	
-//	//First we must do an estimation step, given the previous position
-//  //and the current control information. Lets do this in meters, and then
-//	//convert to lat, lon.
-//	// We should be doing this step quickly enough that we can treat the movement
-//	// as linear.
-//	/*
-//	* x(k+1) = { cos(theta)fVel + x(k) } + vx(k)
-//	*	y(k+1) = { sin(theta)fVel + y(k) } + vy(k)
-//	* theta(k+1) = { dTheta + theta } + vtheta(k)
-//	* vx(k+1) = { cos(theta)fdist/T } + vVx(k)
-//	* vy(k+1) = { sin(theta)fdist/T } + vVy(k)
-//	* vtheta(k+1) = { dTheta/T }
-//	*/
-//	
-//	//Get the new encoder readings.
-//	int curEncR = getEncoderValue(aMOTOR_RIGHT);
-//	int curEncL = getEncoderValue(aMOTOR_LEFT);
-//	
-//  
-//  	//convert those into distance traveled each wheel.
-//	double dWheelR = ((double) (curEncR - m_rEncoder))/ m_ticksPerRev;
-//	double dWheelL = ((double) (curEncL - m_lEncoder))/ m_ticksPerRev; 
-//	m_logger->log(INFO, "CEncR: %d, CEncL: %d, m_rE: %d m_lE: %d, Dleft: %f, Dright: %f", 
-//				  curEncR, curEncL, m_rEncoder, m_lEncoder, dWheelL, dWheelR);
-//	//The forward moving distance
-//	double fDist = dWheelR*m_wheelRd/2 + dWheelL*m_wheelRd/2; 	
-//
-//	m_rEncoder= curEncR;
-//	m_lEncoder= curEncL;
-//	
-//	//The rotational difference
-//	double fRot = dWheelR*m_wheelRd/m_wheelTrk - dWheelL*m_wheelRd/m_wheelTrk;
-//	double dx = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER;
-//	double dy = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER;
-//	
-//	Matrix state(3,1);
-//	//JLG flipped cos/sin - world cordinate system aligns latitude values with,
-//	//values along the x axis, and longitude values along the y axis.
-//	state(1,1) = dx + m_curPos.x;
-//	state(2,1) = dy + m_curPos.y;
-//	state(3,1) = m_curPos.h + (fRot * RAD_TO_DEG);
-//  m_logger->log(INFO, "Set State: ");
-//	//EKF from here on out.
-//	//We need to calculate the probability matrix for the motion each time.
-//	Matrix F(3,3), G(3,3);
-//	
-//	//Setting diags for F to 1, and G 33 to 1.
-//	F(1,1) = F(2,2) = F(3,3) = 1;
-//	//Calculating the Linearization Matrix points for F.
-//	F(1,3) = -dx*sin(m_curPos.h) - dy*cos(m_curPos.h);
-//	F(2,3) = dx*cos(m_curPos.h) - dy*cos(m_curPos.h);
-//	
-//	//Calculate the Linearization Matrix points for G.
-//	G(1,1) = cos(m_curPos.h); G(1,2) = -sin(m_curPos.h);
-//  G(2,1) = sin(m_curPos.h); G(2,2) = cos(m_curPos.h);
-//  G(3,3) = 1;
-//  m_logger->log(INFO, "Calculated F and G: ");
-//	
-//	//Now calculate the probabilit matrix for the position.
-//	m_P = F * m_P * F.transpose() + G * m_Q * G.transpose();
-//	
-//	//We really only want to use GPS information if enough time has passed.
-//	int curSec = getGPSTimeSec();
-//  
-//	double curLat = m_curPos.y;
-//	double curLon = m_curPos.x;
-//	double curHed = m_curPos.h;
-//	if (tmElapsed > 1200 && curSec != m_curGPSTimeSec && getGPSQuality()) {
-//	
-//		//Grab current GPS and compass settings, otherwise we'll rely on 
-//		//a Kalman update with encoder values only.
-//		curLat = getGPSLatitude();
-//		curLon = getGPSLongitude();
-//		curHed = getCMPSHeading();
-//		
-//		//Lets to this KF thing.
-//		Matrix V(3, 1);
-//		V(1,1) = curLat - state(1,1);
-//		V(2,1) = curLon - state(2,1);
-//		V(3,1) = curHed - state(3,1);
-//	  
-//	  Matrix S(3, 3), R(3, 3);
-//	  S = m_P + m_W;
-//	  R = m_P * S.invert();
-//	  state = state + R * V;
-//	  
-//	  m_P = m_P - R * m_P;
-//	
-//		fprintf(gps_track, "%3.12f, %2.12f, %3.1f\n", 
-//		       curLon, curLat, curHed);
-//		m_curGPSTimeSec = curSec;
-//		
-//		m_curClock = clock();
-//	}
-//
-//	//Localization is done. Update the current robot state.
-//	m_curPos.x = state(2, 1);
-//	m_curPos.y = state(1, 1);
-//	m_curPos.h = state(3, 1);
+	//Grab the clock.
+	long int curClock = clock();
+	long tmElapsed = (curClock - m_curClock) * 1000 / CLOCKS_PER_SEC;
+	
+	//First we must do an estimation step, given the previous position
+  //and the current control information. Lets do this in meters, and then
+	//convert to lat, lon.
+	// We should be doing this step quickly enough that we can treat the movement
+	// as linear.
+	/*
+	* x(k+1) = { cos(theta)fVel + x(k) } + vx(k)
+	*	y(k+1) = { sin(theta)fVel + y(k) } + vy(k)
+	* theta(k+1) = { dTheta + theta } + vtheta(k)
+	* vx(k+1) = { cos(theta)fdist/T } + vVx(k)
+	* vy(k+1) = { sin(theta)fdist/T } + vVy(k)
+	* vtheta(k+1) = { dTheta/T }
+	*/
+	
+	//Get the new encoder readings.
+	int curEnc = getEncoderValue(SPAD_USB_ENCODER);
+  
+  	//convert those into distance traveled each wheel.
+	double dWheel = ((double) (curEnc - m_Encoder))/ m_ticksPerRev;
+	m_logger->log(INFO, "CEnc: %d, m_E: %d, D: %f", 
+				  curEnc, m_Encoder, dWheel);
+	//The forward moving distance
+	double fDist = dWheel * m_wheelRd;
+
+	m_Encoder= curEnc;
+	
+	// Estimate the direction and changes in x and y
+  // TODO *fixme* read the steering servo AUTPAD_STEER vaule
+  int steerServo = SERVO_NEUT;
+  // transform the servo into an angle
+  double driveAngle = (steerServo - SERVO_NEUT) * MAX_TURNANGLE/SERVO_NEUT;
+  // TODO *fixme* transform drive angle into a rotation rate
+  double fRot = driveAngle;
+	// estimate change in x and dy
+	double dx = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER;
+	double dy = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER;
+	
+	Matrix state(3,1);
+	//JLG flipped cos/sin - world cordinate system aligns latitude values with,
+	//values along the x axis, and longitude values along the y axis.
+	state(1,1) = dx + m_curPos.x;
+	state(2,1) = dy + m_curPos.y;
+	state(3,1) = m_curPos.h + (fRot * RAD_TO_DEG);
+  m_logger->log(INFO, "Set State: ");
+	//EKF from here on out.
+	//We need to calculate the probability matrix for the motion each time.
+	Matrix F(3,3), G(3,3);
+	
+	//Setting diags for F to 1, and G 33 to 1.
+	F(1,1) = F(2,2) = F(3,3) = 1;
+	//Calculating the Linearization Matrix points for F.
+	F(1,3) = -dx*sin(m_curPos.h) - dy*cos(m_curPos.h);
+	F(2,3) = dx*cos(m_curPos.h) - dy*cos(m_curPos.h);
+	
+	//Calculate the Linearization Matrix points for G.
+	G(1,1) = cos(m_curPos.h); G(1,2) = -sin(m_curPos.h);
+  G(2,1) = sin(m_curPos.h); G(2,2) = cos(m_curPos.h);
+  G(3,3) = 1;
+  m_logger->log(INFO, "Calculated F and G: ");
+	
+	//Now calculate the probabilit matrix for the position.
+	m_P = F * m_P * F.transpose() + G * m_Q * G.transpose();
+	
+	//We really only want to use GPS information if enough time has passed.
+	int curSec = getGPSTimeSec();
+  
+	double curLat = m_curPos.y;
+	double curLon = m_curPos.x;
+	double curHed = m_curPos.h;
+	if (tmElapsed > 1200 && curSec != m_curGPSTimeSec && getGPSQuality()) {
+	
+		//Grab current GPS and compass settings, otherwise we'll rely on 
+		//a Kalman update with encoder values only.
+		curLat = getGPSLatitude();
+		curLon = getGPSLongitude();
+		curHed = getCMPSHeading();
+		
+		//Lets to this KF thing.
+		Matrix V(3, 1);
+		V(1,1) = curLat - state(1,1);
+		V(2,1) = curLon - state(2,1);
+		V(3,1) = curHed - state(3,1);
+	  
+	  Matrix S(3, 3), R(3, 3);
+	  S = m_P + m_W;
+	  R = m_P * S.invert();
+	  state = state + R * V;
+	  
+	  m_P = m_P - R * m_P;
+	
+		fprintf(gps_track, "%3.12f, %2.12f, %3.1f\n", 
+		       curLon, curLat, curHed);
+		m_curGPSTimeSec = curSec;
+		
+		m_curClock = clock();
+	}
+
+	//Localization is done. Update the current robot state.
+	m_curPos.x = state(2, 1);
+	m_curPos.y = state(1, 1);
+	m_curPos.h = state(3, 1);
 	
 }
 
@@ -294,9 +296,9 @@ avcPosition::getCMPSHeading(void) {
 
 /////////////////////////////////////////////////////////////////////////////
 int 
-avcPosition::getEncoderValue(unsigned char motor) {
+avcPosition::getEncoderValue(unsigned char spad) {
   //We could do more here to check for encoder wrap.
-//  return m_pStem->MO_ENC32(aMOTO_MODULE, motor);
+  return m_pStem->MO_ENC32(aMOTO_MODULE, spad);
   return 0;
 }
 
