@@ -22,10 +22,7 @@ public:
 		m_Q(3,3),
 		m_W(3,3),
 		m_Encoder(0),
-		m_wheelRd(0.07626),
-		m_wheelCf(0.479),
-		m_wheelTrk(0.15),
-		m_ticksPerRev(400), 
+		m_metersPerTick(0.04358f), 
 		m_settings(NULL)
 	{	
 		aErr e;
@@ -45,10 +42,7 @@ public:
 		m_Q(3,3),
 		m_W(3,3),
 		m_Encoder(0),
-		m_wheelRd(0.07626),
-		m_wheelCf(0.479),
-		m_wheelTrk(0.15),
-		m_ticksPerRev(400),
+		m_metersPerTick(0.04358),
 		m_settings(NULL)
 	{
 		aErr e;
@@ -102,10 +96,11 @@ private:
 	Matrix m_Q;
 	Matrix m_W;	
 	int m_Encoder;
-	double m_wheelRd; //wheel radius	
-	double m_wheelCf; //wheel circumference
-	double m_wheelTrk; //wheel track, or dist between contact points.
-	int m_ticksPerRev; //encoder ticks per revolution.
+	double m_steerAngle;
+	//double m_wheelRd; //wheel radius	
+	//double m_wheelCf; //wheel circumference
+	//double m_wheelTrk; //wheel track, or dist between contact points.
+	double m_metersPerTick; //encoder ticks per revolution.
 
 	//Our controller owns this we'll let them delete.	
 	aSettingFileRef m_settings;
@@ -119,7 +114,8 @@ private:
 	double getGPSLongitude(void);
 	double getGPSLatitude(void);
 	double getCMPSHeading(void);
-	int getEncoderValue(unsigned char motor);
+	int getEncoderValue(void);
+	double getSteeringAngle(void);
 	
 };
 

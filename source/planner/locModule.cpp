@@ -28,21 +28,20 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 	
 	//first we'll grab some settings from the settings file.
 	float fSetVar;
-	if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_RADIUS,  
-			&fSetVar, aWHEEL_RADIUS, &e)) 
-		throw acpException(e, "getting wheel radius from settings");
-	m_wheelRd = fSetVar;
+	//if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_RADIUS,  
+	//		&fSetVar, aWHEEL_RADIUS, &e)) 
+	//	throw acpException(e, "getting wheel radius from settings");
+	//m_wheelRd = fSetVar;
 
-	if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_TRACK,  
-			&fSetVar, aWHEEL_TRACK, &e)) 
-		throw acpException(e, "getting wheel track from settings");
-	m_wheelTrk = fSetVar;
+	//if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_TRACK,  
+	//		&fSetVar, aWHEEL_TRACK, &e)) 
+	//	throw acpException(e, "getting wheel track from settings");
+	//m_wheelTrk = fSetVar;
 
-	int iSetVar;
-	if(aSettingFile_GetInt(m_ioRef, m_settings, aKEY_ENCTICK_PER_REV,  
-			&iSetVar, aENCTICKS, &e)) 
-		throw acpException(e, "getting encoder ticks per rev from settings");	
-		m_ticksPerRev = iSetVar;
+	if(aSettingFile_GetFloat(m_ioRef, m_settings, KEY_METER_PER_TICK,  
+			&fSetVar, METER_PER_TICK, &e)) 
+		throw acpException(e, "getting meter per tick");	
+		m_metersPerTick = fSetVar;
 
 	if (m_pStem && m_pStem->isConnected()) {
 		/*lets do some initialization. First we need to find out
@@ -124,27 +123,32 @@ avcPosition::updateState() {
 	*/
 	
 	//Get the new encoder readings.
-	int curEnc = getEncoderValue(SPAD_USB_ENCODER);
+	int curEnc = getEncoderValue();
   
   	//convert those into distance traveled each wheel.
-	double dWheel = ((double) (curEnc - m_Encoder))/ m_ticksPerRev;
-	m_logger->log(INFO, "CEnc: %d, m_E: %d, D: %f", 
-				  curEnc, m_Encoder, dWheel);
+	//double dWheel = ((double) (curEnc - m_Encoder))/ m_ticksPerRev;
 	//The forward moving distance
-	double fDist = dWheel * m_wheelRd;
+	//double fDist = dWheel * m_wheelRd;
 
+	double fVelocity = m_metersPerTick * (curEnc - m_Encoder) / tmElapsed;
+	m_logger->log(INFO, "Current Speed: %lf", fVelocity);
+	
 	m_Encoder= curEnc;
 	
 	// Estimate the direction and changes in x and y
-  // TODO *fixme* read the steering servo AUTPAD_STEER vaule
-  int steerServo = SERVO_NEUT;
-  // transform the servo into an angle
-  double driveAngle = (steerServo - SERVO_NEUT) * MAX_TURNANGLE/SERVO_NEUT;
-  // TODO *fixme* transform drive angle into a rotation rate
-  double fRot = driveAngle;
+  double steerAngle = getSteeringAngle();
+	
+	// Change in steering angle.
+  double fRot = steerAngle - m_steerAngle;
+	
+	// Store current reading.
+	m_steerAngle = steerAngle;
+	
 	// estimate change in x and dy
-	double dx = cos(m_curPos.h * DEG_TO_RAD)* fDist * aLAT_PER_METER;
-	double dy = sin(m_curPos.h * DEG_TO_RAD)* fDist * aLON_PER_METER;
+	// TODO - we should use previous state vector to calculate position here.
+	// previous velocity.
+	double dx = cos(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLAT_PER_METER;
+	double dy = sin(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLON_PER_METER;
 	
 	Matrix state(3,1);
 	//JLG flipped cos/sin - world cordinate system aligns latitude values with,
@@ -282,6 +286,7 @@ avcPosition::getGPSLatitude(void)
 	return retVal;
 }
 
+
 /////////////////////////////////////////////////////////////////////////////
 
 double
@@ -294,12 +299,25 @@ avcPosition::getCMPSHeading(void) {
 	return retVal;
 }
 
+
 /////////////////////////////////////////////////////////////////////////////
 int 
-avcPosition::getEncoderValue(unsigned char spad) {
+avcPosition::getEncoderValue(void) {
+	
   //We could do more here to check for encoder wrap.
-  return m_pStem->MO_ENC32(aMOTO_MODULE, spad);
-  return 0;
+  return m_pStem->MO_ENC32(aMOTO_MODULE, ENCODER_IDX);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+double
+avcPosition::getSteeringAngle(void) {
+
+	//We could do more here to check for encoder wrap.
+  unsigned char setpoint = m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER);
+	return (setpoint - SERVO_NEUT) * MAX_TURNANGLE / SERVO_NEUT;
+	
 }
 
 

@@ -15,7 +15,7 @@
 
 #define aSERVO_MODULE 2
 #define aUSBSTEM_MODULE 40
-#define GPS_MODULE (char) 0xD0
+#define GPS_MODULE (unsigned char) 0xD0
 #define aMOTO_MODULE  4
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,6 +37,10 @@
 // Servo	input
 
 #define MIN_DUTY 688
+
+///////////////////////////////////////////////////////////////////////////////
+// Encoder - 32bit
+#define ENCODER_IDX 0 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Servo output
@@ -67,8 +71,7 @@
 #define aSPAD_USB_REPULSIVE_UX 1
 #define aSPAD_USB_REPULSIVE_UY 2
 
-// Encoder - 32bit
-#define SPAD_USB_ENCODER  4 
+
 
 
 

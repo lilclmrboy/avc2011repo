@@ -516,17 +516,49 @@ main(int argc,
   
   // Set the encoder to zero
   stem.MO_ENC32(4, 0, 0);
-  aInt32 encoder  = 0;
+  aInt32 prevEncoder  = 0;
   
   // Encoder read tests
-  while (1) {
-    encoder = stem.MO_ENC32(4, 0);
-    
-    printf("enc: %d\n", encoder);
-    
-    stem.sleep(250);
-  }
+	bool bStart = false;
+	double distance = 0.0;
+	long unsigned int prevClock;
+	aIO_GetMSTicks(ioRef, &prevClock, NULL);
   
+	int trial = 15;
+	while (trial > 0) {
+		
+		if(!bStart && (bStart = !(stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE)))) {
+			printf("Starting record\n");
+			distance = 0.0;
+			// set steering.
+			stem.PAD_IO(aSERVO_MODULE, AUTPAD_STEER, trial * 17);
+		}
+			 
+		if(bStart && !(bStart = !(stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE)))) {
+			printf("Ending record: steering setpoint %d, distance: %e\n", trial * 17, distance);
+			--trial;
+		}
+			
+		long unsigned int curClock;
+		aIO_GetMSTicks(ioRef, &curClock, NULL);
+		long tmElapsed = (curClock - prevClock);
+		prevClock = curClock;
+		
+		aInt32 curEncoder = stem.MO_ENC32(4, 0);
+		
+    aInt32 encTicks = curEncoder - prevEncoder;
+		distance += encTicks * METER_PER_TICK;
+		prevEncoder = curEncoder;
+		
+    printf("enabled %s distance: %e Time Elapsed: %ld\n",
+					 bStart? "true": "false", distance, tmElapsed);
+    
+    aIO_MSSleep(ioRef, 200, NULL);
+		
+		
+  }
+  stem.PAD_IO(aSERVO_MODULE, AUTPAD_STEER, 128);
+	
   aIO_MSSleep(ioRef, 1000, NULL);
   
   //////////////////////////////////
