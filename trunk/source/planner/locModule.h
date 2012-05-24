@@ -101,6 +101,7 @@ private:
 	//double m_wheelCf; //wheel circumference
 	//double m_wheelTrk; //wheel track, or dist between contact points.
 	double m_metersPerTick; //encoder ticks per revolution.
+  double m_wheelBase;
 
 	//Our controller owns this we'll let them delete.	
 	aSettingFileRef m_settings;
@@ -116,6 +117,7 @@ private:
 	double getCMPSHeading(void);
 	int getEncoderValue(void);
 	double getSteeringAngle(void);
+  int getAccelerometerReadings (float *ddx, float *ddy, float *ddz);
 	
 };
 

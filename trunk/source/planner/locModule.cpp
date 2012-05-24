@@ -42,6 +42,11 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 			&fSetVar, METER_PER_TICK, &e)) 
 		throw acpException(e, "getting meter per tick");	
 		m_metersPerTick = fSetVar;
+  
+  if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_BASE,  
+			&fSetVar, WHEEL_BASE, &e)) 
+		throw acpException(e, "getting wheel track from settings");
+	m_wheelBase = fSetVar;
 
 	if (m_pStem && m_pStem->isConnected()) {
 		/*lets do some initialization. First we need to find out
@@ -133,22 +138,19 @@ avcPosition::updateState() {
 	double fVelocity = m_metersPerTick * (curEnc - m_Encoder) / tmElapsed;
 	m_logger->log(INFO, "Current Speed: %lf", fVelocity);
 	
-	m_Encoder= curEnc;
-	
-	// Estimate the direction and changes in x and y
-  double steerAngle = getSteeringAngle();
-	
-	// Change in steering angle.
-  double fRot = steerAngle - m_steerAngle;
-	
-	// Store current reading.
-	m_steerAngle = steerAngle;
-	
-	// estimate change in x and dy
+	// estimate change in x and y and heading
 	// TODO - we should use previous state vector to calculate position here.
 	// previous velocity.
 	double dx = cos(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLAT_PER_METER;
 	double dy = sin(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLON_PER_METER;
+  
+	// Change in heading due to the previous steering angle
+  double fRot = fVelocity/m_wheelBase * tan(m_steerAngle);
+  
+	// Store current readings (for the next predict phase)
+  double steerAngle = getSteeringAngle();
+	m_steerAngle = steerAngle;
+  m_Encoder= curEnc;
 	
 	Matrix state(3,1);
 	//JLG flipped cos/sin - world cordinate system aligns latitude values with,
@@ -310,7 +312,6 @@ avcPosition::getEncoderValue(void) {
 
 
 /////////////////////////////////////////////////////////////////////////////
-
 double
 avcPosition::getSteeringAngle(void) {
 
@@ -318,6 +319,22 @@ avcPosition::getSteeringAngle(void) {
   unsigned char setpoint = m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER);
 	return (setpoint - SERVO_NEUT) * MAX_TURNANGLE / SERVO_NEUT;
 	
+}
+
+/////////////////////////////////////////////////////////////////////////////
+int
+avcPosition::getAccelerometerReadings (float *ddx, float *ddy, float *ddz) {
+  if(!ddx || !ddy || !ddz){
+    m_logger->log(ERROR, "Null pointer passed to getAccelerometerReadings");
+    return -1;
+  }
+
+  *ddx = m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_X_CHAN);
+  *ddy = m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Y_CHAN);
+  *ddz = m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Z_CHAN);
+  
+  return 0;
+  
 }
 
 
@@ -393,5 +410,6 @@ main(int argc,
   return 0;
   
 }
+
 
 #endif
