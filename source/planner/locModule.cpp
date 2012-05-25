@@ -8,6 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////
 aErr
 avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
+	
 	m_pStem = pStem;
 	m_settings = settings;
 	m_logger = logger::getInstance();	
@@ -48,7 +49,9 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		throw acpException(e, "getting wheel track from settings");
 	m_wheelBase = fSetVar;
 
+#ifdef aUSE_GPS	
 	if (m_pStem && m_pStem->isConnected()) {
+		
 		/*lets do some initialization. First we need to find out
 		* whether we have a good GPS signal. If we do, we'll init
 		* our starting position from the GPS position information
@@ -57,6 +60,7 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		int timeout = 0;
 		bool haveGPS = false;
 		while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
+			m_logger->log(INFO, "Setting up GPS subsystem %d", timeout);
 			aIO_MSSleep(m_ioRef, 1000, NULL);
 			++timeout;
 			
@@ -99,9 +103,15 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 //    //Compass is accurate to 4 degrees.
 //    m_W(3,3) = DEG_TO_RAD * 2.5;
 		return aErrNone;
-	} else {
+	} 
+	
+	else {
 		return aErrConnection;
 	}
+#endif
+	
+	return aErrNone;
+	
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -290,14 +300,39 @@ avcPosition::getGPSLatitude(void)
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Take the compass bearing from the CMP10 board
+// See:
+// http://www.robot-electronics.co.uk/htm/cmps10i2c.htm
+// 
+// Reading from registers 2 and 3 gives the bearing with a 0.1
+// increment resolution
+// Result should be in radians 
 
 double
 avcPosition::getCMPSHeading(void) {
-	double retVal = 0.0;
-//	short tmp = 0;
-//	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_CMPS_HD) << 8; 
-//  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_CMPS_HD+1);
-//	retVal = ((double) tmp)/10.0;
+	
+  double retVal = 0.0;
+  unsigned short tmp = 0;
+	unsigned char data[3] = { 0,0,0 };
+	
+	// Set the I2C read pointer
+	data[0] = 1;
+	aPacketRef p = m_pStem->createPacket(CMPS_MODULE, 1, data);
+	m_pStem->sendPacket(p);
+  
+	// Read from the I2C module
+	// Compass bearing as a word is in register 1
+	// so we should read 2 bytes out of it
+	m_pStem->IIC_RD(aUSBSTEM_MODULE, CMPS_MODULE, 1, data);
+	
+	// Convert readings into a word
+	tmp = 255 - data[0];
+	
+	// Convert into the reading we need in degrees to radians
+	retVal = 2 * 0.0174532925 * ((double) tmp * (255.0 / 360.0));
+	
+	//printf("0x%X (%d) [%f]\n", data[0], tmp, retVal);
+	
 	return retVal;
 }
 
@@ -395,10 +430,19 @@ main(int argc,
   
   // Bail if no stem. What's the point little man?
   if (timeout == 10) { return 1; }
-  
+	
 	position.init(&stem, settings);
+	
+	for (int i = 0; i < 500; i++) {
+		
+		position.getCMPSHeadingTest();
+		
+		//printf("Compass reading: %f\n", position.getCMPSHeadingTest());
+		
+		aIO_MSSleep(ioRef, 50, NULL);
+	}
   
-  printf("GPS Quality: %s\n", (position.getGPSQuality())? "good": "bad");
+  //printf("GPS Quality: %s\n", (position.getGPSQuality())? "good": "bad");
   
   aIO_MSSleep(ioRef, 1000, NULL);
   

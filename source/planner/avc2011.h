@@ -52,7 +52,7 @@
 //#define aWHEEL_TRACK 0.162f /* distance in meters between contact point of wheel. */
 
 #define aKEY_WHEEL_BASE "wheel_base"
-#define WHEEL_BASE 0.25
+#define WHEEL_BASE 0.25f
 
 #define KEY_METER_PER_TICK "meter_per_tick"
 #define METER_PER_TICK	0.04358f // 0.47244 meters/rev divided by 10.84 ticks/rev

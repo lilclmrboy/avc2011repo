@@ -79,6 +79,8 @@ public:
     m_curPos.y = newPos.state.y;
     m_curPos.h = newPos.state.h; 
   }
+	
+	inline double getCMPSHeadingTest(void) { return getCMPSHeading(); };
 
 private:
 	acpStem* m_pStem;
