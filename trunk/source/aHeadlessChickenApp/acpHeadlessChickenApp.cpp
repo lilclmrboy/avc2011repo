@@ -45,7 +45,6 @@ acpStemApp("chicken", stem),
 m_pTabs(NULL),
 m_stem(stem),
 m_bInited(false),
-m_bGP2Present(false),
 m_nextUpdateSystem(0),
 m_bAwaitingUpdate(false),
 m_updateIndex(0)
@@ -91,19 +90,7 @@ acpHeadlessChicken::stemCreateUI(void)
     m_analogs[i]->setUnits("V");
   }
   
-  createLabelControl(c, acpControlLabel::kHeading, "GP 2.0 Controls");
-  m_pGPStatus = createLabelControl(c, acpControlLabel::kBody, "---");
-  
-  // Show servo controls
-  acpControl* pServos = m_pTabs->addTab();
-  pServos->setText("Servos");
-  c = new acpColumnView(pServos);
-  
-  // Show servo controls
-  for (i = 0; i < aGP_NUMSERVOS_USED; i++) {
-    m_pServo[i] = new acpStemServo(this, c, aGP_MODULE, i);
-    m_pServo[i]->setEnable(false);
-  }
+
   
 } // stemCreateUI
 
@@ -121,23 +108,7 @@ acpHeadlessChicken::stemUIIdle(void)
     
     // THe GP 2.0 is much slower than our code. Let's let it catch up
     m_stem.sleep(500);
-    
-    // Check that a GP is present by sending a debug packet
-    aUInt8 data[2] = {33,44};
-    if (m_stem.DEBUG(aGP_MODULE, data, 2)) {
-      m_bGP2Present = true;
-      
-      for (int i = 0; i < aGP_NUMSERVOS_USED; i++)
-        m_pServo[i]->setEnable(true);
-      
-      // Set the GUI status
-      m_pGPStatus->setText("Connected");
-    }
-    else {
-      // Set the GUI status
-      m_pGPStatus->setText("Not responding. Controls Disabled");
-    }
-    
+        
     // Configure and set any digital pins 
     
     m_bInited = true;
@@ -211,15 +182,7 @@ acpHeadlessChicken::handleSelection(acpView* pControl)
   // Toggle the show profile plot
   if (pControl == m_pTabs) {
     
-    switch (m_pTabs->currentTab()) {
-      case aSERVOPANE:
-        if (m_bGP2Present) {
-          for (int i = 0; i < aGP_NUMSERVOS_USED; i++) {
-            m_pServo[i]->refresh();
-          }
-        }
-        break;
-        
+    switch (m_pTabs->currentTab()) {        
       default:
         break;
     }
