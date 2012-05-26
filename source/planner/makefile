@@ -70,7 +70,8 @@ OBJECTS = \
 			$(OBJ)/logger.o \
 			$(OBJ)/locModule.o \
 			$(OBJ)/mat_math.o \
-			$(OBJ)/repulsiveForces.o
+			$(OBJ)/repulsiveForces.o\
+			$(OBJ)/gps.o
 
 .PHONY : app
 app : $(OBJ) $(BIN)/$(APP)

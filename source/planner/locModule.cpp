@@ -1,5 +1,6 @@
 #include "locModule.h"
 #include <sys/time.h>
+#include "gps.h"
 
 //We'll wait up to 30 seconds for a GPS lock on initialization.
 #define aGPS_LOCK_STEPS 3
@@ -360,13 +361,18 @@ avcPosition::getSteeringAngle(void) {
 int
 avcPosition::getAccelerometerReadings (float *ddx, float *ddy, float *ddz) {
   if(!ddx || !ddy || !ddz){
-    m_logger->log(ERROR, "Null pointer passed to getAccelerometerReadings");
+    m_logger->log(ERROR, "__FUNCTION__: Null pointer passed to getAccelerometerReadings");
     return -1;
   }
-
+	
   *ddx = m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_X_CHAN);
   *ddy = m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Y_CHAN);
   *ddz = m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Z_CHAN);
+  
+  if (-1 == *ddx || -1 == *ddy || -1 == *ddz){
+    m_logger->log(ERROR, "__FUNCTION__: A2D timeout while reading accelerometer");
+    return -1;
+  }
   
   return 0;
   
