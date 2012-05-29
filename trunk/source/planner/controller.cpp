@@ -71,22 +71,22 @@ avcController::init(const int argc, const char* argv[]) {
 	aErr e = aErrNone;
 	
 	PlaySound("okay.wav");
-
+  
 	if (aSettingFile_Create(m_ioRef,
-				"chicken.config",
-				&m_settings,
-				&e))
+                          "chicken.config",
+                          &m_settings,
+                          &e))
 		throw acpException(e, "creating settings");
 	
 	aArguments_Separate(m_ioRef, m_settings, NULL, argc, argv);
-
+  
 	
 	aSettingFile_GetFloat (m_ioRef,m_settings,
-						 "speedscale",
-						 &m_lithium,
-						 0.2f,
-						 &e);
-
+                         "speedscale",
+                         &m_lithium,
+                         0.2f,
+                         &e);
+  
 	
 	// This starts up the stem link processing and is called once to spawn
 	// the link management thread... based on the settings.
@@ -133,7 +133,7 @@ avcController::getRepulsiveVector(avcForceVector& r) {
 	avcForceVector sonar;
 	avcForceVector ir;
 	
-		
+  
 	temp = m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_USB_REPULSIVE_UX) << 8; 
 	m_stem.sleep(10);
 	temp |= m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_USB_REPULSIVE_UX+1);
@@ -156,7 +156,7 @@ avcController::getRepulsiveVector(avcForceVector& r) {
 	//temp = m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY) << 8; 
 	//temp |= m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY+1);
 	//sonar.y = (double) temp / 32767.0;
-		
+  
 	
 	// Combine all the repulsive forces
 	r.x = ir.x + sonar.x;
@@ -168,7 +168,7 @@ avcController::getRepulsiveVector(avcForceVector& r) {
 	
 	r.y = r.y > 1.0 ? 1.0 : r.y;
 	r.y = r.y < -1.0 ? -1.0 : r.y;
-
+  
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -182,9 +182,9 @@ avcController::run(void) {
 	avcStateVector pos;
 	avcForceVector rv;
 	aErr e = aErrNone;
-    avcRepulsiveForces frepulsive; 
-
-
+  avcRepulsiveForces frepulsive; 
+  
+  
 	
 	//////////////////////////////////////////////
 	m_log->log(INFO, "Checking for the go signal\n");
@@ -205,7 +205,7 @@ avcController::run(void) {
 		      PlaySound("cluck1.wav");
 		      break;
 		    case 2:
-			PlaySound("cluck7.wav");
+          PlaySound("cluck7.wav");
 		      break;
 		    case 3:     
 		      PlaySound("cluck4.wav");
@@ -213,7 +213,7 @@ avcController::run(void) {
 		    case 4:     
 		      PlaySound("cluck8.wav");
 		      break;  
-   		    case 5:     
+        case 5:     
 		      PlaySound("cluck9.wav");
 		      break;  
 		      
@@ -223,7 +223,7 @@ avcController::run(void) {
 		      
 		  }
 		  
-	
+      
 		}
 		else {
 			PlaySound("playwithmyself.wav");
@@ -264,7 +264,7 @@ avcController::run(void) {
 			
 			if (bManualOverride) {
 				PlaySound("ohgodherewego.wav");
-			
+        
 				//Lets clear the encoders to zero.
 				m_stem.MO_ENC32(aSERVO_MODULE, AUTPAD_THROT, SERVO_NEUT);
 				m_stem.MO_ENC32(aSERVO_MODULE, AUTPAD_STEER, SERVO_NEUT);
@@ -300,6 +300,9 @@ avcController::run(void) {
 		motivation.x *= m_lithium;
 		motivation.y *= m_lithium;
 		e = m_mot.updateControl(motivation);
+    
+    if(aErrNone != e)
+      m_log->log(ERROR, "m_mot.updateControl returned error: %d", (int) e);
 		
 		// sleep a bit so we don't wail on the processor
 		aIO_MSSleep(m_ioRef, 1, NULL);
@@ -360,6 +363,6 @@ avcController::checkAndWaitForStem()
 		
 	}
 }
-	
-	
-	
+
+
+

@@ -1,4 +1,6 @@
 #include "planner.h"
+#include <limits.h>
+#include <unistd.h>
 
 #define DEG_TO_RAD (aPI/180)
 #define RAD_TO_DEG (180/aPI)

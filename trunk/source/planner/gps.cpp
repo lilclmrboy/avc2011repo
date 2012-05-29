@@ -93,3 +93,5 @@ int aGPM_GetMagHeading(acpStem* pStem){return aGPM_Get3DigitInt(pStem, GPS_IIC_A
 int aGPM_GetSpeed(acpStem* pStem){return aGPM_Get3DigitInt(pStem, GPS_IIC_ADDR, 52);}
 
 
+
+
