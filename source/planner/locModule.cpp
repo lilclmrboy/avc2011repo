@@ -265,16 +265,9 @@ avcPosition::getGPSLongitude(void)
 
 	//We're in the western hemisphere, so we'll have a negative longitude.
 	double retVal = 0.0;
-//	short tmp = 0;
-//	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON) << 8; 
-//  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+1);
-//	retVal = (double) tmp;
-//	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+2) << 8; 
-//  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+3);
-//	retVal += ((double) tmp)/60.0;
-//	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+4) << 8; 
-//  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LON+5);
-//	retVal += ((double) tmp)/600000.0;
+  retVal = (double)(aGPM_GetLongitudeDegrees(m_pStem));
+  retVal += (double)(aGPM_GetLongitudeMinutes(m_pStem)) / 60.0;
+  retVal += (double)(aGPM_GetLongitudeFrac(m_pStem)) / 600000.0;
 	
 	return retVal * -1.0;
 }
@@ -285,17 +278,9 @@ double
 avcPosition::getGPSLatitude(void)
 {
 	double retVal = 0.0;
-//	short tmp = 0;
-//	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT) << 8; 
-//  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+1);
-//	retVal = (double) tmp;
-//	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+2) << 8; 
-//  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+3);
-//	retVal += ((double) tmp)/60.0;
-//	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+4) << 8; 
-//  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_LAT+5);
-//	retVal += ((double) tmp)/600000.0;
-
+  retVal = aGPM_GetLatitudeDegrees(m_pStem);
+  retVal += (double)(aGPM_GetLatitudeMinutes(m_pStem)) / 60.0;
+  retVal += (double)(aGPM_GetLatitudeFrac(m_pStem)) / 600000.0;
 	return retVal;
 }
 

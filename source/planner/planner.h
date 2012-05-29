@@ -10,6 +10,11 @@
 #include "avc2011.h"
 #include "logger.h"
 
+// ubuntu seems to be missing PATH_MAX
+#ifndef PATH_MAX
+# define PATH_MAX 4096
+#endif
+
 class avcPlanner {
 
 public:
