@@ -7,7 +7,7 @@
 #ifndef _locModule_H_
 #define _locModule_H_
 
-#include "avc2011.h"
+#include "avc.h"
 #include "mat_math.h"
 
 class avcPosition 

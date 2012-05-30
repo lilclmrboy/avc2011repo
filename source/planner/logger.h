@@ -4,7 +4,7 @@
 #ifndef _logger_H_
 #define _logger_H_
 
-#include "avc2011.h"
+#include "avc.h"
 #include <time.h>
 
 // We can add more to this as we see needed

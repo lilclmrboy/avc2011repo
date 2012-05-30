@@ -6,7 +6,7 @@
 
 #ifndef _gps_H_
 #define _gps_H_
-#include "avc2011.h"
+#include "avc.h"
 
 #define GPS_IIC_ADDR 0xD0
 
@@ -14,7 +14,7 @@ int aGPM_Get2DigitInt(acpStem* pStem, char addr, char reg);
 int aGPM_Get3DigitInt(acpStem* pStem, char addr, char reg);
 int aGPM_Get4DigitInt(acpStem* pStem, char addr, char reg);
 int aGPM_GetAltitude(acpStem* pStem, char addr);
-int aGPM_GetAnalogInput(acpStem* pStem, char addr, char n);
+int aGPM_GetAnalogInput(acpStem* pStem, char addr, int n);
 
 int aGPM_GetHours(acpStem* pStem);
 int aGPM_GetMinutes(acpStem* pStem);

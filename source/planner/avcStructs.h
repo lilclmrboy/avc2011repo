@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
-// File: avc2011Structs.h
+// File: avcStructs.h
 // This file contain type definitions used in multiple modules, such as
 // component vectors, state vectors, and the like.
 //
-#ifndef _avc2011Structs_H_
-#define _avc2011Structs_H_
+#ifndef _avcStructs_H_
+#define _avcStructs_H_
 
 using std::vector;
 
@@ -85,4 +85,4 @@ typedef struct avcWaypointVector {
 	}
 } avcWaypointVector;
 
-#endif //_avc2011Structs_H_
+#endif //_avcStructs_H_

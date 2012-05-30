@@ -49,8 +49,8 @@
 #include "logger.h"
 #include "aCmd.tea"
 #include "aStem.h"
-#include "avc2012Defs.tea"
-#include "avc2011Structs.h"
+#include "avcDefs.tea"
+#include "avcStructs.h"
 #include "repulsiveForces.h"
 
 /////////////////////////////////////////////////////////////////////////////

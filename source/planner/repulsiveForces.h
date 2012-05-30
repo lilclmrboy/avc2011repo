@@ -6,7 +6,7 @@
 #ifndef _repulsiveForces_H_
 #define _repulsiveForces_H_
 
-#include "avc2011.h"
+#include "avc.h"
 
 // Sensor types that we have been using
 //typedef enum SensorType 
