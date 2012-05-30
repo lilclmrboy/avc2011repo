@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		271AA45D1575BE77001C402D /* gps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 271AA45B1575BE77001C402D /* gps.cpp */; };
 		27DC348E155B65A30029F72C /* controller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC3485155B65A30029F72C /* controller.cpp */; };
 		27DC348F155B65A30029F72C /* locModule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC3486155B65A30029F72C /* locModule.cpp */; };
 		27DC3490155B65A30029F72C /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27DC3487155B65A30029F72C /* logger.cpp */; };
@@ -35,6 +36,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		271AA45B1575BE77001C402D /* gps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gps.cpp; sourceTree = "<group>"; };
+		271AA45C1575BE77001C402D /* gps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gps.h; sourceTree = "<group>"; };
 		27DC3485155B65A30029F72C /* controller.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = controller.cpp; sourceTree = "<group>"; };
 		27DC3486155B65A30029F72C /* locModule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = locModule.cpp; sourceTree = "<group>"; };
 		27DC3487155B65A30029F72C /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger.cpp; sourceTree = "<group>"; };
@@ -44,8 +47,8 @@
 		27DC348B155B65A30029F72C /* mrand.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mrand.c; sourceTree = "<group>"; };
 		27DC348C155B65A30029F72C /* planner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = planner.cpp; sourceTree = "<group>"; };
 		27DC348D155B65A30029F72C /* repulsiveForces.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = repulsiveForces.cpp; sourceTree = "<group>"; };
-		27DC34E5155B68880029F72C /* avc2011.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avc2011.h; sourceTree = "<group>"; };
-		27DC34E6155B68880029F72C /* avc2011Structs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avc2011Structs.h; sourceTree = "<group>"; };
+		27DC34E5155B68880029F72C /* avc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avc.h; sourceTree = "<group>"; };
+		27DC34E6155B68880029F72C /* avcStructs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avcStructs.h; sourceTree = "<group>"; };
 		27DC34E7155B68880029F72C /* locModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = locModule.h; sourceTree = "<group>"; };
 		27DC34E8155B68880029F72C /* logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = logger.h; sourceTree = "<group>"; };
 		27DC34E9155B68880029F72C /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -56,7 +59,7 @@
 		F0262F530FE05ABA0002726A /* aIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aIO.h; path = ../acroname/aInclude/aIO.h; sourceTree = SOURCE_ROOT; };
 		F0262F540FE05ABA0002726A /* aUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aUtil.h; path = ../acroname/aInclude/aUtil.h; sourceTree = SOURCE_ROOT; };
 		F0262F710FE05B4B0002726A /* aStem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aStem.h; path = ../acroname/aInclude/aStem.h; sourceTree = SOURCE_ROOT; };
-		F028758E15702840003F8EFD /* avc2012Defs.tea */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = avc2012Defs.tea; path = ../acroname/aUser/avc2012Defs.tea; sourceTree = SOURCE_ROOT; };
+		F028758E15702840003F8EFD /* avcDefs.tea */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = avcDefs.tea; path = ../acroname/aUser/avcDefs.tea; sourceTree = SOURCE_ROOT; };
 		F02875C115702C00003F8EFD /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		F02F6D720F9F960B008CD09B /* MotionPlanner */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MotionPlanner; sourceTree = BUILT_PRODUCTS_DIR; };
 		F02F6D7C0F9F9855008CD09B /* aIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = aIO.framework; path = ../acroname/aBinary/aIO.framework; sourceTree = SOURCE_ROOT; };
@@ -97,10 +100,12 @@
 		08FB7795FE84155DC02AAC07 /* source */ = {
 			isa = PBXGroup;
 			children = (
+				271AA45B1575BE77001C402D /* gps.cpp */,
+				271AA45C1575BE77001C402D /* gps.h */,
 				F02875C115702C00003F8EFD /* makefile */,
-				F028758E15702840003F8EFD /* avc2012Defs.tea */,
-				27DC34E5155B68880029F72C /* avc2011.h */,
-				27DC34E6155B68880029F72C /* avc2011Structs.h */,
+				F028758E15702840003F8EFD /* avcDefs.tea */,
+				27DC34E5155B68880029F72C /* avc.h */,
+				27DC34E6155B68880029F72C /* avcStructs.h */,
 				27DC34E7155B68880029F72C /* locModule.h */,
 				27DC34E8155B68880029F72C /* logger.h */,
 				27DC34E9155B68880029F72C /* main.cpp */,
@@ -202,6 +207,7 @@
 				27DC3496155B65A30029F72C /* repulsiveForces.cpp in Sources */,
 				27DC34EE155B68880029F72C /* main.cpp in Sources */,
 				F02875C215702C00003F8EFD /* makefile in Sources */,
+				271AA45D1575BE77001C402D /* gps.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,8 +7,8 @@
 #ifndef _motModule_H_
 #define _motModule_H_
 
-#include "avc2011.h"
-#include "avc2012Defs.tea"
+#include "avc.h"
+#include "avcDefs.tea"
 
 #define aMOTOR_NUM                          2
 #define aMOTMODULE_THROTTLE_WINDOW_KEY      "speedscale"

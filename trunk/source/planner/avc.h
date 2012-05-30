@@ -15,8 +15,8 @@
 #include <math.h>
 
 // Project specific headers
-#include "avc2011Structs.h"
-#include "avc2012Defs.tea"
+#include "avcStructs.h"
+#include "avcDefs.tea"
 #include "logger.h"
 
 // Utilites

@@ -7,7 +7,7 @@
 // Its inputs are the current robot position, repulsive vector, 
 // and the overall goal. It outputs the atractive force vector based 
 //on these inputs.
-#include "avc2011.h"
+#include "avc.h"
 #include "logger.h"
 
 // ubuntu seems to be missing PATH_MAX
