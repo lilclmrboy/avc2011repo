@@ -354,7 +354,11 @@ double
 avcPosition::getSteeringAngle(void) {
 
 	//We could do more here to check for encoder wrap.
-  unsigned char setpoint = m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER);
+  // Cubic method.
+	
+	
+	// Linear method.
+	unsigned char setpoint = m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER);
 	return (setpoint - SERVO_NEUT) * MAX_TURNANGLE / SERVO_NEUT;
 	
 }

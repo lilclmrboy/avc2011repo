@@ -52,19 +52,35 @@
 //#define aWHEEL_TRACK 0.162f /* distance in meters between contact point of wheel. */
 
 #define aKEY_WHEEL_BASE "wheel_base"
-#define WHEEL_BASE 0.25f
+#define WHEEL_BASE 0.3302f
 
 #define KEY_METER_PER_TICK "meter_per_tick"
 #define METER_PER_TICK	0.04358f // 0.47244 meters/rev divided by 10.84 ticks/rev
+
+//cubic curve for servo setpoints > 128
+// pconst + x * pa1 + x^2 * pa2 + x^3 * pa3
+#define PCONST -108.9563
+#define PA1	1.3637
+#define PA2	-5.4696e-3
+#define PA3 8.1417e-6
+
+
+//cubic curve for serov sepoints < 128
+// nconst + x * na1 + x^2 * na2 + x^3 * n a3
+#define NCONST 19.7800
+#define NA1	-0.1004
+#define NA2	-1.0727e-3
+#define NA3 9.4986e-6
+
+
+// Maximum turn angle
+#define MAX_TURNANGLE 0.3168111
 
 // degree of latitude per meter at 40 degrees latitude.
 #define aLAT_PER_METER 0.00000900620125
 
 // degree of Longitude per meter
 #define aLON_PER_METER 0.000011710448481
-
-// Maximum turn angle
-#define MAX_TURNANGLE 0.698131701f
 
 
 #endif //_avc2011_H_
