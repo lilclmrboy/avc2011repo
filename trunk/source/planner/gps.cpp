@@ -9,7 +9,7 @@ int aGPM_Get2DigitInt(acpStem* pStem, char addr, char reg)
   
   aPacketRef regPacket = pStem->createPacket(addr, 1, reg_buffer);
   pStem->sendPacket(regPacket);
-  pStem->IIC_RD(aUSBSTEM_MODULE, addr, 2, read_buffer);
+  pStem->IIC_RD(aUSBSTEM_MODULE, addr+1, 2, read_buffer);
 
   ret_value = (int)(read_buffer[0]*10 + read_buffer[1]);
   return ret_value;
@@ -23,7 +23,7 @@ int aGPM_Get3DigitInt(acpStem* pStem, char addr, char reg)
   
   aPacketRef regPacket = pStem->createPacket(addr, 1, reg_buffer);
   pStem->sendPacket(regPacket);
-  pStem->IIC_RD(aUSBSTEM_MODULE, addr, 3, read_buffer);
+  pStem->IIC_RD(aUSBSTEM_MODULE, addr+1, 3, read_buffer);
   
   /* typecasts avoid overflow */
   ret_value = ((int)read_buffer[0])*100 + ((int)read_buffer[1])*10 + (int)read_buffer[2];
@@ -38,7 +38,7 @@ int aGPM_Get4DigitInt(acpStem* pStem, char addr, char reg)
   
   aPacketRef regPacket = pStem->createPacket(addr, 1, reg_buffer);
   pStem->sendPacket(regPacket);
-  pStem->IIC_RD(aUSBSTEM_MODULE, addr, 4, read_buffer);
+  pStem->IIC_RD(aUSBSTEM_MODULE, addr+1, 4, read_buffer);
   
   /* typecasts avoid overflow */
   ret_value = ((int)read_buffer[0])*1000 + ((int)read_buffer[1])*100 + ((int)read_buffer[2])*10 + (int)read_buffer[3];
@@ -61,10 +61,25 @@ int aGPM_GetAnalogInput(acpStem* pStem, char addr, int n)
   
   aPacketRef regPacket = pStem->createPacket(addr, 1, reg_buffer);
   pStem->sendPacket(regPacket);
-  pStem->IIC_RD(aUSBSTEM_MODULE, addr, 1, read_buffer);
+  pStem->IIC_RD(aUSBSTEM_MODULE, addr+1, 1, read_buffer);
 
   ret_value = read_buffer[0];
 
+  return ret_value;
+}
+
+int aGPM_GetGPSQuality(acpStem* pStem)
+{
+  int ret_value = 0;
+  aUInt8 read_buffer[1] = {0};
+  aUInt8 reg_buffer[1] = {33};
+  
+  aPacketRef regPacket = pStem->createPacket(GPS_IIC_ADDR, 1, reg_buffer);
+  pStem->sendPacket(regPacket);
+  pStem->IIC_RD(aUSBSTEM_MODULE, GPS_IIC_ADDR+1, 1, read_buffer);
+  
+  ret_value = read_buffer[0];
+  
   return ret_value;
 }
 

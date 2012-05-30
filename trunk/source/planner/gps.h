@@ -59,5 +59,7 @@ int aGPM_GetStatus(acpStem* pStem);
 int aGPM_SetPortDir(acpStem* pStem, char dir);
 int aGPM_SetPortBits(acpStem* pStem, char bits);
 
+int aGPM_GetGPSQuality(acpStem* pStem);
+
 
 #endif //_gps_H_
