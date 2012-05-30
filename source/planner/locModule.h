@@ -80,7 +80,10 @@ public:
     m_curPos.h = newPos.state.h; 
   }
 	
-	inline double getCMPSHeadingTest(void) { return getCMPSHeading(); };
+
+#ifdef aDEBUG_FLOC
+	friend int main(int, const char**);
+#endif
 
 private:
 	acpStem* m_pStem;

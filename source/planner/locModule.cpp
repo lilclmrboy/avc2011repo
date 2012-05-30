@@ -252,8 +252,10 @@ bool
 avcPosition::getGPSQuality(void) {
 
   unsigned char value = 0;
-  m_pStem->IIC_RD(GPS_MODULE, 33, 1, &value);
+  value = aGPM_GetGPSQuality(m_pStem);
+
   m_logger->log(INFO, "Quality value: %d", value);
+  
 	return !!(value);
 }
 
@@ -303,19 +305,34 @@ avcPosition::getCMPSHeading(void) {
 	
 	// Set the I2C read pointer
 	data[0] = 1;
-	aPacketRef p = m_pStem->createPacket(CMPS_MODULE, 1, data);
+  aPacketRef p;
+	  
+  // test out the roll and pitch
+#ifdef aDEBUG_FLOC
+  p = m_pStem->createPacket(CMPS_MODULE, 4, data);
 	m_pStem->sendPacket(p);
+  m_pStem->IIC_RD(aUSBSTEM_MODULE, CMPS_MODULE, 1, data);
+  m_logger->log(INFO, "%s: raw pitch %d",__FUNCTION__, data[0]);	
   
-	// Read from the I2C module
+  p = m_pStem->createPacket(CMPS_MODULE, 4, data);
+	m_pStem->sendPacket(p);
+  m_pStem->IIC_RD(aUSBSTEM_MODULE, CMPS_MODULE, 1, data);
+  m_logger->log(INFO, "%s: raw roll %d",__FUNCTION__, data[0]);	
+#endif
+  
+  // Read from the I2C module
 	// Compass bearing as a word is in register 1
 	// so we should read 2 bytes out of it
+  p = m_pStem->createPacket(CMPS_MODULE, 1, data);
+	m_pStem->sendPacket(p);
 	m_pStem->IIC_RD(aUSBSTEM_MODULE, CMPS_MODULE, 1, data);
+  m_logger->log(INFO, "%s: raw compass %d",__FUNCTION__, data[0]);	
 	
 	// Convert readings into a word
 	tmp = 255 - data[0];
 	
 	// Convert into the reading we need in degrees to radians
-	retVal = 2 * 0.0174532925 * ((double) tmp * (255.0 / 360.0));
+	retVal = DEG_TO_RAD * ((double) tmp * (255.0 / 360.0));
 	
 	//printf("0x%X (%d) [%f]\n", data[0], tmp, retVal);
 	
@@ -423,12 +440,12 @@ main(int argc,
   if (timeout == 10) { return 1; }
 	
 	position.init(&stem, settings);
-	
-	for (int i = 0; i < 500; i++) {
-		
-		position.getCMPSHeadingTest();
-		
-		//printf("Compass reading: %f\n", position.getCMPSHeadingTest());
+
+//	for (int i = 0; i < 500; i++) {
+  while (1){
+		printf("Compass reading: %f\n", position.getCMPSHeading() * RAD_TO_DEG);
+    printf("GPS Quality: %s\n", (position.getGPSQuality())? "good": "bad");
+    printf("GPS sat count: %d\n", aGPM_GetSatellitesInUse(&stem));
 		
 		aIO_MSSleep(ioRef, 50, NULL);
 	}
