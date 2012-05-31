@@ -26,7 +26,8 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 	if (!gps_track)
 		return aErrIO;
 
-	fputs("Chicken GPS track",gps_track);
+	fprintf(gps_track, "Chicken GPS track\n");
+	fflush(gps_track);
 	
 	//first we'll grab some settings from the settings file.
 	float fSetVar;
@@ -53,6 +54,13 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 #ifdef aUSE_GPS	
 	if (m_pStem && m_pStem->isConnected()) {
 		
+		//Set current time.	
+		aIO_GetMSTicks(m_ioRef, &m_gpsClock, NULL);
+		
+    //Lets initialize the encoders to zero.
+		stem.MO_ENC32(aMOTO_MODULE, ENCODER_IDX, 0);
+		m_Encoder = 0;
+		
 		/*lets do some initialization. First we need to find out
 		* whether we have a good GPS signal. If we do, we'll init
 		* our starting position from the GPS position information
@@ -66,43 +74,36 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 			++timeout;
 			
 		}
-//	  
-//		if (haveGPS) {
-//			//Lets get a lat, lon, and heading... from compass. We shouldn't
-//			//be moving yet.
-//		
-//			m_curPos.x = getGPSLongitude();						
-//			m_curPos.y = getGPSLatitude();
-//			//We shouldn't have moved yet, so we get the heading from the 
-//			//compass instead of the GPS, we only want to get the compass
-//			//while outside to reduce the potential confound of a prevailing
-//			//non-earth magnetic field.
-//			m_curPos.h = getCMPSHeading(); 	
-//	
-//    } //else the default initilization of the state vector
-//			//and probability matrix is zero'd.
-//
-//		//We should always be able to get a timestamp from the GPS unit.
-//		//even without the required number of satellites.		
-//		m_curGPSTimeSec = getGPSTimeSec();
-//
-//    //Lets initialize the encoders to zero.
-//		//m_pStem->MO_ENC32(aMOTO_MODULE, aMOTOR_RIGHT, 0);
-//		m_pStem->MO_ENC32(aMOTO_MODULE, aMOTOR_LEFT, 0);
-//
-//    //Initialize the Variance matrix Q.
-//    //1 meter x and y, and 1 degree heading.
-//    // ~ .31 meters per reading. * 10% is .0312 
-//    m_Q(1,1) = aLAT_PER_METER * .0312;
-//    m_Q(2,2) = aLON_PER_METER * .0312;
-//    // heading variance 
-//    m_Q(3,3) = DEG_TO_RAD * .25;
-//
-//    //The GPS is accurate to a meter, but I don't really trust that. 
-//    m_W(1,1) = aLAT_PER_METER * 1.25;
-//    m_W(2,2) = aLON_PER_METER * 1.25;
-//    //Compass is accurate to 4 degrees.
-//    m_W(3,3) = DEG_TO_RAD * 2.5;
+	  
+		if (haveGPS) {
+			//Lets get a lat, lon, and heading... from compass. We shouldn't
+		  //be moving yet.
+		
+			m_curPos.x = getGPSLongitude();						
+			m_curPos.y = getGPSLatitude();
+			//We shouldn't have moved yet, so we get the heading from the 
+			//compass instead of the GPS, we only want to get the compass
+			//while outside to reduce the potential confound of a prevailing
+			//non-earth magnetic field.
+			m_curPos.h = getCMPSHeading(); 	
+	
+    } //else the default initilization of the state vector
+			//and probability matrix is zero'd.
+
+
+    //Initialize the Variance matrix Q.
+    //1 meter x and y, and 1 degree heading.
+    // ~ .31 meters per reading. * 10% is .0312 
+    m_Q(1,1) = aLAT_PER_METER * .0312;
+    m_Q(2,2) = aLON_PER_METER * .0312;
+    // heading variance 
+    m_Q(3,3) = DEG_TO_RAD * .25;
+
+    //The GPS is accurate to a meter, but I don't really trust that. 
+    m_W(1,1) = aLAT_PER_METER * 1.25;
+    m_W(2,2) = aLON_PER_METER * 1.25;
+    //Compass is accurate to 4 degrees.
+    m_W(3,3) = DEG_TO_RAD * 2.5;
 		return aErrNone;
 	} 
 	
@@ -120,9 +121,11 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 void 
 avcPosition::updateState() {
 	
-	//Grab the clock.
-	long int curClock = clock();
-	long tmElapsed = (curClock - m_curClock) * 1000 / CLOCKS_PER_SEC;
+	//Grab the clock. Use the aIO verison, clock is not accurate when 
+	// we have stem processes running
+	long unsigned int curClock;
+	aIO_GetMSTicks(m_ioRef, &curClock, NULL);
+	long tmElapsed = (curClock - m_curClock);
 	
 	//First we must do an estimation step, given the previous position
   //and the current control information. Lets do this in meters, and then
@@ -141,13 +144,11 @@ avcPosition::updateState() {
 	//Get the new encoder readings.
 	int curEnc = getEncoderValue();
   
-  	//convert those into distance traveled each wheel.
-	//double dWheel = ((double) (curEnc - m_Encoder))/ m_ticksPerRev;
-	//The forward moving distance
-	//double fDist = dWheel * m_wheelRd;
-
-	double fVelocity = m_metersPerTick * (curEnc - m_Encoder) / tmElapsed;
+	// Calculate the rear wheel velociy in meters / second.
+	double fVelocity = m_metersPerTick * (curEnc - m_Encoder) / (tmElapsed / 1000);
 	m_logger->log(INFO, "Current Speed: %lf", fVelocity);
+	// Get the steering angle.
+	double steerAngle = getSteeringAngle();
 	
 	// estimate change in x and y and heading
 	// TODO - we should use previous state vector to calculate position here.
@@ -156,13 +157,16 @@ avcPosition::updateState() {
 	double dy = sin(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLON_PER_METER;
   
 	// Change in heading due to the previous steering angle
-  double fRot = fVelocity/m_wheelBase * tan(m_steerAngle);
+  double fRot = fVelocity/m_wheelBase * tan(steerAngle);
   
 	// Store current readings (for the next predict phase)
-  double steerAngle = getSteeringAngle();
-	m_steerAngle = steerAngle;
   m_Encoder= curEnc;
 	
+	m_curPos.x += dx;
+	m_curPos.y += dy;
+	m_curPos.h += fRot; 
+	
+	/*
 	Matrix state(3,1);
 	//JLG flipped cos/sin - world cordinate system aligns latitude values with,
 	//values along the x axis, and longitude values along the y axis.
@@ -227,7 +231,8 @@ avcPosition::updateState() {
 	m_curPos.x = state(2, 1);
 	m_curPos.y = state(1, 1);
 	m_curPos.h = state(3, 1);
-	
+	*/
+	 
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -244,6 +249,33 @@ avcPosition::getGPSTimeSec(void) {
 //	secs += tmp;
 		
 	return secs;	
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+void
+avcPosition::recordGPSPoint(void) {
+
+	long unsigned int curTime, timeElapsed;
+	aIO_GetMSTicks(m_ioRef, &curTime, NULL);
+	
+	timeElapsed = curTime - m_gpsClock;
+	
+	if(timeElapsed > 2000 ) {//&& getGPSQuality()) {
+	
+		double curLat= 0.0, curLon= 0.0, curHed = 0.0;
+		
+		curLat = getGPSLatitude();
+		curLon = getGPSLongitude();
+		curHed = getCMPSHeading();
+		
+		fprintf(gps_track, "%3.12f, %2.12f, %3.1f\n", 
+						curLon, curLat, curHed);
+		fflush(gps_track);
+		
+		m_gpsClock = curTime;
+		
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

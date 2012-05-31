@@ -70,6 +70,8 @@ public:
 	
 	bool getGPSQuality(void);
 	
+	void recordGPSPoint(void);
+	
 	//return the current robot position.
 	avcStateVector getPosition(void) { return m_curPos; }
 	
@@ -101,10 +103,6 @@ private:
 	Matrix m_Q;
 	Matrix m_W;	
 	int m_Encoder;
-	double m_steerAngle;
-	//double m_wheelRd; //wheel radius	
-	//double m_wheelCf; //wheel circumference
-	//double m_wheelTrk; //wheel track, or dist between contact points.
 	double m_metersPerTick; //encoder ticks per revolution.
   double m_wheelBase;
 

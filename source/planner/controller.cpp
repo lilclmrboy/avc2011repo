@@ -223,6 +223,8 @@ avcController::run(void) {
 		      
 		  }
 		  
+			//Record a gps point
+			m_pos.recordGPSPoint();
       
 		}
 		else {
@@ -255,7 +257,7 @@ avcController::run(void) {
 			
 			
 			// Wait for 1000 msec
-			m_stem.sleep(2500);
+			m_stem.sleep(2000);
 			
 			continue;
 			
@@ -283,7 +285,7 @@ avcController::run(void) {
 		// What we need to do is:
 		//  1.) Read the scratchpad x and y value
 		//  2.) Convert them into a normalized float value
-		m_repulse.getForceResultant(&rv);
+		//m_repulse.getForceResultant(&rv);
 		m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
 		
 		//e = m_mot.updateControl(rv);
