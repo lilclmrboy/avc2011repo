@@ -288,8 +288,6 @@ avcController::run(void) {
 		//m_repulse.getForceResultant(&rv);
 		m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
 		
-		//e = m_mot.updateControl(rv);
-		
 		//rv.x *=4;
 		//rv.y *=4;
 		// motion planning step
@@ -307,7 +305,7 @@ avcController::run(void) {
       m_log->log(ERROR, "m_mot.updateControl returned error: %d", (int) e);
 		
 		// sleep a bit so we don't wail on the processor
-		aIO_MSSleep(m_ioRef, 1, NULL);
+		aIO_MSSleep(m_ioRef, 100, NULL);
 		
 	} // end while
 	

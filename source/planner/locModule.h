@@ -10,6 +10,8 @@
 #include "avc.h"
 #include "mat_math.h"
 
+#define aUSE_GPS
+
 class avcPosition 
 {
 public: 
