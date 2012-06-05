@@ -71,7 +71,9 @@ OBJECTS = \
 			$(OBJ)/locModule.o \
 			$(OBJ)/mat_math.o \
 			$(OBJ)/repulsiveForces.o\
-			$(OBJ)/gps.o
+			$(OBJ)/gps.o\
+      $(OBJ)/gyroL3G4200D.o\
+      $(OBJ)/gyro.o
 
 .PHONY : app
 app : $(OBJ) $(BIN)/$(APP)
@@ -123,6 +125,13 @@ MatrixTest : $(OBJ)/mat_math.o
 plannerTest : $(OBJ) $(OBJ)/logger.o
 	$(CC) -c $(CFLAGS) -DaDEBUG_PLANNER planner.cpp -o $(OBJ)/planner.o 
 	$(CC) -g $(CFLAGS) -DaDEBUG_PLANNER $(LFLAGS) $(OBJ)/logger.o $(OBJ)/planner.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/plannerTest
+
+.PHONY : gyroTest
+gyroTest : $(OBJ) $(OBJ)/logger.o
+	$(CC) -c $(CFLAGS) gyroL3G4200D.cpp -o $(OBJ)/gyroL3G4200D.o
+	$(CC) -c $(CFLAGS) -DaDEBUG_GYRO gyro.cpp -o $(OBJ)/gyro.o
+	$(CC) -g $(CFLAGS) -DaDEBUG_GYRO $(LFLAGS) $(OBJ)/logger.o $(OBJ)/gyroL3G4200D.o $(OBJ)/gyro.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/gyroTest
+
 
 .PHONY : clean
 clean :
