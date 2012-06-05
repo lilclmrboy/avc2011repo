@@ -139,6 +139,8 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 	}
 	
 	// calculate a vector between the current position to the next waypoint
+  m_logger->log(INFO, "Current position: %3.2f, %3.2f", pos.x, pos.y);
+  m_logger->log(INFO, "Next waypoint: %3.2f, %3.2f", nextUnpassedWaypoint.state.x, nextUnpassedWaypoint.state.y);
 	if( aErrNone != calcForceVectorBetweenStates (pos,
 								  nextUnpassedWaypoint.state,
 									 &goal) )

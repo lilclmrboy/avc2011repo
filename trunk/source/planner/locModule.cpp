@@ -55,10 +55,10 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 	if (m_pStem && m_pStem->isConnected()) {
 		
 		//Set current time.	
-		aIO_GetMSTicks(m_ioRef, &m_gpsClock, NULL);
+		aIO_GetMSTicks(m_ioRef, (unsigned long int*)&m_gpsClock, NULL);
 		
     //Lets initialize the encoders to zero.
-		stem.MO_ENC32(aMOTO_MODULE, ENCODER_IDX, 0);
+		m_pStem->MO_ENC32(aMOTO_MODULE, ENCODER_IDX, 0);
 		m_Encoder = 0;
 		
 		/*lets do some initialization. First we need to find out
@@ -81,6 +81,7 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		
 			m_curPos.x = getGPSLongitude();						
 			m_curPos.y = getGPSLatitude();
+
 			//We shouldn't have moved yet, so we get the heading from the 
 			//compass instead of the GPS, we only want to get the compass
 			//while outside to reduce the potential confound of a prevailing
@@ -156,14 +157,16 @@ avcPosition::updateState() {
 	double dx = cos(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLAT_PER_METER;
 	double dy = sin(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLON_PER_METER;
   
+  m_logger->log(INFO, "%s: dx,dy: %f, %f", __FUNCTION__, dx, dy);
+  
 	// Change in heading due to the previous steering angle
   double fRot = fVelocity/m_wheelBase * tan(steerAngle);
   
 	// Store current readings (for the next predict phase)
   m_Encoder= curEnc;
 	
-	m_curPos.x += dx;
-	m_curPos.y += dy;
+	m_curPos.x += dx * aLON_PER_METER;
+	m_curPos.y += dy * aLAT_PER_METER;
 	m_curPos.h += fRot; 
 	
 	/*
@@ -479,9 +482,13 @@ main(int argc,
 
 //	for (int i = 0; i < 500; i++) {
   while (1){
-		printf("Compass reading: %f\n", position.getCMPSHeading() * RAD_TO_DEG);
+    //float acc_x = 0, acc_y = 0, acc_z = 0;
+		//printf("Compass reading: %f\n", position.getCMPSHeading() * RAD_TO_DEG);
     printf("GPS Quality: %s\n", (position.getGPSQuality())? "good": "bad");
     printf("GPS sat count: %d\n", aGPM_GetSatellitesInUse(&stem));
+    printf("GPS time: %d:%d:%d\n", aGPM_GetHours(&stem), aGPM_GetMinutes(&stem), aGPM_GetSeconds(&stem));
+    //position.getAccelerometerReadings(&acc_x, &acc_y, &acc_z);
+    //printf("Accel: %3.2f, %3.2f, %3.2f\n", acc_x, acc_y, acc_z);
 		
 		aIO_MSSleep(ioRef, 50, NULL);
 	}
