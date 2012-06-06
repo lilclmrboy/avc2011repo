@@ -36,6 +36,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		136C1F91157EF2D900A24167 /* controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = controller.h; sourceTree = "<group>"; };
 		271AA45B1575BE77001C402D /* gps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gps.cpp; sourceTree = "<group>"; };
 		271AA45C1575BE77001C402D /* gps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gps.h; sourceTree = "<group>"; };
 		27DC3485155B65A30029F72C /* controller.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = controller.cpp; sourceTree = "<group>"; };
@@ -106,7 +107,6 @@
 				F028758E15702840003F8EFD /* avcDefs.tea */,
 				27DC34E5155B68880029F72C /* avc.h */,
 				27DC34E6155B68880029F72C /* avcStructs.h */,
-				27DC34E7155B68880029F72C /* locModule.h */,
 				27DC34E8155B68880029F72C /* logger.h */,
 				27DC34E9155B68880029F72C /* main.cpp */,
 				27DC34EA155B68880029F72C /* mat_math.h */,
@@ -114,6 +114,8 @@
 				27DC34EC155B68880029F72C /* mrand.h */,
 				27DC34ED155B68880029F72C /* planner.h */,
 				27DC3485155B65A30029F72C /* controller.cpp */,
+				136C1F91157EF2D900A24167 /* controller.h */,
+				27DC34E7155B68880029F72C /* locModule.h */,
 				27DC3486155B65A30029F72C /* locModule.cpp */,
 				27DC3487155B65A30029F72C /* logger.cpp */,
 				27DC3488155B65A30029F72C /* mat_math.cpp */,

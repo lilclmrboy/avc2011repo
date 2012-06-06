@@ -28,6 +28,11 @@ typedef struct avcForceVector {
 
 /////////////////////////////////////////////////////////////////////////////
 // The state vector is a robot global position, heading and speed	
+// Convention for this system is:
+// x - units of longitude
+// y - units of latitude
+// h - degrees from magnetic north
+
 typedef struct avcStateVector {
 
 	//Longitude
