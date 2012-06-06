@@ -65,7 +65,7 @@ public:
 	
 	//We need a valid link to the stem network here. 
 	//We'll ask for current GPS coordinates, and a timestamp.
-	aErr init(acpStem* Stem, aSettingFileRef setting);
+	aErr init(acpStem* Stem, aSettingFileRef setting, avcWaypointVector firstMapPoint);
 	
 	//does an EKF state update.
 	void updateState(void);
@@ -119,7 +119,7 @@ private:
 	//fractional degrees.
 	double getGPSLongitude(void);
 	double getGPSLatitude(void);
-	double getCMPSHeading(void);
+	double getHeading(void);
 	int getEncoderValue(void);
 	double getSteeringAngle(void);
   int getAccelerometerReadings (float *ddx, float *ddy, float *ddz);

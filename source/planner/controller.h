@@ -73,7 +73,6 @@ public:
 
 private:
 	
-	void getRepulsiveVector(avcForceVector& r);
 	aErr checkAndWaitForStem();
 	
 	//The controller owns the settings, no other module should destroy them.
@@ -88,8 +87,11 @@ private:
 	avcStateVector m_curState;
 	//This contains the current setpoints for the left
 	//and right motors.
-	avcControlVector m_curControl;	
-	float m_lithium;	
+	avcControlVector m_curControl;
+  logger *m_log;
+  
+  unsigned long m_loopdelay;
+  
 };
 
 #endif //_controller_H_

@@ -44,12 +44,14 @@ int PlaySound(const char * file)
 avcController::avcController(void) : 
 m_settings(NULL),
 m_ioRef(NULL),
-m_lithium(0.2f) 
+m_loopdelay(aCONTROLLER_LOOP_DELAY_DEFAULT)
 {
 	aErr e;
 	
 	if(aIO_GetLibRef(&m_ioRef, &e)) 
 		throw acpException(e, "Getting aIOLib reference");
+  
+  m_log = logger::getInstance();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -63,9 +65,11 @@ avcController::~avcController(void) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// Main initialization for the whole shooting match
 
 int
 avcController::init(const int argc, const char* argv[]) {
+  
 	// Create a setting file to hold our link settings so we can change 
 	// the settings without recompiling.
 	aErr e = aErrNone;
@@ -79,18 +83,16 @@ avcController::init(const int argc, const char* argv[]) {
 		throw acpException(e, "creating settings");
 	
 	aArguments_Separate(m_ioRef, m_settings, NULL, argc, argv);
-  
-	
-	aSettingFile_GetFloat (m_ioRef,m_settings,
-                         "speedscale",
-                         &m_lithium,
-                         0.2f,
-                         &e);
-  
-	
+
 	// This starts up the stem link processing and is called once to spawn
 	// the link management thread... based on the settings.
 	m_stem.startLinkThread(m_settings);
+  
+  // Get the loop cycle delay from the settings
+  aSettingFile_GetULong(m_ioRef, m_settings, 
+                        aCONTROLLER_LOOP_DELAY_KEY, 
+                        &m_loopdelay, 
+                        aCONTROLLER_LOOP_DELAY_DEFAULT, &e);
 	
 	// Wait until we have a solid heartbeat connection so we know there is 
 	// someone to talk to.
@@ -114,61 +116,26 @@ avcController::init(const int argc, const char* argv[]) {
 		aDEBUG_PRINT("done\n");
 		
 		// Don't forget to init the modules :)
-		e = m_mot.init(&m_stem, m_settings);
-		e = m_pos.init(&m_stem, m_settings);
-		e = m_repulse.init(&m_stem, m_settings);
-		e = m_planner.init(m_ioRef, m_settings);
-		if (!m_pos.getGPSQuality())
-			m_pos.setPosition(m_planner.getFirstMapPoint());
-	}
+    // Do the motion module
+    if (aErrNone != m_mot.init(&m_stem, m_settings)) 
+      m_log->log(ERROR, "%s: Failed init m_mot", __PRETTY_FUNCTION__);
+    
+    // Do the repulsive force class
+    if (aErrNone != m_repulse.init(&m_stem, m_settings))
+      m_log->log(ERROR, "%s: Failed init m_repulse", __PRETTY_FUNCTION__);
+    
+    // Do the planner
+    if (aErrNone != m_planner.init(m_ioRef, m_settings))
+      m_log->log(ERROR, "%s: Failed init m_planner", __PRETTY_FUNCTION__);
+    
+    // Do the position module now, but pass in the first map point from 
+    // the planner
+    if (aErrNone != m_pos.init(&m_stem, m_settings, m_planner.getFirstMapPoint()))    
+      m_log->log(ERROR, "%s: Failed init m_pos", __PRETTY_FUNCTION__);
+    
+	} // end of else
+  
 	return e;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-void 
-avcController::getRepulsiveVector(avcForceVector& r) {
-	
-	short temp = 0;
-	avcForceVector sonar;
-	avcForceVector ir;
-	
-  
-	temp = m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_USB_REPULSIVE_UX) << 8; 
-	m_stem.sleep(10);
-	temp |= m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_USB_REPULSIVE_UX+1);
-	m_stem.sleep(10);
-	ir.x = (double) temp / 32767.0;
-	
-	temp = m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_USB_REPULSIVE_UY) << 8; 
-	m_stem.sleep(10);
-	temp |= m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_USB_REPULSIVE_UY+1);
-	m_stem.sleep(10);
-	ir.y = (double) temp / 32767.0;
-	
-	
-	// Sonar sensors repulsive
-	
-	//temp = m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX) << 8; 
-	//temp |= m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UX+1);
-	//sonar.x = (double) temp / 32767.0;
-	
-	//temp = m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY) << 8; 
-	//temp |= m_stem.PAD_IO(aUSBSTEM_MODULE, aSPAD_GP2_SONAR_REPULSIVE_UY+1);
-	//sonar.y = (double) temp / 32767.0;
-  
-	
-	// Combine all the repulsive forces
-	r.x = ir.x + sonar.x;
-	r.y = ir.y + sonar.y;
-	
-	//Boundary check the repulsive force
-	r.x = r.x > 1.0 ? 1.0 : r.x;
-	r.x = r.x < -1.0 ? -1.0 : r.x;
-	
-	r.y = r.y > 1.0 ? 1.0 : r.y;
-	r.y = r.y < -1.0 ? -1.0 : r.y;
-  
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -178,14 +145,10 @@ avcController::run(void) {
 	
 	//Lets allow a condition to gracefully end the application. 
 	//bool running = true;
-	logger *m_log = logger::getInstance();
 	avcStateVector pos;
 	avcForceVector rv;
-	aErr e = aErrNone;
   avcRepulsiveForces frepulsive; 
   
-  
-	
 	//////////////////////////////////////////////
 	m_log->log(INFO, "Checking for the go signal\n");
 	
@@ -222,7 +185,7 @@ avcController::run(void) {
 		      break;                                    
 		      
 		  }
-		  
+      
 			//Record a gps point
 			m_pos.recordGPSPoint();
       
@@ -235,7 +198,8 @@ avcController::run(void) {
 		int extradelay = (int) random() % 1000;
 	  
 		// Wait for 1600 msec (long enough for clucking to finish
-		m_stem.sleep(500 + extradelay);
+    aIO_MSSleep(m_ioRef, 500 + extradelay, NULL);
+
 	}
 	
 	
@@ -244,17 +208,21 @@ avcController::run(void) {
 	
 	bool bManualOverride = false;
 	
-	//while (m_stem.isConnected(STEMCONNECTED_WAIT)) {
-	while (aErrNone ==checkAndWaitForStem())  {
+	// All this junk is about the RC stuff getting enabled. It is
+  // a little more confusing since we want to trigger a sound
+  // That is different depending on if we want to go to manual 
+  // override mode, or autonomous control mode. 
+	while (aErrNone == checkAndWaitForStem())  {
 		
 		// When we get set automatic mode, we expect a value of 0
 		if (m_stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE + 1)) {
 			
+      // First time through, it defaults to false. Then we 
+      // rely on the scratchpad for the current state.
 			if (!bManualOverride) {
 				PlaySound("retarded.wav");
 				bManualOverride = true;
 			}
-			
 			
 			// Wait for 1000 msec
 			m_stem.sleep(2000);
@@ -264,51 +232,42 @@ avcController::run(void) {
 		}
 		else {
 			
+      // We are off on autonomous mode now. Let's let Stan tell us since
+      // he is frigging code.
 			if (bManualOverride) {
 				PlaySound("ohgodherewego.wav");
         
-				//Lets clear the encoders to zero.
-				m_stem.MO_ENC32(aSERVO_MODULE, AUTPAD_THROT, SERVO_NEUT);
-				m_stem.MO_ENC32(aSERVO_MODULE, AUTPAD_STEER, SERVO_NEUT);
+				//Lets set the motion module to holding still.
+        m_mot.updateControl(avcForceVector(0,0));
+        
 			}
 			
+      // Set the boolean flag to tell the system we are running blind...
 			bManualOverride = false;
 		}
 		
-		//First do the localization step. Lets get relevant GPS
-		//info from the unit, and compass heading. Along with 
-		//the previous state and control vector.
+		//First do the localization step. Let's find out what our system is 
+    // at.
 		m_pos.updateState();			        
 		
-		// get sensor readings
-		// We need to fill out ir force vector. 
-		// What we need to do is:
-		//  1.) Read the scratchpad x and y value
-		//  2.) Convert them into a normalized float value
+		// get repulsive forces
 		//m_repulse.getForceResultant(&rv);
 		m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
 		
-		//rv.x *=4;
-		//rv.y *=4;
 		// motion planning step
-		avcForceVector motivation = m_planner.getMotivation(m_pos.getPosition(), rv);
-		
-		pos = m_pos.getPosition();
-		//m_log->log(INFO, "Current position:%e,%e", pos.x, pos.y);
+    avcForceVector motivation;
+		m_planner.getMotivation(&motivation, m_pos.getPosition(), rv);
 		m_log->log(INFO, "Motivation: %f,%f", motivation.x, motivation.y);
 		
-		motivation.x *= m_lithium;
-		motivation.y *= m_lithium;
-		e = m_mot.updateControl(motivation);
-    
-    if(aErrNone != e)
-      m_log->log(ERROR, "m_mot.updateControl returned error: %d", (int) e);
+    // Update the control system
+		m_mot.updateControl(motivation);
 		
 		// sleep a bit so we don't wail on the processor
-		aIO_MSSleep(m_ioRef, 100, NULL);
+    aIO_MSSleep(m_ioRef, m_loopdelay, NULL);
 		
 	} // end while
 	
+  // We lost the stem, so might as well be drama queens.
 	m_log->log(INFO, "BrainStem Network is no longer connected!\n");
 	PlaySound("r2d2die.wav");
 	
@@ -319,19 +278,20 @@ avcController::run(void) {
 /////////////////////////////////////////////////////////////////////////////
 // Check to see if the stem is connected. If it isn't, try to connect
 //
+// This makes sure we haven't lost control of the stem for some 
+// reason. In theory, we won't lose the connection once up and going. 
 
 aErr
 avcController::checkAndWaitForStem()
 {
+  
+  aErr e = aErrNone;
 	
 	if (m_stem.isConnected(STEMCONNECTED_WAIT)) {
-		return aErrNone;
+		e = aErrNone;
 	}
 	else {
 		aDEBUG_PRINT("\nlost stem connection\t");
-		
-		aErr e = aErrNone;
-		
 		PlaySound("dang.wav");
 		
 		// Wait until we have a solid heartbeat connection so we know there is 
@@ -340,6 +300,7 @@ avcController::checkAndWaitForStem()
 		
 		aDEBUG_PRINT("awaiting heartbeat");
 		
+    // Give the pump a few times to prime and get running.
 		do { 
 			aDEBUG_PRINT(".");
 			aIO_MSSleep(m_ioRef, 500, NULL);
@@ -356,12 +317,13 @@ avcController::checkAndWaitForStem()
 			//We have a valid stem connection.
 			aDEBUG_PRINT("done\n");
 			PlaySound("ohgodherewego.wav");
-		}
-		
-		return e;
-		
+		} // end of else
 		
 	}
+  
+  // Return the error state
+  return e;
+  
 }
 
 

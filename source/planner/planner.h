@@ -26,7 +26,7 @@ public:
 
 	//The main operation, we'll take some inputs, and product a unit
 	//vector output.
-	avcForceVector getMotivation(const avcStateVector& pos, 	
+	aErr getMotivation(avcForceVector *pForceResult, const avcStateVector& pos, 	
 				     const avcForceVector& repulse);
 	
 
@@ -35,6 +35,7 @@ public:
 	// should be used by camera/laser system to add "bonus" waypoints
 	aErr insertMapPoint(const avcStateVector newPosition);
 	const avcWaypointVector& getFirstMapPoint(void) { return m_waypoints.front(); }
+  
 #ifdef aDEBUG_PLANNER
 	friend int main(int, const char**);
 #endif

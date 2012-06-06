@@ -12,7 +12,7 @@
 
 #define aMOTOR_NUM                          2
 #define aMOTMODULE_THROTTLE_WINDOW_KEY      "speedscale"
-#define aMOTMODULE_THROTTLE_WINDOW_DEFAULT  0.05f
+#define aMOTMODULE_THROTTLE_WINDOW_DEFAULT  0.2f
 
 class avcMotion {
   

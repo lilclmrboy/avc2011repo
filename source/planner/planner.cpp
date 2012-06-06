@@ -110,9 +110,12 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-avcForceVector 
-avcPlanner::getMotivation(const avcStateVector& pos,
-			  const avcForceVector& repulse) {
+aErr 
+avcPlanner::getMotivation(avcForceVector *pForceResult, 
+                          const avcStateVector& pos,
+                          const avcForceVector& repulse) {
+  
+  aErr e = aErrNone;
 	
 	avcForceVector motivationVector, goal;
 	avcWaypointVector nextUnpassedWaypoint;
@@ -139,8 +142,8 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 	}
 	
 	// calculate a vector between the current position to the next waypoint
-  m_logger->log(INFO, "Current position: %3.2f, %3.2f", pos.x, pos.y);
-  m_logger->log(INFO, "Next waypoint: %3.2f, %3.2f", nextUnpassedWaypoint.state.x, nextUnpassedWaypoint.state.y);
+  m_logger->log(INFO, "Current position: %f, %f", pos.x, pos.y);
+  m_logger->log(INFO, "Next waypoint: %f, %f", nextUnpassedWaypoint.state.x, nextUnpassedWaypoint.state.y);
 	if( aErrNone != calcForceVectorBetweenStates (pos,
 								  nextUnpassedWaypoint.state,
 									 &goal) )
@@ -172,7 +175,10 @@ avcPlanner::getMotivation(const avcStateVector& pos,
 		normalizeForceVector(&motivationVector);
 	}
 	
-	return motivationVector;
+	*pForceResult = motivationVector;
+  
+  return e;
+  
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -248,7 +254,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		
 	// if we are within a minimum distance to the waypoint, mark it as passed; recurse
 	if (distanceToWaypoint <= m_minUnPassedDistanceToWaypoint) {
-		m_logger->log(INFO, "Passed waypoint minUnPassedDistance %d/%d", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
+		m_logger->log(INFO, "Passed waypoint minUnPassedDistance %d/%d",distanceToWaypoint, firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
 		
 		//m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
@@ -263,7 +269,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 	
 	// if we are more than a max distance to the waypoint -> not passed; return
 	if (distanceToWaypoint > m_maxUnPassedDistanceToWaypoint) {
-		m_logger->log(INFO,"Not in donut");
+		m_logger->log(INFO,"Not to donut yet");
 		return aErrNone;
 	}
 	
@@ -343,6 +349,8 @@ avcPlanner::calcPolarVectorBetweenStates(const avcStateVector& state1,
 		cos(state2.y * DEG_TO_RAD) * sin(dLon/2) * sin(dLon/2);
 	c = 2.0 * atan2(sqrt(a), sqrt(1-a));
 	*distanceToWaypoint = earthRadiusKM * c * 1000;
+  
+  m_logger->log(INFO, "%s: To next map point (dist,heading): %f, %f", __FUNCTION__, *distanceToWaypoint, *thetaRad); 
 	
 	return aErrNone;
 }
@@ -401,7 +409,7 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	if (dist < m_maxUnPassedDistanceToWaypoint) {
 		//pGoalForceVec->x *= dist/m_maxUnPassedDistanceToWaypoint;
 		//pGoalForceVec->y *= dist/m_maxUnPassedDistanceToWaypoint;
-    m_logger->log(INFO, "Within maxUnPassedDistanceToWaypoint; must be at end of map. Did we win?");
+    m_logger->log(INFO, "Within maxUnPassedDistanceToWaypoint");
 		pGoalForceVec->x *= 0.5;
 		pGoalForceVec->y *= 0.5;
 	}

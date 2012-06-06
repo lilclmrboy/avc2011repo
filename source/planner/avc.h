@@ -82,5 +82,9 @@
 // degree of Longitude per meter
 #define aLON_PER_METER 0.000011710448481
 
+// Main controller loop cycle delay
+#define aCONTROLLER_LOOP_DELAY_KEY     "loopdelay"
+#define aCONTROLLER_LOOP_DELAY_DEFAULT 100
+
 
 #endif //_avc2011_H_

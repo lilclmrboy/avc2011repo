@@ -8,7 +8,9 @@
 #define RAD_TO_DEG (180/aPI)
 ////////////////////////////////////////////////////////////////////////////
 aErr
-avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
+avcPosition::init(acpStem* pStem, 
+                  aSettingFileRef settings, 
+                  avcWaypointVector firstMapPoint) {
 	
 	m_pStem = pStem;
 	m_settings = settings;
@@ -21,10 +23,14 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 	time(&rawtime);
         timeinfo = localtime( &rawtime );
 	strftime(buffer,100, "GPS_Track_%d_%m_%H_%M.gpx", timeinfo);
+  
+  m_logger->log(DEBUG, "Writing GPS track: %s", buffer);
  
 	gps_track = fopen(buffer, "w");
-	if (!gps_track)
+	if (!gps_track) {
+    m_logger->log(ERROR, "Not able to write GPS track. e = %d", e);
 		return aErrIO;
+  }
 
 	fprintf(gps_track, "Chicken GPS track\n");
 	fflush(gps_track);
@@ -50,6 +56,9 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 			&fSetVar, WHEEL_BASE, &e)) 
 		throw acpException(e, "getting wheel track from settings");
 	m_wheelBase = fSetVar;
+  
+  // Set the first position waypoint that we passed in
+  setPosition(firstMapPoint);
 
 #ifdef aUSE_GPS	
 	if (m_pStem && m_pStem->isConnected()) {
@@ -76,17 +85,11 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 		}
 	  
 		if (haveGPS) {
-			//Lets get a lat, lon, and heading... from compass. We shouldn't
+			//Lets get a lat, lon, and heading. We shouldn't
 		  //be moving yet.
-		
-			m_curPos.x = getGPSLongitude();						
-			m_curPos.y = getGPSLatitude();
-
-			//We shouldn't have moved yet, so we get the heading from the 
-			//compass instead of the GPS, we only want to get the compass
-			//while outside to reduce the potential confound of a prevailing
-			//non-earth magnetic field.
-			m_curPos.h = getCMPSHeading(); 	
+      setPosition(avcWaypointVector(getGPSLongitude(), 
+                                    getGPSLatitude(), 
+                                    getHeading()));
 	
     } //else the default initilization of the state vector
 			//and probability matrix is zero'd.
@@ -122,15 +125,15 @@ avcPosition::init(acpStem* pStem, aSettingFileRef settings) {
 void 
 avcPosition::updateState() {
 	
-	//Grab the clock. Use the aIO verison, clock is not accurate when 
+	// Grab the clock. Use the aIO verison, clock is not accurate when 
 	// we have stem processes running
 	long unsigned int curClock;
 	aIO_GetMSTicks(m_ioRef, &curClock, NULL);
-	long tmElapsed = (curClock - m_curClock);
+	long unsigned int tmElapsed = (curClock - m_curClock);
 	
-	//First we must do an estimation step, given the previous position
-  //and the current control information. Lets do this in meters, and then
-	//convert to lat, lon.
+	// First we must do an estimation step, given the previous position
+  // and the current control information. Lets do this in meters, and then
+	// convert to lat, lon.
 	// We should be doing this step quickly enough that we can treat the movement
 	// as linear.
 	/*
@@ -146,27 +149,36 @@ avcPosition::updateState() {
 	int curEnc = getEncoderValue();
   
 	// Calculate the rear wheel velociy in meters / second.
-	double fVelocity = m_metersPerTick * (curEnc - m_Encoder) / (tmElapsed / 1000);
-	m_logger->log(INFO, "Current Speed: %lf", fVelocity);
+  if(tmElapsed <= 0)
+    m_logger->log(ERROR, "%s: Elapsed time is invalid", __FUNCTION__);
+  
+  m_logger->log(INFO, "%s: Elapsed time: %dms", __FUNCTION__, tmElapsed);
+	double fVelocity = m_metersPerTick * (curEnc - m_Encoder) / ((double)tmElapsed / 1000.0);
+	m_logger->log(INFO, "Current Speed (m/s): %lf", fVelocity);
+  
 	// Get the steering angle.
 	double steerAngle = getSteeringAngle();
 	
+  // These calculations are predictions of where we think we need to be
 	// estimate change in x and y and heading
 	// TODO - we should use previous state vector to calculate position here.
 	// previous velocity.
-	double dx = cos(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLAT_PER_METER;
-	double dy = sin(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLON_PER_METER;
-  
-  m_logger->log(INFO, "%s: dx,dy: %f, %f", __FUNCTION__, dx, dy);
-  
+	double dx = cos(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLON_PER_METER;
+	double dy = sin(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLAT_PER_METER;
+    
 	// Change in heading due to the previous steering angle
   double fRot = fVelocity/m_wheelBase * tan(steerAngle);
   
+  m_logger->log(INFO, "%s: dx(m), dy(m), fRot(deg): %f, %f, %f", __FUNCTION__, dx/aLON_PER_METER, dy/aLAT_PER_METER, fRot*RAD_TO_DEG);
+  
 	// Store current readings (for the next predict phase)
   m_Encoder= curEnc;
+  m_curClock = curClock;
 	
-	m_curPos.x += dx * aLON_PER_METER;
-	m_curPos.y += dy * aLAT_PER_METER;
+  // Update the current control state vector
+  // These vector values should be in latitude, longitude and degrees
+	m_curPos.x += dx;
+	m_curPos.y += dy;
 	m_curPos.h += fRot; 
 	
 	/*
@@ -208,7 +220,7 @@ avcPosition::updateState() {
 		//a Kalman update with encoder values only.
 		curLat = getGPSLatitude();
 		curLon = getGPSLongitude();
-		curHed = getCMPSHeading();
+		curHed = getHeading();
 		
 		//Lets to this KF thing.
 		Matrix V(3, 1);
@@ -240,19 +252,19 @@ avcPosition::updateState() {
 
 /////////////////////////////////////////////////////////////////////////////
 
-int 
-avcPosition::getGPSTimeSec(void) {
-	int secs = 0;
-//	int tmp = 0;
-//	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_MIN) << 8; 
-//  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_MIN+1);
-//	secs = tmp * 60;
-//	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_SEC) << 8; 
-//  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_SEC+1);
-//	secs += tmp;
-		
-	return secs;	
-}
+//int 
+//avcPosition::getGPSTimeSec(void) {
+//	int secs = 0;
+////	int tmp = 0;
+////	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_MIN) << 8; 
+////  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_MIN+1);
+////	secs = tmp * 60;
+////	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_SEC) << 8; 
+////  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_SEC+1);
+////	secs += tmp;
+//		
+//	return secs;	
+//}
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -270,12 +282,13 @@ avcPosition::recordGPSPoint(void) {
 		
 		curLat = getGPSLatitude();
 		curLon = getGPSLongitude();
-		curHed = getCMPSHeading();
+		curHed = getHeading();
 		
 		fprintf(gps_track, "%3.12f, %2.12f, %3.1f\n", 
 						curLon, curLat, curHed);
 		fflush(gps_track);
 		
+    // Store the reading for the next time around
 		m_gpsClock = curTime;
 		
 	}
@@ -323,53 +336,12 @@ avcPosition::getGPSLatitude(void)
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Take the compass bearing from the CMP10 board
-// See:
-// http://www.robot-electronics.co.uk/htm/cmps10i2c.htm
-// 
-// Reading from registers 2 and 3 gives the bearing with a 0.1
-// increment resolution
-// Result should be in radians 
+// Compass wrapper class for whatever widget we are using.
 
 double
-avcPosition::getCMPSHeading(void) {
+avcPosition::getHeading(void) {
 	
   double retVal = 0.0;
-  unsigned short tmp = 0;
-	unsigned char data[3] = { 0,0,0 };
-	
-	// Set the I2C read pointer
-	data[0] = 1;
-  aPacketRef p;
-	  
-  // test out the roll and pitch
-#ifdef aDEBUG_FLOC
-  p = m_pStem->createPacket(CMPS_MODULE, 4, data);
-	m_pStem->sendPacket(p);
-  m_pStem->IIC_RD(aUSBSTEM_MODULE, CMPS_MODULE, 1, data);
-  m_logger->log(INFO, "%s: raw pitch %d",__FUNCTION__, data[0]);	
-  
-  p = m_pStem->createPacket(CMPS_MODULE, 4, data);
-	m_pStem->sendPacket(p);
-  m_pStem->IIC_RD(aUSBSTEM_MODULE, CMPS_MODULE, 1, data);
-  m_logger->log(INFO, "%s: raw roll %d",__FUNCTION__, data[0]);	
-#endif
-  
-  // Read from the I2C module
-	// Compass bearing as a word is in register 1
-	// so we should read 2 bytes out of it
-  p = m_pStem->createPacket(CMPS_MODULE, 1, data);
-	m_pStem->sendPacket(p);
-	m_pStem->IIC_RD(aUSBSTEM_MODULE, CMPS_MODULE, 1, data);
-  m_logger->log(INFO, "%s: raw compass %d",__FUNCTION__, data[0]);	
-	
-	// Convert readings into a word
-	tmp = 255 - data[0];
-	
-	// Convert into the reading we need in degrees to radians
-	retVal = DEG_TO_RAD * ((double) tmp * (255.0 / 360.0));
-	
-	//printf("0x%X (%d) [%f]\n", data[0], tmp, retVal);
 	
 	return retVal;
 }
@@ -399,19 +371,91 @@ avcPosition::getSteeringAngle(void) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// Read the accelerometer sensor data
+// See the datasheet for more information
+// http://www.analog.com/static/imported-files/data_sheets/ADXL335.pdf
+
 int
 avcPosition::getAccelerometerReadings (float *ddx, float *ddy, float *ddz) {
+  
+  // Scaling is radiometric
+  /* From datasheet:
+     VCC(3.6V) = 360 mV/g
+     VCC(2.0V) = 195 mV/g
+     thus
+     VCC(3.3V) = 329.0625 mV/g
+     our readings are in normalized 0 - 1.0 values across a 3.3V range
+     
+  */
+  const float a2d_ref = 3.3f; // V
+  float scale_factor = a2d_ref * 1.0f / 0.3290625f; // g
+   
+    
   if(!ddx || !ddy || !ddz){
-    m_logger->log(ERROR, "__FUNCTION__: Null pointer passed to getAccelerometerReadings");
+    m_logger->log(ERROR, "%s: Null pointer passed to getAccelerometerReadings", __FUNCTION__);
     return -1;
   }
+ 
+#ifdef aACCEL_BULK_CAPTURE
+  
+  aUInt8 slot = 9;
+  unsigned int samples = 50;
+  unsigned short pace = 10;
+  aStreamRef s = NULL;
+  aErr e = aErrNone;
+  aMemSize len = 0;
+  char *pData;
+  unsigned int index = 0;
+  
+  m_logger->log(INFO, "Starting bulk capture\n");
+  
+  // Tell the stem to fire off the readings
+  m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_X_CHAN, slot, pace, samples);
+  
+  // Read the data back from the Stem
+  // First create a memory buffer to write the capture to
+  if (aStreamBuffer_Create(m_ioRef, 4092, &s, &e))
+      throw acpException(e, "creating bulk read buffer");
+  
+  // Unload the slot data capture into a buffer
+  m_pStem->unloadSlot(aUSBSTEM_MODULE, slot, s);
+  
+  // Put the data into the storage array
+  if (aStreamBuffer_Get(m_ioRef, s, &len, &pData, &e))
+      throw acpException(e, "getting buffer data");
+  
+  // Debug what we have read from the stem
+  m_logger->log(INFO, "Retreived %d data points from bulk capture\n", len);
+  
+  // Once we get data back, then we can chip through it
+  // The bulk raw data is stored in 2 byte pairs creating a 16 bit word
+  if (len > 1) {
+    
+    for (unsigned int i = 0; i < samples; i++) {
+      m_logger->log(DEBUG, "[%d]: %d\n", 
+                    i, 
+                    pData[index] << 8 + pData[index + 1]);
+      index+=2;
+    }
+    
+  }
+  
+  // Clean up the stream reference
+  if (aStream_Destroy(m_ioRef, s, &e))
+    throw acpException(e, "destroying bulk stream");
+  
+  // let us know we are finished
+  m_logger->log(INFO, "Ending bulk capture\n");
+  
+#endif // end of buik capture
 	
-  *ddx = m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_X_CHAN);
-  *ddy = m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Y_CHAN);
-  *ddz = m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Z_CHAN);
+  // Take the reading values and average them
+  *ddx = scale_factor * m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_X_CHAN);
+  *ddy = scale_factor * m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Y_CHAN);
+  *ddz = scale_factor * m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Z_CHAN);
   
   if (-1 == *ddx || -1 == *ddy || -1 == *ddz){
-    m_logger->log(ERROR, "__FUNCTION__: A2D timeout while reading accelerometer");
+    m_logger->log(ERROR, "%s: A2D timeout while reading accelerometer", __FUNCTION__);
     return -1;
   }
   
@@ -483,7 +527,7 @@ main(int argc,
 //	for (int i = 0; i < 500; i++) {
   while (1){
     //float acc_x = 0, acc_y = 0, acc_z = 0;
-		//printf("Compass reading: %f\n", position.getCMPSHeading() * RAD_TO_DEG);
+		//printf("Compass reading: %f\n", position.getCHeading() * RAD_TO_DEG);
     printf("GPS Quality: %s\n", (position.getGPSQuality())? "good": "bad");
     printf("GPS sat count: %d\n", aGPM_GetSatellitesInUse(&stem));
     printf("GPS time: %d:%d:%d\n", aGPM_GetHours(&stem), aGPM_GetMinutes(&stem), aGPM_GetSeconds(&stem));
