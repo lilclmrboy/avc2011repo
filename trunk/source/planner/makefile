@@ -72,8 +72,10 @@ OBJECTS = \
 			$(OBJ)/mat_math.o \
 			$(OBJ)/repulsiveForces.o\
 			$(OBJ)/gps.o\
-      $(OBJ)/gyroL3G4200D.o\
-      $(OBJ)/gyro.o
+			$(OBJ)/gyroL3G4200D.o\
+			$(OBJ)/gyro.o\
+			$(OBJ)/LSM303DLM.o\
+			$(OBJ)/compass.o
 
 .PHONY : app
 app : $(OBJ) $(BIN)/$(APP)
@@ -131,6 +133,12 @@ gyroTest : $(OBJ) $(OBJ)/logger.o
 	$(CC) -c $(CFLAGS) gyroL3G4200D.cpp -o $(OBJ)/gyroL3G4200D.o
 	$(CC) -c $(CFLAGS) -DaDEBUG_GYRO gyro.cpp -o $(OBJ)/gyro.o
 	$(CC) -g $(CFLAGS) -DaDEBUG_GYRO $(LFLAGS) $(OBJ)/logger.o $(OBJ)/gyroL3G4200D.o $(OBJ)/gyro.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/gyroTest
+
+.PHONY : compassTest
+compassTest : $(OBJ) $(OBJ)/logger.o
+	$(CC) -c $(CFLAGS) LSM303DLM.cpp -o $(OBJ)/LSM303DLM.o
+	$(CC) -c $(CFLAGS) -DaDEBUG_COMPASS compass.cpp -o $(OBJ)/compass.o
+	$(CC) -g $(CFLAGS) -DaDEBUG_COMPASS $(LFLAGS) $(OBJ)/logger.o $(OBJ)/LSM303DLM.o $(OBJ)/compass.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/compassTest
 
 
 .PHONY : clean

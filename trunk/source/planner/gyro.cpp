@@ -1,27 +1,23 @@
 #include "gyro.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// Pull in the HW implementation files
-// These could be masked out based on what's being used to save program space
-// Such masking doesn't seem necessary now
-#include "gyroL3G4200D.h"
-
-
-/////////////////////////////////////////////////////////////////////////////
 // avcGyro interface constructor
 // initializes the class and the gyro
 avcGyro::avcGyro(acpStem *pStem, aSettingFileRef settings){
-  if(!pStem){
-    m_logger->log(ERROR, "%s: stem pointer is null; setting gyro HW to none", __PRETTY_FUNCTION__);
-    m_gyroHWtype = kGyro_none;
-  }
+	//setup the logger
+  m_logger = logger::getInstance();
   
-  else{
-	  // Define which HW to use
-  	m_gyroHWtype = kGyro_L3G4200D;
-    
-    m_pStem = pStem;
+  // check that stem reference is OK
+  if(!pStem){
+    m_logger->log(ERROR, "%s: stem pointer is null; setting gyro HW to none", __FUNCTION__);
+    m_gyroHWtype = kGyro_none;
+    return;
   }
+
+  // store the stem reference for later use
+  m_pStem = pStem;
+  m_gyroHWtype = kGyro_none;
+
   
   return;
 }
@@ -35,58 +31,26 @@ avcGyro::~avcGyro(void) {}
 /////////////////////////////////////////////////////////////////////////////
 int avcGyro::init(){
   // call the HW init
-  switch (m_gyroHWtype) {
-    // L3G4200D
-    case kGyro_L3G4200D:
-      if(0 != gyroL3G4200Dinit(m_pStem)){
-        m_logger->log(ERROR, "%s: Error while initializing L3G4200D", __PRETTY_FUNCTION__);
-      }
-      break;
-      
-    // Default or none
-    case kGyro_none:
-    default:
-      m_logger->log(INFO, "%s: Gyro type %d not supported", __PRETTY_FUNCTION__, (int)m_gyroHWtype);
-      break;
-  }
-  
-  return 0;
+  // Default or none
+  m_logger->log(ERROR, "%s: Not implemented by gyro type %d", __FUNCTION__, (int)m_gyroHWtype);
+
+  return -1;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // Return the angular rate of acceleration from the gyro (single reading)
 int avcGyro::getAngularRateData(int *dddx, int *dddy, int *dddz){
-  
+    
   // Check the pointers
   if(!dddx || !dddy || !dddz){
     m_logger->log(ERROR, "%s: Null pointer passed in", __PRETTY_FUNCTION__);
-    return 0;
+    return -1;
   }
+
+  // Default or none
+  m_logger->log(ERROR, "%s: Not implemented by gyro type %d", __FUNCTION__, (int)m_gyroHWtype);
   
-  // Set up some temp variables
-  int tempDddx=0, tempDddy=0, tempDddz=0;
-  
-  switch (m_gyroHWtype) {
-    // L3G4200D
-    case kGyro_L3G4200D:
-      gyroL3G4200DgetX(m_pStem, &tempDddx);
-      gyroL3G4200DgetY(m_pStem, &tempDddy);
-      gyroL3G4200DgetZ(m_pStem, &tempDddz);
-      break;
-    
-    // Default or none
-    case kGyro_none:
-    default:
-      m_logger->log(INFO, "%s: Gyro type %d not supported", __FUNCTION__, (int)m_gyroHWtype);
-      break;
-  }
-  
-  // Move the temp readings to the passed locations
-  *dddx = tempDddx;
-  *dddy = tempDddy;
-  *dddz = tempDddz;
-  
-  return 0;
+  return -1;
 }
 
 
@@ -114,7 +78,9 @@ int main(int argc, const char* argv[]) {
   // or, maybe command line arguements
   aArguments_Separate(ioRef, settings, NULL, argc, argv);
   
-  avcGyro gyro = avcGyro(&stem, &settings);
+	// the gyro classes are using polymorphism, so should be accessed via references
+  // to ensure the child-class virtual functions are used
+  avcGyro *gyro = new gyroL3G4200D(&stem, &settings);
   
   printf("connecting to stem\n");
   
@@ -135,19 +101,22 @@ int main(int argc, const char* argv[]) {
     ++timeout;
   } while (!stem.isConnected() && timeout < 30);
   
-  printf("\n");
-  
-  gyro.init();
+  printf("\nDone; ");
   
   // Bail if no stem. What's the point little man?
-  if (timeout == 10) { return 1; }
+  if (timeout == 10) { printf("Failed.\n"); return 1; }
+  printf("Got stem.\n");
+  
+  gyro->init();
 
   for (int i=0; i<100; i++){
     int x=0, y=0, z=0;
-    gyro.getAngularRateData(&x, &y, &z);
+    gyro->getAngularRateData(&x, &y, &z);
     log->log(INFO, "gyro x,y,z: %d\t%d\t%d", x, y, z);
     stem.sleep(100);
   }
+  
+  free(gyro);
   
 }
 
