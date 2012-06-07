@@ -247,8 +247,6 @@ avcController::run(void) {
       // We're attempting so run the loop for a consistent frequency.
       // So we get the elapsed time, and sleep if not enough time
       // has passed.
-
-
       unsigned long int curTime, elapsedTime = 0;
       // Get the current time.
       aIO_GetMSTicks(m_ioRef, &curTime, NULL);
@@ -271,8 +269,6 @@ avcController::run(void) {
     m_log->log(INFO, "We Made it !!!\n");
     return 0;
   }
-
-
 
 
 }
