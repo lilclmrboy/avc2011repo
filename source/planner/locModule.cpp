@@ -50,7 +50,7 @@ avcPosition::init(acpStem* pStem,
 	if(aSettingFile_GetFloat(m_ioRef, m_settings, KEY_METER_PER_TICK,  
 			&fSetVar, METER_PER_TICK, &e)) 
 		throw acpException(e, "getting meter per tick");	
-		m_metersPerTick = fSetVar;
+  m_metersPerTick = fSetVar;
   
   if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_BASE,  
 			&fSetVar, WHEEL_BASE, &e)) 
@@ -152,25 +152,35 @@ avcPosition::updateState() {
   if(tmElapsed <= 0)
     m_logger->log(ERROR, "%s: Elapsed time is invalid", __FUNCTION__);
   
-  m_logger->log(INFO, "%s: Elapsed time: %dms", __FUNCTION__, tmElapsed);
-	double fVelocity = m_metersPerTick * (curEnc - m_Encoder) / ((double)tmElapsed / 1000.0);
+	// Get the steering angle.
+	double steerAngleRad = getSteeringAngleRad();
+  int motorSetPoint = getMotorSetPoint();
+	
+  double fVelocity = (motorSetPoint < SERVO_NEUT ? -1 : 1) * m_metersPerTick * (double)(curEnc - m_Encoder) / ((double)tmElapsed / 1000.0);
+  double fDistRolled = (motorSetPoint < SERVO_NEUT ? -1 : 1) * m_metersPerTick * (double)(curEnc - m_Encoder);
 	m_logger->log(INFO, "Current Speed (m/s): %lf", fVelocity);
   
-	// Get the steering angle.
-	double steerAngle = getSteeringAngle();
+
 	
   // These calculations are predictions of where we think we need to be
 	// estimate change in x and y and heading
 	// TODO - we should use previous state vector to calculate position here.
 	// previous velocity.
-	double dx = cos(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLON_PER_METER;
-	double dy = sin(m_curPos.h * DEG_TO_RAD)* fVelocity * tmElapsed * aLAT_PER_METER;
+	double dx = sin(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLON_PER_METER;
+	double dy = cos(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLAT_PER_METER;
     
 	// Change in heading due to the previous steering angle
-  double fRot = fVelocity/m_wheelBase * tan(steerAngle);
+  double fRot = fDistRolled/m_wheelBase * tan(steerAngleRad) * RAD_TO_DEG;
   
-  m_logger->log(INFO, "%s: dx(m), dy(m), fRot(deg): %f, %f, %f", __FUNCTION__, dx/aLON_PER_METER, dy/aLAT_PER_METER, fRot*RAD_TO_DEG);
-  
+  if(curEnc - m_Encoder) {
+    m_logger->log(INFO, "%s: --- SteerAng(Rad): %f", __FUNCTION__, steerAngleRad);
+    m_logger->log(INFO, "%s: --- Throt: %d", __FUNCTION__, motorSetPoint);
+  	m_logger->log(INFO, "%s: --- fDist: %f", __FUNCTION__, fDistRolled);
+    m_logger->log(INFO, "%s: --- dx(m): %f", __FUNCTION__, dx/aLON_PER_METER);
+    m_logger->log(INFO, "%s: --- dy(m): %f", __FUNCTION__, dy/aLAT_PER_METER);
+    m_logger->log(INFO, "%s: --- fRot(deg): %f", __FUNCTION__, fRot);
+    m_logger->log(INFO, "%s: --- hed: %f", __FUNCTION__, m_curPos.h);
+  }
 	// Store current readings (for the next predict phase)
   m_Encoder= curEnc;
   m_curClock = curClock;
@@ -250,21 +260,6 @@ avcPosition::updateState() {
 	 
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-//int 
-//avcPosition::getGPSTimeSec(void) {
-//	int secs = 0;
-////	int tmp = 0;
-////	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_MIN) << 8; 
-////  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_MIN+1);
-////	secs = tmp * 60;
-////	tmp = m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_SEC) << 8; 
-////  tmp |= m_pStem->PAD_IO(aGP2_MODULE, aSPAD_GP2_GPS_SEC+1);
-////	secs += tmp;
-//		
-//	return secs;	
-//}
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -357,18 +352,33 @@ avcPosition::getEncoderValue(void) {
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Returns the steering angle in radians
 double
-avcPosition::getSteeringAngle(void) {
+avcPosition::getSteeringAngleRad(void) {
 
 	//We could do more here to check for encoder wrap.
   // Cubic method.
 	
 	
 	// Linear method.
-	unsigned char setpoint = m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER);
+  // Need to read the second byte, since the PAD_IO writes 2 bytes at a time
+	unsigned char setpoint = m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER+1);
 	return (setpoint - SERVO_NEUT) * MAX_TURNANGLE / SERVO_NEUT;
 	
 }
+
+/////////////////////////////////////////////////////////////////////////////
+// Returns the motor set point (to be used to determine forward/backward driving
+int
+avcPosition::getMotorSetPoint(void) {
+  
+	// Linear method.
+  // Need to read the second byte, since the PAD_IO writes 2 bytes at a time
+	unsigned char setpoint = m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT+1);
+	return setpoint;
+	
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Read the accelerometer sensor data

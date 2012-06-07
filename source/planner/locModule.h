@@ -24,7 +24,7 @@ public:
 		m_Q(3,3),
 		m_W(3,3),
 		m_Encoder(0),
-		m_metersPerTick(0.04358f), 
+		m_metersPerTick(METER_PER_TICK), 
 		m_settings(NULL)
 	{	
 		aErr e;
@@ -44,7 +44,7 @@ public:
 		m_Q(3,3),
 		m_W(3,3),
 		m_Encoder(0),
-		m_metersPerTick(0.04358),
+		m_metersPerTick(METER_PER_TICK),
 		m_settings(NULL)
 	{
 		aErr e;
@@ -121,7 +121,8 @@ private:
 	double getGPSLatitude(void);
 	double getHeading(void);
 	int getEncoderValue(void);
-	double getSteeringAngle(void);
+	double getSteeringAngleRad(void);
+  int getMotorSetPoint(void);
   int getAccelerometerReadings (float *ddx, float *ddy, float *ddz);
 	
 };
