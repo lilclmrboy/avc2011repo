@@ -83,6 +83,11 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
   // unsigned char since we are not likely to go past 200. 
   m_setpointMax = (short) setpoint;
   
+  m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, SERVO_NEUT);
+  m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, SERVO_NEUT);
+
+  printf("Read back steer pad %d\n",   m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER+1));
+  
   // Get access to the logger class
   m_log = logger::getInstance();
   m_log->log(INFO, "Motion Module initialized");
@@ -198,12 +203,12 @@ avcMotion::updateControl(const avcForceVector& potential)
     // Send the values to the stem
         
     
-    m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt16) servoDrive);
-    m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, (aUInt16) servoSteer);
+    m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
+    m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, (aUInt8) servoSteer);
     
     // Make sure the reading took
-    if ((m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT + 1) != servoDrive) || 
-      (m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER + 1) != servoSteer))
+    if ((m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT+1) != servoDrive) || 
+      (m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER+1) != servoSteer))
       e = aErrNotReady;
     
 #if aDEBUG_MOTMODULE_SWEEP    
@@ -526,14 +531,14 @@ main(int argc,
   
 	int trial = 15;
 	while (trial > 0) {
-		
+    // Need to read the second byte, since the PAD_IO writes 2 bytes at a time		
 		if(!bStart && (bStart = !(stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE)))) {
 			printf("Starting record\n");
 			distance = 0.0;
 			// set steering.
 			stem.PAD_IO(aSERVO_MODULE, AUTPAD_STEER, trial * 17);
 		}
-			 
+    // Need to read the second byte, since the PAD_IO writes 2 bytes at a time			 
 		if(bStart && !(bStart = !(stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE)))) {
 			printf("Ending record: steering setpoint %d, distance: %e\n", trial * 17, distance);
 			--trial;
@@ -557,7 +562,7 @@ main(int argc,
 		
 		
   }
-  stem.PAD_IO(aSERVO_MODULE, AUTPAD_STEER, 128);
+  stem.PAD_IO(aSERVO_MODULE, AUTPAD_STEER, SERVO_NEUT);
 	
   aIO_MSSleep(ioRef, 1000, NULL);
   

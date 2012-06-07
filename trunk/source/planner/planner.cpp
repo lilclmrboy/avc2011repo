@@ -254,7 +254,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		
 	// if we are within a minimum distance to the waypoint, mark it as passed; recurse
 	if (distanceToWaypoint <= m_minUnPassedDistanceToWaypoint) {
-		m_logger->log(INFO, "Passed waypoint minUnPassedDistance %d/%d",distanceToWaypoint, firstUnpassedWaypoint, (int)m_waypoints.size()-1);
+		m_logger->log(INFO, "Passed waypoint minUnPassedDistance %d/%d", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
 		
 		//m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);

@@ -155,7 +155,8 @@ avcController::run(void) {
 	while (m_stem.isConnected(STEMCONNECTED_WAIT)) {
 		
 		// Read the scratchpad for the RC enable bit
-		int rcswitch = m_stem.PAD_IO(aSERVO_MODULE, DIG_RCENABLE + 1);
+    // Need to read the second byte, since the PAD_IO writes 2 bytes at a time
+		int rcswitch = m_stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE);
 	  
 		// When we get set automatic mode, we expect a value of 0
 		if (rcswitch) {
@@ -215,7 +216,8 @@ avcController::run(void) {
 	while (aErrNone == checkAndWaitForStem())  {
 		
 		// When we get set automatic mode, we expect a value of 0
-		if (m_stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE + 1)) {
+    // Need to read the second byte, since the PAD_IO writes 2 bytes at a time
+		if (m_stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE)) {
 			
       // First time through, it defaults to false. Then we 
       // rely on the scratchpad for the current state.
@@ -252,7 +254,7 @@ avcController::run(void) {
 		
 		// get repulsive forces
 		//m_repulse.getForceResultant(&rv);
-		m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
+		//m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
 		
 		// motion planning step
     avcForceVector motivation;
