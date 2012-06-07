@@ -1,4 +1,5 @@
-#include "LSM303DLM.h"
+#include "avc.h"
+#include "compass.h"
 
 #define ACCEL_IIC_ADDR 0x30
 // Accelerometer registers
@@ -42,9 +43,21 @@
 #define LSM303DLM_IRC_REG_M 0x0C
 #define LSM303DLM_WHO_AM_I_M 0x0F
 
+/////////////////////////////////////////////////////////////////////////////
+// Constructor that calls parent constructor
+compassLSM303DLM::compassLSM303DLM(acpStem *pStem, aSettingFileRef settings)
+	: avcCompass(pStem, settings)
+{
+	m_compassHwType = kCompass_LSM303DLM;
+}
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLMinit(acpStem *pStem){
+// Default deconstructor
+compassLSM303DLM::~compassLSM303DLM(){
+}
+
+/////////////////////////////////////////////////////////////////////////////
+int compassLSM303DLM::init(){
   // setup the various control registers
   aUInt8 reg_buffer[2];
   aPacketRef regPacket;
@@ -52,8 +65,8 @@ int compassLSM303DLMinit(acpStem *pStem){
   // set the update rate
   reg_buffer[0] = LSM303DLM_CRA_REG_M;
   reg_buffer[1] = 0x14; // 15Hz update rate
-  regPacket = pStem->createPacket(LSM303DLM_MAG_IIC_ADDR, 2, reg_buffer);
-  pStem->sendPacket(regPacket);
+  regPacket = m_pStem->createPacket(LSM303DLM_MAG_IIC_ADDR, 2, reg_buffer);
+  m_pStem->sendPacket(regPacket);
   
   // set the gain
   // earth's field is 0.25-0.65 gauss
@@ -61,88 +74,113 @@ int compassLSM303DLMinit(acpStem *pStem){
   reg_buffer[1] = 0x20; // ±1.3 gauss range
   reg_buffer[1] = 0x80; // ±4.0 gauss range
   reg_buffer[1] = 0xE0; // ±8.1 gauss range
-  regPacket = pStem->createPacket(LSM303DLM_MAG_IIC_ADDR, 2, reg_buffer);
-  pStem->sendPacket(regPacket);
+  regPacket = m_pStem->createPacket(LSM303DLM_MAG_IIC_ADDR, 2, reg_buffer);
+  m_pStem->sendPacket(regPacket);
   
   // set the operating mode
   reg_buffer[0] = LSM303DLM_MR_REG_M;
   reg_buffer[1] = 0x00; // continuous conversion mode
-  regPacket = pStem->createPacket(LSM303DLM_MAG_IIC_ADDR, 2, reg_buffer);
-  pStem->sendPacket(regPacket);
+  regPacket = m_pStem->createPacket(LSM303DLM_MAG_IIC_ADDR, 2, reg_buffer);
+  m_pStem->sendPacket(regPacket);
   
   return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLMreadTwoByteTwosCompliment(acpStem *pStem, unsigned int firstReg, int *reading){
+int compassLSM303DLM::getMagnetometerReadings(int *x, int *y, int *z){
+  // check the points
+  if(!x || !y || !z){
+    m_logger->log(ERROR, "%s: null pointer passed in", __FUNCTION__);
+    return -1;
+  }
+  
+  try {
+    getMagneticX(x);
+    getMagneticY(y);
+    getMagneticZ(z);
+  } catch (int &e) {
+    m_logger->log(ERROR, "%s: error while reading magnetometer", __FUNCTION__);
+    return -1;
+  }
+  
+  return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+int compassLSM303DLM::getHeadingDeg(float *headingDeg){
+  // check pointer
+  if(!headingDeg)
+		return -1;
+  
+  m_logger->log(DEBUG, "%s: this function is not complete", __FUNCTION__);
+  // need to add dot product to get difference from north for "heading"
+  // need to add calibration information
+  
+  int x=0;
+  getMagneticX(&x);
+  
+  *headingDeg = (float)x;
+  
+  return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+int compassLSM303DLM::readTwoByteTwosCompliment(unsigned int firstReg, int *reading){
 	// Check the passed pointer
   if(!reading)
-    return -1;
+    throw -1;
   
   short ret_value = 0;
   aUInt8 read_buffer[2]={0,0};
   aUInt8 reg_buffer[1] = {firstReg};
   
-  aPacketRef regPacket = pStem->createPacket(LSM303DLM_MAG_IIC_ADDR, 1, reg_buffer);
-  pStem->sendPacket(regPacket);
-  pStem->IIC_RD(aUSBSTEM_MODULE, LSM303DLM_MAG_IIC_ADDR+1, 2, read_buffer);
+  aPacketRef regPacket = m_pStem->createPacket(LSM303DLM_MAG_IIC_ADDR, 1, reg_buffer);
+  m_pStem->sendPacket(regPacket);
+  m_pStem->IIC_RD(aUSBSTEM_MODULE, LSM303DLM_MAG_IIC_ADDR+1, 2, read_buffer);
   
-  // value is stored as two byte two's compliment; stuff and extend
+  // value is stored as two byte two's compliment little endian
   ret_value = (short)((read_buffer[1] << 8) | read_buffer[0]);
   
+  // sign extension by cast
   *reading = (int) ret_value;
   
   return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLMgetX(acpStem *pStem, int *x){
+int compassLSM303DLM::getMagneticX(int *x){
   // check pointers
   if(!x)
-		return -1;
+		throw -1;
   
-  compassLSM303DLMreadTwoByteTwosCompliment(pStem, LSM303DLM_OUT_X_H_M, x);
+	readTwoByteTwosCompliment(LSM303DLM_OUT_X_H_M, x);
   
   return 0;
 }
 
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLMgetY(acpStem *pStem, int *y){
+int compassLSM303DLM::getMagneticY(int *y){
   // check pointers
   if(!y)
-		return -1;
+		throw -1;
   
-  compassLSM303DLMreadTwoByteTwosCompliment(pStem, LSM303DLM_OUT_Y_H_M, y);
+	readTwoByteTwosCompliment(LSM303DLM_OUT_Y_H_M, y);
   
   return 0;
 }
 
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLMgetZ(acpStem *pStem, int *z){
+int compassLSM303DLM::getMagneticZ(int *z){
   // check pointers
   if(!z)
-		return -1;
+		throw -1;
   
-  compassLSM303DLMreadTwoByteTwosCompliment(pStem, LSM303DLM_OUT_Z_H_M, z);
+	readTwoByteTwosCompliment(LSM303DLM_OUT_Z_H_M, z);
   
   return 0;
 }
 
-
-/////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLMgetHeading(acpStem *pStem, int *heading){
-  // check pointer
-  if(!heading)
-		return -1;
-  
-  int x=0;
-  compassLSM303DLMgetX(pStem, &x);
-  
-  *heading = x;
-  
-  return 0;
-}
 
 

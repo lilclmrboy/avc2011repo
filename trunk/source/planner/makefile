@@ -75,6 +75,7 @@ OBJECTS = \
 			$(OBJ)/gyroL3G4200D.o\
 			$(OBJ)/gyro.o\
 			$(OBJ)/LSM303DLM.o\
+			$(OBJ)/CMPS10.o\
 			$(OBJ)/compass.o
 
 .PHONY : app
@@ -88,6 +89,15 @@ $(BIN)/MotionPlanner : $(OBJ)/MotionPlanner.o $(OBJECTS)
 
 $(OBJ)/MotionPlanner.o : main.cpp
 	$(CC) -c $(CFLAGS) $< -o $@
+
+$(OBJ)/gyroL3G4200D.o: gyroL3G4200D.cpp
+	$(CC) -c $(CFLAGS) gyroL3G4200D.cpp -o $(OBJ)/gyroL3G4200D.o
+
+$(OBJ)/LSM303DLM.o: LSM303DLM.cpp
+	$(CC) -c $(CFLAGS) LSM303DLM.cpp -o $(OBJ)/LSM303DLM.o
+
+$(OBJ)/CMPS10.o: CMPS10.cpp
+	$(CC) -c $(CFLAGS) CMPS10.cpp -o $(OBJ)/CMPS10.o
 
 $(OBJ)/%.o : %.cpp %.h
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -137,8 +147,9 @@ gyroTest : $(OBJ) $(OBJ)/logger.o
 .PHONY : compassTest
 compassTest : $(OBJ) $(OBJ)/logger.o
 	$(CC) -c $(CFLAGS) LSM303DLM.cpp -o $(OBJ)/LSM303DLM.o
+	$(CC) -c $(CFLAGS) CMPS10.cpp -o $(OBJ)/CMPS10.o
 	$(CC) -c $(CFLAGS) -DaDEBUG_COMPASS compass.cpp -o $(OBJ)/compass.o
-	$(CC) -g $(CFLAGS) -DaDEBUG_COMPASS $(LFLAGS) $(OBJ)/logger.o $(OBJ)/LSM303DLM.o $(OBJ)/compass.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/compassTest
+	$(CC) -g $(CFLAGS) -DaDEBUG_COMPASS $(LFLAGS) $(OBJ)/logger.o $(OBJ)/LSM303DLM.o $(OBJ)/CMPS10.o $(OBJ)/compass.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/compassTest
 
 
 .PHONY : clean
