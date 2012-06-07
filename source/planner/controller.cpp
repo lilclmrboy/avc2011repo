@@ -148,8 +148,6 @@ avcController::run(void) {
   avcForceVector rv;
   avcRepulsiveForces frepulsive;
 
-
-
   bool bManualOverride = false;
   bool bNotStarted = true;
   bool bSuccess = false;
@@ -250,11 +248,13 @@ avcController::run(void) {
       // So we get the elapsed time, and sleep if not enough time
       // has passed.
 
+
       unsigned long int curTime, elapsedTime = 0;
       // Get the current time.
       aIO_GetMSTicks(m_ioRef, &curTime, NULL);
       elapsedTime = curTime - prevTime;
       if (elapsedTime < m_loopdelay)
+        //Now we sleep... if we have any time left.
         aIO_MSSleep(m_ioRef, (m_loopdelay - elapsedTime), NULL);
 
     } // end if not Manual Override
@@ -272,7 +272,7 @@ avcController::run(void) {
     return 0;
   }
 
-  //Now we sleep... if we have any time left.
+
 
 
 }
