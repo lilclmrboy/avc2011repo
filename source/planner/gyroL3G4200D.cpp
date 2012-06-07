@@ -61,9 +61,10 @@ int gyroL3G4200D::gyroL3G4200DreadTwoByteTwosCompliment(unsigned int firstReg, i
   m_pStem->sendPacket(regPacket);
   m_pStem->IIC_RD(aUSBSTEM_MODULE, L3G4200D_IIC_ADDR+1, 2, read_buffer);
   
-  // value is stored as two byte two's compliment; stuff and extend
+  // value is stored as two byte two's compliment little endian
   ret_value = (short)((read_buffer[1] << 8) | read_buffer[0]);
 
+  // sign extension by cast
   *reading = (int) ret_value;
   
   return 0;

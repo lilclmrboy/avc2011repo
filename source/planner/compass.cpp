@@ -1,10 +1,13 @@
 #include "compass.h"
-#include "LSM303DLM.h"
+
+#define DEG_TO_RAD (aPI/180)
+#define RAD_TO_DEG (180/aPI)
 
 /////////////////////////////////////////////////////////////////////////////
 // Constructor
 avcCompass::avcCompass(acpStem *pStem, aSettingFileRef settings){
-  m_compassHwType = kCompass_LSM303DLM;
+	m_logger = logger::getInstance();
+  m_compassHwType = kCompass_none;
   m_pStem = pStem;
 }
 
@@ -15,42 +18,37 @@ avcCompass::~avcCompass(void) {}
 /////////////////////////////////////////////////////////////////////////////
 // initialize the HW
 int avcCompass::init(){
-  switch (m_compassHwType){
-      // LSM303DLM compass
-    case kCompass_LSM303DLM:
-      compassLSM303DLMinit(m_pStem);
-      break;
-      
-      // default and undefined compass
-    case kCompass_none:
-    default:
-      m_logger->log(INFO, "%s: not supported by compass type %d", __PRETTY_FUNCTION__, m_compassHwType);
-      break;
-  }
-  return 0;
+  // default and undefined compass
+  m_logger->log(ERROR, "%s: not supported by compass type %d", __FUNCTION__, m_compassHwType);
+  return -1;
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// read the current heading
-int avcCompass::getHeading(int *heading){
+// read the current heading in degress
+int avcCompass::getHeadingDeg(float *headingDeg){
   // Check the pointers
-  if(!heading){
-    m_logger->log(ERROR, "%s: Null pointer passed in", __PRETTY_FUNCTION__);
+  if(!headingDeg){
+    m_logger->log(ERROR, "%s: Null pointer passed in", __FUNCTION__);
     return -1;
   }
   
-  switch (m_compassHwType){
-    // LSM303DLM compass
-    case kCompass_LSM303DLM:
-      compassLSM303DLMgetHeading(m_pStem, heading);
-      break;
-      
-    // default and undefined compass
-    case kCompass_none:
-    default:
-      m_logger->log(INFO, "%s: not supported by compass type %d", __PRETTY_FUNCTION__, m_compassHwType);
-      break;
-  }
+  m_logger->log(INFO, "%s: not supported by compass type %d", __FUNCTION__, m_compassHwType);
+  return -1;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// read the current heading in radians
+int avcCompass::getHeadingRad(float *headingRad){
+  // check pointer
+  if(!headingRad)
+		return -1;
+  
+  float headingDeg=0.0;
+  if(0 != getHeadingDeg(&headingDeg))
+    return -1;
+  
+  *headingRad = headingDeg * DEG_TO_RAD;
+  
   return 0;
 }
 
@@ -59,26 +57,12 @@ int avcCompass::getHeading(int *heading){
 int avcCompass::getMagnetometerReadings(int *x, int *y, int *z){
   // Check the pointers
   if(!x || !y || !z){
-    m_logger->log(ERROR, "%s: Null pointers passed in", __PRETTY_FUNCTION__);
+    m_logger->log(ERROR, "%s: Null pointers passed in", __FUNCTION__);
     return -1;
   }
   
-  switch (m_compassHwType){
-      // LSM303DLM compass
-    case kCompass_LSM303DLM:
-      compassLSM303DLMgetX(m_pStem, x);
-      compassLSM303DLMgetY(m_pStem, y);
-      compassLSM303DLMgetZ(m_pStem, z);
-      break;
-      
-      // default and undefined compass
-    case kCompass_none:
-    default:
-      m_logger->log(INFO, "%s: not supported by compass type %d", __PRETTY_FUNCTION__, m_compassHwType);
-      break;
-  }
-  
-  return 0;
+  m_logger->log(INFO, "%s: not supported by compass type %d", __FUNCTION__, m_compassHwType);
+  return -1;
 }
 
 
@@ -106,8 +90,6 @@ int main(int argc, const char* argv[]) {
   // or, maybe command line arguements
   aArguments_Separate(ioRef, settings, NULL, argc, argv);
   
-  avcCompass compass = avcCompass(&stem, &settings);
-  
   printf("connecting to stem\n");
   
   // This starts up the stem link processing and is called once to spawn
@@ -127,17 +109,19 @@ int main(int argc, const char* argv[]) {
     ++timeout;
   } while (!stem.isConnected() && timeout < 30);
   
-  printf("\n");
+  printf("\nDone; ");
   
   // Bail if no stem. What's the point little man?
-  if (timeout == 10) { return 1; }
+  if (timeout == 10) { printf("Failed.\n"); return 1; }
+  printf("Got stem.\n");
   
-  compass.init();
+  avcCompass *compass = new compassLSM303DLM(&stem, &settings);
+  compass->init();
   
   //for (int i=0; i<100; i++){
   while(1){
     int x=0, y=0, z=0;
-    compass.getMagnetometerReadings(&x, &y, &z);
+    compass->getMagnetometerReadings(&x, &y, &z);
     log->log(INFO, "compass x,y,z: %d\t%d\t%d", x, y, z);
     stem.sleep(100);
   }
