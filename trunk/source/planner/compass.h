@@ -18,6 +18,7 @@ public:
   virtual int getHeadingDeg(float *headingDeg);
   virtual int getHeadingRad(float *headingRad);
   virtual int getMagnetometerReadings(int *x, int *y, int *z);
+  virtual int resetCalToFactory();
   
 protected:
   acpStem *m_pStem;
@@ -69,7 +70,7 @@ public:
   int init();
   int getHeadingDeg(float *heading);
   int getMagnetometerReadings(int *x, int *y, int *z);
-  
+  int resetCalToFactory();
 private:
   int readTwoByteTwosCompliment(unsigned int firstReg, int *reading);
   int getMagneticX(int *x);

@@ -251,10 +251,14 @@ avcController::run(void) {
       // Get the current time.
       aIO_GetMSTicks(m_ioRef, &curTime, NULL);
       elapsedTime = curTime - prevTime;
+      m_log->log(INFO, "Elapsed Time: %d", elapsedTime);
       if (elapsedTime < m_loopdelay)
         //Now we sleep... if we have any time left.
         aIO_MSSleep(m_ioRef, (m_loopdelay - elapsedTime), NULL);
 
+      // We get this here to maintain correct elapsed time in the loop.
+      aIO_GetMSTicks(m_ioRef, &prevTime, NULL);
+      
     } // end if not Manual Override
 
   } // end while

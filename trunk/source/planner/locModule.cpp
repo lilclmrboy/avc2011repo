@@ -15,6 +15,7 @@ avcPosition::init(acpStem* pStem,
 	m_pStem = pStem;
 	m_settings = settings;
 	m_logger = logger::getInstance();	
+  m_compass = new compassCMPS10(m_pStem, m_settings);
 	aErr e;
 
 	char buffer[100];
@@ -84,7 +85,7 @@ avcPosition::init(acpStem* pStem,
 			
 		}
 	  
-		if (haveGPS) {
+		if (0){//(haveGPS) {
 			//Lets get a lat, lon, and heading. We shouldn't
 		  //be moving yet.
       setPosition(avcWaypointVector(getGPSLongitude(), 
@@ -160,7 +161,7 @@ avcPosition::updateState() {
   double fDistRolled = (motorSetPoint < SERVO_NEUT ? -1 : 1) * m_metersPerTick * (double)(curEnc - m_Encoder);
 	m_logger->log(INFO, "Current Speed (m/s): %lf", fVelocity);
   
-
+  m_curPos.h = getHeading();
 	
   // These calculations are predictions of where we think we need to be
 	// estimate change in x and y and heading
@@ -189,7 +190,7 @@ avcPosition::updateState() {
   // These vector values should be in latitude, longitude and degrees
 	m_curPos.x += dx;
 	m_curPos.y += dy;
-	m_curPos.h += fRot; 
+	//m_curPos.h += fRot; 
 	
 	/*
 	Matrix state(3,1);
@@ -337,7 +338,13 @@ double
 avcPosition::getHeading(void) {
 	
   double retVal = 0.0;
-	
+	float headingDeg=0.0;
+  if(0 != m_compass->getHeadingDeg(&headingDeg)){
+    m_logger->log(ERROR, "%s: Error getting current heading", __FUNCTION__);
+  	return 0.0;
+  }
+  
+  retVal = (double) headingDeg;
 	return retVal;
 }
 

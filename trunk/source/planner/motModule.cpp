@@ -201,7 +201,19 @@ avcMotion::updateControl(const avcForceVector& potential)
   #endif	    
       
     // Send the values to the stem
-        
+  
+  	// The controller has a braking mechanism so when the throttle crosses SERVO_NEUT
+  	// we need to set the value, set neut, set the value
+  	if((m_setpointLast[0] > SERVO_NEUT && servoDrive < SERVO_NEUT) ||
+       (m_setpointLast[0] < SERVO_NEUT && servoDrive > SERVO_NEUT)){
+      
+      m_log->log(INFO, "MotionModule: Detected rapid reversal in throttle (%d to %d)", m_setpointLast[0], servoDrive);
+      m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
+      m_pStem->sleep(10); // short sleep for it to set
+      m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) SERVO_NEUT);
+      m_pStem->sleep(10); // short sleep for it to set      
+    }
+  	
     
     m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
     m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, (aUInt8) servoSteer);
@@ -210,6 +222,10 @@ avcMotion::updateControl(const avcForceVector& potential)
     if ((m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT+1) != servoDrive) || 
       (m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER+1) != servoSteer))
       e = aErrNotReady;
+  	
+  	// store the current settings for next loop
+		m_setpointLast[0] = servoDrive;
+	  m_setpointLast[1] = servoSteer;
     
 #if aDEBUG_MOTMODULE_SWEEP    
     
