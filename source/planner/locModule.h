@@ -9,6 +9,7 @@
 
 #include "avc.h"
 #include "mat_math.h"
+#include "compass.h"
 
 #define aUSE_GPS
 
@@ -61,6 +62,8 @@ public:
 		aErr e;
 		if (aIO_ReleaseLibRef(m_ioRef, &e))
  	     		throw acpException(e, "unable to destroy IO lib");	
+    
+    free(m_compass);
 	};
 	
 	//We need a valid link to the stem network here. 
@@ -107,6 +110,8 @@ private:
 	int m_Encoder;
 	double m_metersPerTick; //encoder ticks per revolution.
   double m_wheelBase;
+  
+  avcCompass *m_compass;
 
 	//Our controller owns this we'll let them delete.	
 	aSettingFileRef m_settings;

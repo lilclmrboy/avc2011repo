@@ -65,6 +65,12 @@ int avcCompass::getMagnetometerReadings(int *x, int *y, int *z){
   return -1;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// get all three axes reading
+int avcCompass::resetCalToFactory(){
+	m_logger->log(INFO, "%s: not supported by compass type %d", __FUNCTION__, m_compassHwType);
+  return -1;
+}
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -118,11 +124,34 @@ int main(int argc, const char* argv[]) {
   avcCompass *compass = new compassLSM303DLM(&stem, &settings);
   compass->init();
   
-  //for (int i=0; i<100; i++){
-  while(1){
+  printf("\n\n Running the LSM303DLM compass\n");
+  
+  for (int i=101; i<100; i++){
+  //while(1){
     int x=0, y=0, z=0;
     compass->getMagnetometerReadings(&x, &y, &z);
     log->log(INFO, "compass x,y,z: %d\t%d\t%d", x, y, z);
+    stem.sleep(100);
+  }
+  
+  free(compass);
+  
+  compass = new compassCMPS10(&stem, &settings);
+  compass->init();
+  
+  printf("\n\n Now the CMPS10\n");
+  
+  //compass->resetCalToFactory();
+  
+  //for (int i=0; i<100; i++){
+	while(1){
+    int x=0, y=0, z=0;
+    compass->getMagnetometerReadings(&x, &y, &z);
+    //log->log(INFO, "compass x,y,z: %d\t%d\t%d", x, y, z);
+    
+    float headingDeg=0.0;
+    compass->getHeadingDeg(&headingDeg);
+    log->log(INFO, "compass heading: %f", headingDeg);
     stem.sleep(100);
   }
   
