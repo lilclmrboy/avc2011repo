@@ -269,27 +269,29 @@ avcController::run(void) {
       aIO_GetMSTicks(m_ioRef, &prevTime, NULL);
       
     } // end if not Manual Override
+		
+		// Measure the input voltage for the controller logic
+		// Just do it once in a while
+		if ((nIterations++ % 50) == 0) {
+			
+			// Measure the voltage from the USBStem
+			float inputVoltage = m_stem.A2D(aUSBSTEM_MODULE, a40PINSTEM_VPWR);
+			
+			// If below our desired voltage
+			if (m_fInputVoltageContollerMin > inputVoltage ) {
+				
+				// We have a low system voltage
+				m_log->log(INFO, "Input system voltage: %fV", 
+									 a40PINSTEM_VPWR_VOLTS(inputVoltage));
+				
+				PlaySound("sonofabitch.wav");
+				
+			} // end of if for checking input voltage
+		} // end if for modulus of iterations that check input voltage
 
   } // end while
 	
-	// Measure the input voltage for the controller logic
-	// Just do it once in a while
-	if ((nIterations++ % 50)) {
-		
-		// Measure the voltage from the USBStem
-		float inputVoltage = m_stem.A2D(aUSBSTEM_MODULE, a40PINSTEM_VPWR);
-		
-		// If below our desired voltage
-		if (inputVoltage < m_fInputVoltageContollerMin) {
-			
-			// We have a low system voltage
-			m_log->log(INFO, "Input system voltage: %fV", 
-								 a40PINSTEM_VPWR_VOLTS(inputVoltage));
-			
-			PlaySound("sonofabitch.wav");
-			
-		} // end of if for checking input voltage
-	} // end if for modulus of iterations that check input voltage
+
 
 
   // We lost the stem, so might as well be drama queens.
