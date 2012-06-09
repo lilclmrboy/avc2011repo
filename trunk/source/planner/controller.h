@@ -48,7 +48,7 @@
 #include "planner.h"
 #include "logger.h"
 #include "aCmd.tea"
-#include "aStem.h"
+#include "a40PinStem.h"
 #include "avcDefs.tea"
 #include "avcStructs.h"
 #include "repulsiveForces.h"
@@ -89,6 +89,7 @@ private:
 	//and right motors.
 	avcControlVector m_curControl;
   logger *m_log;
+	float m_fInputVoltageContollerMin;
   
   unsigned long m_loopdelay;
   
