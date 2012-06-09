@@ -19,6 +19,7 @@ public:
   virtual int getHeadingRad(float *headingRad);
   virtual int getMagnetometerReadings(int *x, int *y, int *z);
   virtual int resetCalToFactory();
+  virtual int getAccelerometerReadings(int *accX, int *accY, int *accZ);
   
 protected:
   acpStem *m_pStem;
@@ -53,12 +54,43 @@ public:
   int init();
   int getHeadingDeg(float *heading);
   int getMagnetometerReadings(int *x, int *y, int *z);
+  int getAccelerometerReadings(int *accX, int *accY, int *accZ); // this should be moved to the accelerometer class
   
 private:
-  int readTwoByteTwosCompliment(unsigned int firstReg, int *reading);
+  typedef struct vector3D{
+    double x, y, z;
+    
+    vector3D (double newx, double newy, double newz){
+      x = newx;
+      y = newy;
+      z = newz;
+    }
+    
+    vector3D (void){x=0; y=0; z=0;}
+    
+  } vector3D;
+  
+  int readTwoByteTwosComplimentLittleEndian(unsigned int firstReg, int *reading);
+  int readTwoByteTwosComplimentBigEndian(unsigned int firstReg, int *reading);
   int getMagneticX(int *x);
   int getMagneticY(int *y);
   int getMagneticZ(int *z);
+  
+  int calculateHeadingDeg(vector3D magV, float *headingDeg);
+    
+  // store the initial accelerometer readings so they can be used in
+  // heading calculation
+  vector3D m_initalAccelerometerReadings;
+  vector3D m_compassCalMin;
+  vector3D m_compassCalMax;
+  
+  // flag to indication if the LSM303DLM has been initialized
+  int m_beenInitialized;
+  
+  // vector helper functions
+  void normalizeVector3D(vector3D *vec);
+  void crossProductVector3D(const vector3D *a, const vector3D *b, vector3D *result);
+  double dotProductVector3D(const vector3D *a, const vector3D *b);
   
 };
 
@@ -72,11 +104,12 @@ public:
   int getMagnetometerReadings(int *x, int *y, int *z);
   int resetCalToFactory();
 private:
+  
+  
   int readTwoByteTwosCompliment(unsigned int firstReg, int *reading);
   int getMagneticX(int *x);
   int getMagneticY(int *y);
   int getMagneticZ(int *z);
-  
 };
 
 #endif //_gyro_H_
