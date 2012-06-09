@@ -43,6 +43,7 @@ int PlaySound(const char * file)
 avcController::avcController(void) : 
 m_settings(NULL),
 m_ioRef(NULL),
+m_fInputVoltageContollerMin(12.0f),
 m_loopdelay(aCONTROLLER_LOOP_DELAY_DEFAULT)
 {
   aErr e;
@@ -92,6 +93,12 @@ avcController::init(const int argc, const char* argv[]) {
                         aCONTROLLER_LOOP_DELAY_KEY,
                         &m_loopdelay,
                         aCONTROLLER_LOOP_DELAY_DEFAULT, &e);
+	
+	aSettingFile_GetFloat(m_ioRef, 
+												m_settings, 
+												aCONTROLLER_INPUTV_CONTROLLER_KEY, 
+												&m_fInputVoltageContollerMin, 
+												aCONTROLLER_INPUTV_CONTROLLER_DEFAULT, &e);
 
   // Wait until we have a solid heartbeat connection so we know there is
   // someone to talk to.
@@ -153,6 +160,7 @@ avcController::run(void) {
   bool bSuccess = false;
   int extraDelay = 0;
   unsigned long int prevTime = 0;
+	unsigned long int nIterations = 0;
   //Initialize the previous time to something reasonable
   aIO_GetMSTicks(m_ioRef, &prevTime, NULL);
 
@@ -162,11 +170,12 @@ avcController::run(void) {
     // Read the scratchpad for the RC enable bit
     // Need to read the second byte, since the PAD_IO writes 2 bytes at a time
     int rcswitch = m_stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE);
-
+		
     // All this junk is about the RC stuff getting enabled. It is
     // a little more confusing since we want to trigger a sound
     // That is different depending on if we want to go to manual
     // override mode, or autonomous control mode.
+	
 
     if(rcswitch && !bManualOverride) {
       if(bNotStarted)
@@ -262,6 +271,25 @@ avcController::run(void) {
     } // end if not Manual Override
 
   } // end while
+	
+	// Measure the input voltage for the controller logic
+	// Just do it once in a while
+	if ((nIterations++ % 50)) {
+		
+		// Measure the voltage from the USBStem
+		float inputVoltage = m_stem.A2D(aUSBSTEM_MODULE, a40PINSTEM_VPWR);
+		
+		// If below our desired voltage
+		if (inputVoltage < m_fInputVoltageContollerMin) {
+			
+			// We have a low system voltage
+			m_log->log(INFO, "Input system voltage: %fV", 
+								 a40PINSTEM_VPWR_VOLTS(inputVoltage));
+			
+			PlaySound("sonofabitch.wav");
+			
+		} // end of if for checking input voltage
+	} // end if for modulus of iterations that check input voltage
 
 
   // We lost the stem, so might as well be drama queens.

@@ -86,5 +86,10 @@
 #define aCONTROLLER_LOOP_DELAY_KEY     "loopdelay"
 #define aCONTROLLER_LOOP_DELAY_DEFAULT 100
 
+// Main controller input voltage minimum control value
+#define aCONTROLLER_INPUTV_CONTROLLER_KEY     "minInputVoltageController"
+#define aCONTROLLER_INPUTV_CONTROLLER_DEFAULT 12.0f
+
+
 
 #endif //_avc2011_H_
