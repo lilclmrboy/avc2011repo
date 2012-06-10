@@ -16,12 +16,12 @@ main(int argc,
     retVal = controller.init(argc, argv);
     switch (retVal) {
       case aErrTimeout:
-	printf("Couldn't connect to stem. Check connections, jackass.\n");
-	PlaySound("crap.wav");
-	return 0;
-	break;
+				printf("Couldn't connect to stem. Check connections, jackass.\n");
+				PlaySound("crap.wav");
+				return 0;
+				break;
       default:
-	break;
+				break;
     }
     if(!retVal)
       retVal = controller.run();

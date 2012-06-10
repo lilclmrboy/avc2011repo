@@ -13,7 +13,8 @@ enum aLogType {
 	RAW = 1,
 	DEBUG,
 	INFO,
-	NOTICE,	
+	NOTICE,
+	WARN,
 	ERROR
 };
 
