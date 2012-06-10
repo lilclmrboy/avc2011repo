@@ -27,6 +27,10 @@ avcMotion::avcMotion() :
     
   }
   
+  // Set the setpoint history to all neutral values
+  for (int j = 0; j < aMOTMODULE_HISTORY_WINDOW; j++)
+    m_setpointHistory[j] = SERVO_NEUT;
+  
   // Create a aIO reference to manipulate settings file reference
   if(aIO_GetLibRef(&m_ioRef, &e)) 
     throw acpException(e, "Getting aIOLib reference");
@@ -50,6 +54,10 @@ avcMotion::~avcMotion()
 
 aErr
 avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
+  
+  // Get access to the logger class
+  m_log = logger::getInstance();
+  m_log->log(INFO, "Motion Module initialized");
   
   aErr e = aErrNone;
   
@@ -83,14 +91,32 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
   // unsigned char since we are not likely to go past 200. 
   m_setpointMax = (short) setpoint;
   
+  // We store and send the host side setpoint values into a scratchpad
+  // A TEA process running on the servo module reads from this 
+  // pad location and determines if it should use this or
+  // do the manual override RC value.
   m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, SERVO_NEUT);
   m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, SERVO_NEUT);
 
-  printf("Read back steer pad %d\n",   m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER+1));
+  //m_log->log(INFO, "Read back steer pad %d",   m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER+1))
   
-  // Get access to the logger class
-  m_log = logger::getInstance();
-  m_log->log(INFO, "Motion Module initialized");
+  // Setting ramp configuration for the GP servo throttle setting
+  // Where the second
+  try {
+    m_pStem->SRV_CFG(aSERVO_MODULE, THROT_SERVO, 
+                     bitCMD_DEST_HOST | 0x81);
+    m_pStem->SRV_CFG(aSERVO_MODULE, STEER_SERVO, 
+                     bitCMD_DEST_HOST | 0x00);
+  } catch (acpException &e) {
+    m_log->log(ERROR, "%s: error writing ramp to GP", __FUNCTION__, e.msg());
+  }
+  
+  // Read back the servo configuration from each servo motor
+  unsigned char rampCheckThrottle = m_pStem->SRV_CFG(aSERVO_MODULE, THROT_SERVO);
+  unsigned char rampCheckSteering = m_pStem->SRV_CFG(aSERVO_MODULE, STEER_SERVO);
+  
+  m_log->log(INFO, "Steering Servo Ramp: 0x%X", rampCheckSteering);
+  m_log->log(INFO, "Throttle Servo Ramp: 0x%X", rampCheckThrottle);
   
   // Set the flag to inidicate that we have been properly initialized
   m_bInit = true;
@@ -112,25 +138,25 @@ avcMotion::updateControl(const avcForceVector& potential)
   // Make sure you other hackers initialized this first
   if (!m_pStem) {
     m_log->log(ERROR,"avcMotion::updateControl failed. acpStem is NULL\n"
-	       " \tCall avcMotion::init(acpStem *)");
+               " \tCall avcMotion::init(acpStem *)");
     return aErrInitialization;
   }
   
   if (!m_bInit) {
     m_log->log(ERROR,"avcMotion::updateControl failed since uninitialized.\n"
-	       " \tCall avcMotion::init(acpStem *)");
+               " \tCall avcMotion::init(acpStem *)");
     return aErrInitialization;
   }
   
   // Boundary check the input force vectors
   if (potential.x > 1.0 || potential.x < -1.0) {
     m_log->log(ERROR,"avcMotion::updateControl failed.\n"
-	       "\tavcForceVector.x is out of range");
+               "\tavcForceVector.x is out of range");
     return aErrRange;
   }
   if (potential.y > 1.0 || potential.y < -1.0) {
     m_log->log(ERROR,"avcMotion::updateControl failed.\n"
-	       "\tavcForceVector.y is out of range");
+               "\tavcForceVector.y is out of range");
     return aErrRange;
   }
   
@@ -145,15 +171,15 @@ avcMotion::updateControl(const avcForceVector& potential)
     //printf("delta is negative\n  delta: %f deltad: %f", delta, aPI*2 + delta);
     delta += aPI*2 + delta;
   }
-  	  
+  
   // The magnitude value directly translates to the gas pedal for the 
   // rear drive motor.
   // Scale the change window by the throttle window setpoint value
   unsigned char servoDrive = (unsigned char)(SERVO_NEUT 
-					     + ((SERVO_NEUT-1) * m_fThrottleWindow * magnitude));
+                                             + ((SERVO_NEUT-1) * m_fThrottleWindow * magnitude));
   unsigned char servoSteer = SERVO_NEUT;
-
-    // Update the servo values
+  
+  // Update the servo values
   // The magnitude value directly translates to the gas pedal for the 
   // rear drive motor.
   unsigned char steerdelta = 0;
@@ -183,61 +209,93 @@ avcMotion::updateControl(const avcForceVector& potential)
     steerdelta = (unsigned char)((2*aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
     servoSteer = SERVO_NEUT - steerdelta;
   }
-      
-  #ifdef aDEBUG_MOTMODULE	
-    // Show us what we got
-    if (bDebugHeader) {
-      m_log->log(DEBUG,"MotionModule: "
-                 "Ux\tUy\tmag\tdelta\tsrvD\tsrvS\tsDel\trad");
-      bDebugHeader = false;
-    }
-    
+  
+#ifdef aDEBUG_MOTMODULE	
+  // Show us what we got
+  if (bDebugHeader) {
     m_log->log(DEBUG,"MotionModule: "
-               "%2.2f\t%2.2f\t%2.2f\t%2.2f\t%d\t%d\t%d\t%f",
-               potential.x, potential.y, 
-               magnitude, delta,
-               servoDrive, servoSteer, steerdelta, delta);
-    
-  #endif	    
-      
-    // Send the values to the stem
+               "Ux\tUy\tmag\tdelta\tsrvD\tsrvS\tsDel\trad");
+    bDebugHeader = false;
+  }
   
-  	// The controller has a braking mechanism so when the throttle crosses SERVO_NEUT
-  	// we need to set the value, set neut, set the value
-  	if((m_setpointLast[0] > SERVO_NEUT && servoDrive < SERVO_NEUT) ||
-       (m_setpointLast[0] < SERVO_NEUT && servoDrive > SERVO_NEUT)){
-      
-      m_log->log(INFO, "MotionModule: Detected rapid reversal in throttle (%d to %d)", m_setpointLast[0], servoDrive);
-      //m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
-      //m_pStem->sleep(200); // short sleep for it to set
-      m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) SERVO_NEUT);
-      m_pStem->sleep(500); // short sleep for it to set      
-    }
-  	
-    m_log->log(INFO, "MotionModule: Throttle, Steer: %d, %d", servoDrive, servoSteer);
+  m_log->log(DEBUG,"MotionModule: "
+             "%2.2f\t%2.2f\t%2.2f\t%2.2f\t%d\t%d\t%d\t%f",
+             potential.x, potential.y, 
+             magnitude, delta,
+             servoDrive, servoSteer, steerdelta, delta);
   
-    m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
-    m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, (aUInt8) servoSteer);
+#endif	    
+  
+  // Send the values to the stem
+  // The controller has a braking mechanism so when the throttle crosses SERVO_NEUT
+  // we need to set the value, set neut, set the value
+  //    Instead of doing this, making a servo ramp happen in the GP seems to work better
+    	if((m_setpointLast[0] > SERVO_NEUT && servoDrive < SERVO_NEUT) ||
+         (m_setpointLast[0] < SERVO_NEUT && servoDrive > SERVO_NEUT)){
+        
+        m_log->log(INFO, "MotionModule: Detected rapid reversal in throttle (%d to %d)", m_setpointLast[0], servoDrive);
+        //m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
+        //m_pStem->sleep(200); // short sleep for it to set
+        m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) SERVO_NEUT);
+        m_pStem->sleep(500); // short sleep for it to set      
+      }
+  
+  // Do a running average on the steering servo setpoint. Use this value to 
+  // send to the controller.
+  
+  for (int i=aMOTMODULE_HISTORY_WINDOW-1; i>0; i--){
+    m_setpointHistory[i] = m_setpointHistory[i-1];
+  }
+  m_setpointHistory[0] = servoSteer;
+
+  // Calculate the running average of the setpoint values
+  // This is through all the accululated values
+  int setpointCumulative = 0;
+  for (int n = 0; n < aMOTMODULE_HISTORY_WINDOW; n++) {
+    setpointCumulative += m_setpointHistory[n];
     
-    // Make sure the reading took
-    if ((m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT+1) != servoDrive) || 
+    // Debug the cumulative setpoint total
+    m_log->log(DEBUG, "%s: setpoint @%d: %d", 
+               __FUNCTION__, n, m_setpointHistory[n]);
+  }
+
+  m_log->log(DEBUG,"here4");
+  // Divide the addition of the values by the history window
+  // Cast it and roundn it.
+  servoSteer = (aUInt8) ((float)setpointCumulative / (float) aMOTMODULE_HISTORY_WINDOW);
+  
+  m_log->log(INFO, "MotionModule: Throttle, Steer: %d, %d", servoDrive, servoSteer);
+  
+  m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
+  m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, (aUInt8) servoSteer);
+  
+  // Make sure the reading took
+  if ((m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT+1) != servoDrive) || 
       (m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER+1) != servoSteer))
-      e = aErrNotReady;
-  	
-  	// store the current settings for next loop
-		m_setpointLast[0] = servoDrive;
-	  m_setpointLast[1] = servoSteer;
-    
+    e = aErrNotReady;
+  
+  // store the current settings for next loop
+  m_setpointLast[0] = servoDrive;
+  m_setpointLast[1] = servoSteer;
+  
 #if aDEBUG_MOTMODULE_SWEEP    
-    
-    // Delay so we can see things happen
-    m_pStem->sleep(aSLICE);
-    
-  } // end for loop
+  
+  // Delay so we can see things happen
+  m_pStem->sleep(aSLICE);
+  
+} // end for loop
 #endif
 
-  return e;
-  
+return e;
+
+}
+
+
+short avcMotion::getLastThrottle(){
+  return m_setpointLast[0];
+}
+short avcMotion::getLastSteer(){
+  return m_setpointLast[1];
 }
 
 
@@ -474,6 +532,8 @@ int driveTests(acpStem *pStem, aSettingFileRef settings)
   
 }
 
+
+
 ////////////////////////////////////////
 // main testing routine for motModule 
 int 
@@ -591,5 +651,6 @@ main(int argc,
   return 0;
   
 }
+
 
 #endif

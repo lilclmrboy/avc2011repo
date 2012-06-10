@@ -14,6 +14,8 @@
 #define aMOTMODULE_THROTTLE_WINDOW_KEY      "speedscale"
 #define aMOTMODULE_THROTTLE_WINDOW_DEFAULT  0.2f
 
+#define aMOTMODULE_HISTORY_WINDOW           1
+
 class avcMotion {
   
 public:
@@ -27,6 +29,9 @@ public:
   // Updates the wheel velocity setpoints with a desired
   // force vector. 
   aErr updateControl(const avcForceVector& potential);
+  
+  short getLastThrottle();
+  short getLastSteer();
   
 private: 
   
@@ -44,6 +49,8 @@ private:
   
   bool m_bInit;
   float m_fThrottleWindow;
+  
+  aUInt8 m_setpointHistory[aMOTMODULE_HISTORY_WINDOW];
   
   
 };
