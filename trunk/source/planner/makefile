@@ -76,7 +76,8 @@ OBJECTS = \
 			$(OBJ)/gyro.o\
 			$(OBJ)/LSM303DLM.o\
 			$(OBJ)/CMPS10.o\
-			$(OBJ)/compass.o
+			$(OBJ)/compass.o\
+			$(OBJ)/accelerometer.o
 
 .PHONY : app
 app : $(OBJ) $(BIN)/$(APP)
@@ -151,8 +152,16 @@ gyroTest : $(OBJ) $(OBJ)/logger.o
 compassTest : $(OBJ) $(OBJ)/logger.o
 	$(CC) -c $(CFLAGS) LSM303DLM.cpp -o $(OBJ)/LSM303DLM.o
 	$(CC) -c $(CFLAGS) CMPS10.cpp -o $(OBJ)/CMPS10.o
+	$(CC) -c $(CFLAGS) accelerometer.cpp -o $(OBJ)/accelerometer.o
 	$(CC) -c $(CFLAGS) -DaDEBUG_COMPASS compass.cpp -o $(OBJ)/compass.o
-	$(CC) -g $(CFLAGS) -DaDEBUG_COMPASS $(LFLAGS) $(OBJ)/logger.o $(OBJ)/LSM303DLM.o $(OBJ)/CMPS10.o $(OBJ)/compass.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/compassTest
+	$(CC) -g $(CFLAGS) -DaDEBUG_COMPASS $(LFLAGS) $(OBJ)/logger.o $(OBJ)/accelerometer.o $(OBJ)/LSM303DLM.o $(OBJ)/CMPS10.o $(OBJ)/compass.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/compassTest
+
+.PHONY : accelTest
+accelTest : $(OBJ) $(OBJ)/logger.o
+	$(CC) -c $(CFLAGS) LSM303DLM.cpp -o $(OBJ)/LSM303DLM.o
+	$(CC) -c $(CFLAGS) compass.cpp -o $(OBJ)/compass.o
+	$(CC) -c $(CFLAGS) -DaDEBUG_ACCELEROMETER accelerometer.cpp -o $(OBJ)/accelerometer.o
+	$(CC) -g $(CFLAGS) -DaDEBUG_ACCELEROMETER $(LFLAGS) $(OBJ)/logger.o $(OBJ)/LSM303DLM.o $(OBJ)/compass.o $(OBJ)/accelerometer.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/accelTest  
 
 
 .PHONY : clean

@@ -72,14 +72,18 @@ int avcCompass::resetCalToFactory(){
   return -1;
 }
 
-
 /////////////////////////////////////////////////////////////////////////////
-// temporary for testing
-int avcCompass::getAccelerometerReadings(int *accX, int *accY, int *accZ){
-	m_logger->log(INFO, "%s: not supported by compass type %d", __FUNCTION__, m_compassHwType);
+// get all three axes reading
+int avcCompass::getAccelerometerReadings(int *x, int *y, int *z){
+  // Check the pointers
+  if(!x || !y || !z){
+    m_logger->log(ERROR, "%s: Null pointers passed in", __FUNCTION__);
+    return -1;
+  }
+  
+  m_logger->log(INFO, "%s: not supported by compass type %d", __FUNCTION__, m_compassHwType);
   return -1;
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////

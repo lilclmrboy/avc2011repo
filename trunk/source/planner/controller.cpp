@@ -246,9 +246,16 @@ avcController::run(void) {
       //m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
 
       // motion planning step
+      int wayPointWasPassed=0;
+      wayPointWasPassed=0; //reset before getting update from planner
       avcForceVector motivation;
-      m_planner.getMotivation(&motivation, m_pos.getPosition(), rv);
+      m_planner.getMotivation(&motivation, m_pos.getPosition(), rv, &wayPointWasPassed);
       m_log->log(INFO, "Motivation: %f,%f", motivation.x, motivation.y);
+      
+      if(0 != wayPointWasPassed){
+        char inputStr[256];
+        gets(inputStr);
+      }
 
       // Update the control system
       m_mot.updateControl(motivation);

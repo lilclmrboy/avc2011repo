@@ -113,7 +113,8 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 aErr 
 avcPlanner::getMotivation(avcForceVector *pForceResult, 
                           const avcStateVector& pos,
-                          const avcForceVector& repulse) {
+                          const avcForceVector& repulse,
+                          int *wayPointWasPassed) {
   
   aErr e = aErrNone;
 	
@@ -124,7 +125,7 @@ avcPlanner::getMotivation(avcForceVector *pForceResult,
 	// this could pontentially mark an added bonus waypoint as passed before
 	// we attempt to drive to it. This seems to be the right behavior, since we
 	// don't want to drive far off course to get to a bonus waypoint
-	G_CHK_ERR(m_logger, checkForPassedWayPoints(pos), "Checking for passed waypoints");
+	G_CHK_ERR(m_logger, checkForPassedWayPoints(pos, wayPointWasPassed), "Checking for passed waypoints");
 	
 	try {
 		//get the next unpassed waypoint
@@ -134,10 +135,17 @@ avcPlanner::getMotivation(avcForceVector *pForceResult,
 		// probably couldn't find any unpassed waypoints. We might have
 		// completed the map.
 		// set the goal vector to 0,0 so we just look for sensor inputs
+    static int playedFinalMusic=0;
 		m_logger->log(INFO, "At last waypoint. Next point will be current position");
 		 
 		nextUnpassedWaypoint.state.x = pos.x;
 		nextUnpassedWaypoint.state.y = pos.y;
+    
+    if(0==playedFinalMusic){
+      playedFinalMusic =1;
+      PlaySound("yes.wav");
+      PlaySound("finalcountdown.wav");
+    }
 
 	}
 	
@@ -218,7 +226,7 @@ avcPlanner::insertMapPoint(const avcStateVector newPosition) {
 /////////////////////////////////////////////////////////////////////////////
 
 aErr
-avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
+avcPlanner::checkForPassedWayPoints(const avcStateVector& pos, int *wayPointWasPassed) {
 	// compare current position to unpassed waypoints to determine if
 	// points should be marked as passed
 	
@@ -260,12 +268,13 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		m_logger->log(INFO, "Passed waypoint minUnPassedDistance %d/%d", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
     PlaySound("okay.wav");
+    *wayPointWasPassed = 1;
 		
 		//m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		
 		//if we're not at the last waypoint, recurse to the next waypoint
 		if (firstUnpassedWaypoint < (int)m_waypoints.size()-1) {
-			checkForPassedWayPoints(pos);
+			checkForPassedWayPoints(pos, wayPointWasPassed);
 		}
 		
 		return aErrNone;
@@ -288,12 +297,13 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 		m_logger->log(INFO, "Passed waypoint in donut outside of slice %d/%d", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
     PlaySound("okay.wav");
+    *wayPointWasPassed = 1;
 		
 		//m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		
 		//if we're not at the last waypoint, recurse to the next waypoint
 		if (firstUnpassedWaypoint < (int)m_waypoints.size()-1) {
-			checkForPassedWayPoints(pos);
+			checkForPassedWayPoints(pos, wayPointWasPassed);
 		}
 		
 		return aErrNone;
@@ -389,7 +399,6 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 		var brng = Math.atan2(y, x).toDeg();
 	 */
 	double dist=0.0, headingToNextStateRad=0.0, goalHeading=0.0;
-  static int playedFinalMusic=0;
 	
 	// check the force vector pointer validity
 	CHECK_ARG_RETURN(m_logger, pGoalForceVec);
@@ -419,11 +428,6 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
     m_logger->log(INFO, "Within maxUnPassedDistanceToWaypoint");
 		pGoalForceVec->x *= 0.0;
 		pGoalForceVec->y *= 0.0;
-    if(0==playedFinalMusic){
-      playedFinalMusic =1;
-      PlaySound("yes.wav");
-      PlaySound("finalcountdown.wav");
-    }
 	}
 	
 	m_logger->log(INFO, "dist: %3.2f\tbearing(deg): %3.2f\theading(deg): %3.2f", dist, unwrapAngleDeg(headingToNextStateRad*RAD_TO_DEG), unwrapAngleDeg(goalHeading*RAD_TO_DEG));
