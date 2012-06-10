@@ -43,11 +43,11 @@ int avcCompass::getHeadingRad(float *headingRad){
   if(!headingRad)
 		return -1;
   
-  float headingDeg=0.0;
+  float headingDeg=0.0f;
   if(0 != getHeadingDeg(&headingDeg))
     return -1;
   
-  *headingRad = headingDeg * DEG_TO_RAD;
+  *headingRad = headingDeg * (float)DEG_TO_RAD;
   
   return 0;
 }

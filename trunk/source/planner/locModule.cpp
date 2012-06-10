@@ -339,7 +339,7 @@ double
 avcPosition::getHeading(void) {
 	
   double retVal = 0.0;
-	float headingDeg=0.0;
+	float headingDeg=0.0f;
   if(0 != m_compass->getHeadingDeg(&headingDeg)){
     m_logger->log(ERROR, "%s: Error getting current heading", __FUNCTION__);
   	return 0.0;
