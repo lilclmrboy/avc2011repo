@@ -65,7 +65,7 @@ int compassCMPS10::getHeadingDeg(float *headingDeg){
 	readTwoByteTwosCompliment(CMPS10_BEARING_INT, &iHeadingDeg);
   
   //convert the two int to a float
-  *headingDeg = ((float)iHeadingDeg)/10.0;
+  *headingDeg = ((float)iHeadingDeg)/10.0f;
   
   return 0;
 }

@@ -16,7 +16,7 @@ enum gyroHwEnumType {
 class avcGyro{
 public:
   avcGyro(acpStem *pStem, aSettingFileRef settings);
-  ~avcGyro(void);
+  virtual ~avcGyro(void);
   
   virtual int init();
   virtual int getAngularRateData(int *dddx, int *dddy, int *dddz);
@@ -32,7 +32,7 @@ protected:
 class gyroL3G4200D: public avcGyro {
 public:
   gyroL3G4200D(acpStem *pStem, aSettingFileRef settings);
-  ~gyroL3G4200D();
+  virtual ~gyroL3G4200D();
   
   virtual int init();
   virtual int getAngularRateData(int *dddx, int *dddy, int *dddz);

@@ -136,7 +136,7 @@ int compassLSM303DLM::init(){
   g_beenInitialized = 1;
   
   // get and store the inital acc readings to be used in compass heading calc
-  float accX=0.0, accY=0.0, accZ=0.0;
+  float accX=0.0f, accY=0.0f, accZ=0.0f;
   if(0 != getAccelerometerReadings(&accX, &accY, &accZ)){
     m_logger->log(ERROR, "%s: Error while getting initial accelerometer readings from the LSM303DLM", __FUNCTION__);
     return -1;
@@ -269,9 +269,9 @@ int compassLSM303DLM::calculateHeadingDeg(vector3D magV, float *headingDeg){
   crossProductVector3D(&normalizedAcc, &EastV, &NorthV); // north should be normalized (unit X unit = unit)
   
   //compute the heading
-  *headingDeg = (float)RAD_TO_DEG * atan2( dotProductVector3D(&EastV, &chipOrientationV), dotProductVector3D(&NorthV, &chipOrientationV));
+  *headingDeg = (float)RAD_TO_DEG * (float)atan2( dotProductVector3D(&EastV, &chipOrientationV), dotProductVector3D(&NorthV, &chipOrientationV));
   
-  if(*headingDeg < 0) *headingDeg += 360.0;
+  if(*headingDeg < 0) *headingDeg += 360.0f;
   
   return 0;
 }

@@ -13,7 +13,7 @@
 class avcAccelerometer{
 public:
   avcAccelerometer(acpStem *pStem, aSettingFileRef settings);
-  ~avcAccelerometer(void);
+  virtual ~avcAccelerometer(void);
   
   virtual int init();
   virtual int getAccelerometerReadings(float *accX, float *accY, float *accZ);
@@ -35,7 +35,7 @@ protected:
 class accelerometerLSM303DLM : public avcAccelerometer {
 public:
   accelerometerLSM303DLM(acpStem *pStem, aSettingFileRef settings);
-  ~accelerometerLSM303DLM(void);
+  virtual ~accelerometerLSM303DLM(void);
   friend int compassLSM303DLM::init();
   friend int compassLSM303DLM::getAccelerometerReadings(float *accX, float *accY, float *accZ); 
   
@@ -48,7 +48,7 @@ private:
 class accelerometerADXL335 : public avcAccelerometer {
 public:
   accelerometerADXL335(acpStem *pStem, aSettingFileRef settings);
-  ~accelerometerADXL335(void);
+  virtual ~accelerometerADXL335(void);
   int init();
   int getAccelerometerReadings(float *accX, float *accY, float *accZ);
   

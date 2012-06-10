@@ -12,7 +12,7 @@
 class avcCompass{
 public:
   avcCompass(acpStem *pStem, aSettingFileRef settings);
-  ~avcCompass(void);
+  virtual ~avcCompass(void);
   
   virtual int init();
   virtual int getHeadingDeg(float *headingDeg);
@@ -96,7 +96,7 @@ private:
 class compassCMPS10 : public avcCompass {
 public:
   compassCMPS10(acpStem *pStem, aSettingFileRef settings);
-  ~compassCMPS10(void);
+  virtual ~compassCMPS10(void);
   int init();
   int getHeadingDeg(float *heading);
   int getMagnetometerReadings(int *x, int *y, int *z);

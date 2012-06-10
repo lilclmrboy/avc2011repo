@@ -78,7 +78,8 @@ OBJECTS = \
 			$(OBJ)/CMPS10.o\
 			$(OBJ)/compass.o\
 			$(OBJ)/ADXL335.o\
-			$(OBJ)/accelerometer.o
+			$(OBJ)/accelerometer.o\
+			$(OBJ)/TinyGPS.o
 
 .PHONY : app
 app : $(OBJ) $(BIN)/$(APP)

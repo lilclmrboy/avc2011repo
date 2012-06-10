@@ -131,7 +131,7 @@ avcPlanner::getMotivation(avcForceVector *pForceResult,
 		//get the next unpassed waypoint
 		nextUnpassedWaypoint = m_waypoints[getFirstUnpassedWayPoint()];
 	}
-	catch (int &e) {
+	catch (int &err) {
 		// probably couldn't find any unpassed waypoints. We might have
 		// completed the map.
 		// set the goal vector to 0,0 so we just look for sensor inputs
