@@ -129,8 +129,8 @@ int main(int argc, const char* argv[]) {
   
   int minx=0, miny=0, minz=0, maxx=0, maxy=0, maxz=0;
   
-  for (int i=0; i<100; i++){
-  //while(1){
+  //for (int i=0; i<100; i++){
+  while(1){
     int magx=0, magy=0, magz=0;
     compass->getMagnetometerReadings(&magx, &magy, &magz);
     //log->log(INFO, "mag x,y,z: %6d\t%6d\t%6d", magx, magy, magz);

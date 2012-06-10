@@ -10,6 +10,7 @@
 #include "avc.h"
 #include "mat_math.h"
 #include "compass.h"
+#include "motModule.h"
 
 #define aUSE_GPS
 
@@ -71,7 +72,7 @@ public:
 	aErr init(acpStem* Stem, aSettingFileRef setting, avcWaypointVector firstMapPoint);
 	
 	//does an EKF state update.
-	void updateState(void);
+	void updateState(short lastThrottleSetPoint);
 	
 	bool getGPSQuality(void);
 	

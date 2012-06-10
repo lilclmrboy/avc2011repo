@@ -90,7 +90,7 @@ avcPlanner::init(aIOLib ioRef, aSettingFileRef settings) {
 	aSettingFile_GetFloat (ioRef, settings,
 						   aKEY_UNPASSED_SLICE_ZETA,
 						   &unpassedZetaSliceDeg,
-						   90,
+						   0,
 						   &e);
 	// Copy flag to member variable.
 	m_unpassedZetaSliceDeg = unpassedZetaSliceDeg;
@@ -144,8 +144,11 @@ avcPlanner::getMotivation(avcForceVector *pForceResult,
     if(0==playedFinalMusic){
       playedFinalMusic =1;
       PlaySound("yes.wav");
-      PlaySound("finalcountdown.wav");
     }
+    
+    goal.x = 0.0;
+		goal.y = 0.0;
+    return aErrNone;
 
 	}
 	
@@ -426,8 +429,8 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 		//pGoalForceVec->x *= dist/m_maxUnPassedDistanceToWaypoint;
 		//pGoalForceVec->y *= dist/m_maxUnPassedDistanceToWaypoint;
     m_logger->log(INFO, "Within maxUnPassedDistanceToWaypoint");
-		pGoalForceVec->x *= 0.0;
-		pGoalForceVec->y *= 0.0;
+		//pGoalForceVec->x *= 0.0;
+		//pGoalForceVec->y *= 0.0;
 	}
 	
 	m_logger->log(INFO, "dist: %3.2f\tbearing(deg): %3.2f\theading(deg): %3.2f", dist, unwrapAngleDeg(headingToNextStateRad*RAD_TO_DEG), unwrapAngleDeg(goalHeading*RAD_TO_DEG));

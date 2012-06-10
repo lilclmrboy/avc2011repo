@@ -153,9 +153,10 @@ avcController::run(void) {
   //bool running = true;
   avcStateVector pos;
   avcForceVector rv;
+  avcForceVector motivation;
 	
 	//Need to start taking repulsive forces.
-	m_repulse.run();
+	//m_repulse.run();
 
   bool bManualOverride = false;
   bool bNotStarted = true;
@@ -172,7 +173,7 @@ avcController::run(void) {
     // Read the scratchpad for the RC enable bit
     // Need to read the second byte, since the PAD_IO writes 2 bytes at a time
     int rcswitch = m_stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE);
-		
+		int firstTimeAutoControl;
     // All this junk is about the RC stuff getting enabled. It is
     // a little more confusing since we want to trigger a sound
     // That is different depending on if we want to go to manual
@@ -225,6 +226,7 @@ avcController::run(void) {
         PlaySound("clucking.wav");
         break;
 
+      firstTimeAutoControl=0;
       }
 
       if(bNotStarted) {
@@ -237,27 +239,21 @@ avcController::run(void) {
       aIO_MSSleep(m_ioRef, 500 + extraDelay, NULL);
 
     } else {
+      
+      int wayPointWasPassed=0;
+      
       ///////////////////////////////////////////////////////
       // go time!
-      //First do the localization step. Let's find out what our system is
-      // at.
-      m_pos.updateState();
-
+      //First do the localization step. Let's find out what our system is at.
+      if(firstTimeAutoControl == 1){
+        m_pos.updateState(m_mot.getLastThrottle());
+      }
+      
       // get repulsive forces
       //m_repulse.getForceResultant(&rv);
       //m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
 
-      // motion planning step
-      int wayPointWasPassed=0;
-      wayPointWasPassed=0; //reset before getting update from planner
-      avcForceVector motivation;
-      m_planner.getMotivation(&motivation, m_pos.getPosition(), rv, &wayPointWasPassed);
-      m_log->log(INFO, "Motivation: %f,%f", motivation.x, motivation.y);
       
-      if(0 != wayPointWasPassed){
-        char inputStr[256];
-        gets(inputStr);
-      }
 
       // Update the control system
       m_mot.updateControl(motivation);
@@ -277,24 +273,40 @@ avcController::run(void) {
       // We get this here to maintain correct elapsed time in the loop.
       aIO_GetMSTicks(m_ioRef, &prevTime, NULL);
       
+      
+      //do the localization step. Let's find out what our system is at.
+      m_pos.updateState(m_mot.getLastThrottle());
+      
+      // motion planning step
+      wayPointWasPassed=0; //reset before getting update from planner
+      m_planner.getMotivation(&motivation, m_pos.getPosition(), rv, &wayPointWasPassed);
+      m_log->log(INFO, "Motivation: %f,%f", motivation.x, motivation.y);
+      
+      if(0){//(0 != wayPointWasPassed){
+        avcForceVector tempMotivation(0.0,0.0);
+        m_mot.updateControl(tempMotivation);
+        char inputStr[256];
+        gets(inputStr);
+      }
+      
+
     } // end if not Manual Override
 		
 		// Measure the input voltage for the controller logic
 		// Just do it once in a while
 		if ((nIterations++ % 50) == 0) {
-			
 			// Measure the voltage from the USBStem
-			float inputVoltage = m_stem.A2D(aUSBSTEM_MODULE, a40PINSTEM_VPWR);
-			
+			float inputVoltage = a40PINSTEM_VPWR_VOLTS(m_stem.A2D(aUSBSTEM_MODULE, a40PINSTEM_VPWR));
+      
+      m_log->log(INFO, "Input system voltage: %fV", 
+                 inputVoltage);
+      
 			// If below our desired voltage
 			if (m_fInputVoltageContollerMin > inputVoltage ) {
-				
-				// We have a low system voltage
-				m_log->log(INFO, "Input system voltage: %fV", 
-									 a40PINSTEM_VPWR_VOLTS(inputVoltage));
-				
-				//PlaySound("sonofabitch.wav");
-				
+        m_log->log(INFO, "Input system voltage low: %3.2fV (limit %3.2fV)", 
+                   a40PINSTEM_VPWR_VOLTS(inputVoltage), m_fInputVoltageContollerMin);
+        // We have a low system voltage
+				PlaySound("sonofabitch.wav");
 			} // end of if for checking input voltage
 		} // end if for modulus of iterations that check input voltage
 

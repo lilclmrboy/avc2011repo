@@ -125,7 +125,7 @@ avcPosition::init(acpStem* pStem,
 /////////////////////////////////////////////////////////////////////////////
 
 void 
-avcPosition::updateState() {
+avcPosition::updateState(short lastThrottleSetPoint) {
 	
 	// Grab the clock. Use the aIO verison, clock is not accurate when 
 	// we have stem processes running
@@ -155,12 +155,13 @@ avcPosition::updateState() {
     m_logger->log(ERROR, "%s: Elapsed time is invalid", __FUNCTION__);
   
 	// Get the steering angle.
-	double steerAngleRad = getSteeringAngleRad();
-  int motorSetPoint = getMotorSetPoint();
+	//double steerAngleRad = getSteeringAngleRad();
+  //int motorSetPoint = getMotorSetPoint();
+  int motorSetPoint = lastThrottleSetPoint;
 	
   double fVelocity = (motorSetPoint < SERVO_NEUT ? -1 : 1) * m_metersPerTick * (double)(curEnc - m_Encoder) / ((double)tmElapsed / 1000.0);
   double fDistRolled = (motorSetPoint < SERVO_NEUT ? -1 : 1) * m_metersPerTick * (double)(curEnc - m_Encoder);
-	m_logger->log(INFO, "Current Speed (m/s): %lf", fVelocity);
+	m_logger->log(INFO, "Current Speed (m/s): %lf (tick/time=%d/%d)", fVelocity, (curEnc - m_Encoder), tmElapsed);
   
   m_curPos.h = getHeading();
 	
@@ -172,15 +173,15 @@ avcPosition::updateState() {
 	double dy = cos(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLAT_PER_METER;
     
 	// Change in heading due to the previous steering angle
-  double fRot = fDistRolled/m_wheelBase * tan(steerAngleRad) * RAD_TO_DEG;
+  //double fRot = fDistRolled/m_wheelBase * tan(steerAngleRad) * RAD_TO_DEG;
   
   if(1){//(curEnc - m_Encoder) {
-    m_logger->log(INFO, "%s: --- SteerAng(Rad): %f", __FUNCTION__, steerAngleRad);
+    //m_logger->log(INFO, "%s: --- SteerAng(Rad): %f", __FUNCTION__, steerAngleRad);
     m_logger->log(INFO, "%s: --- Throt: %d", __FUNCTION__, motorSetPoint);
   	m_logger->log(INFO, "%s: --- fDist: %f", __FUNCTION__, fDistRolled);
     m_logger->log(INFO, "%s: --- dx(m): %f", __FUNCTION__, dx/aLON_PER_METER);
     m_logger->log(INFO, "%s: --- dy(m): %f", __FUNCTION__, dy/aLAT_PER_METER);
-    m_logger->log(INFO, "%s: --- fRot(deg): %f", __FUNCTION__, fRot);
+    //m_logger->log(INFO, "%s: --- fRot(deg): %f", __FUNCTION__, fRot);
     m_logger->log(INFO, "%s: --- hed: %f", __FUNCTION__, m_curPos.h);
   }
 	// Store current readings (for the next predict phase)
@@ -356,6 +357,7 @@ avcPosition::getEncoderValue(void) {
 	
   //We could do more here to check for encoder wrap.
   return m_pStem->MO_ENC32(aMOTO_MODULE, ENCODER_IDX);
+  
 }
 
 
@@ -455,8 +457,9 @@ main(int argc,
     printf("GPS Quality: %s\n", (position.getGPSQuality())? "good": "bad");
     printf("GPS sat count: %d\n", aGPM_GetSatellitesInUse(&stem));
     printf("GPS time: %d:%d:%d\n", aGPM_GetHours(&stem), aGPM_GetMinutes(&stem), aGPM_GetSeconds(&stem));
+    printf("GPS date: %d-%d-%d\n", aGPM_GetYear(&stem), aGPM_GetMonth(&stem), aGPM_GetDay(&stem));
 		
-		aIO_MSSleep(ioRef, 50, NULL);
+		aIO_MSSleep(ioRef, 200, NULL);
 	}
   
   //printf("GPS Quality: %s\n", (position.getGPSQuality())? "good": "bad");
