@@ -15,7 +15,8 @@ avcPosition::init(acpStem* pStem,
 	m_pStem = pStem;
 	m_settings = settings;
 	m_logger = logger::getInstance();	
-  m_compass = new compassCMPS10(m_pStem, m_settings);
+  m_compass = new compassLSM303DLM(m_pStem, m_settings);
+  m_compass->init();
 	aErr e;
 
 	char buffer[100];
@@ -173,7 +174,7 @@ avcPosition::updateState() {
 	// Change in heading due to the previous steering angle
   double fRot = fDistRolled/m_wheelBase * tan(steerAngleRad) * RAD_TO_DEG;
   
-  if(curEnc - m_Encoder) {
+  if(1){//(curEnc - m_Encoder) {
     m_logger->log(INFO, "%s: --- SteerAng(Rad): %f", __FUNCTION__, steerAngleRad);
     m_logger->log(INFO, "%s: --- Throt: %d", __FUNCTION__, motorSetPoint);
   	m_logger->log(INFO, "%s: --- fDist: %f", __FUNCTION__, fDistRolled);
@@ -539,7 +540,7 @@ main(int argc,
   // Bail if no stem. What's the point little man?
   if (timeout == 10) { return 1; }
 	
-	position.init(&stem, settings);
+	position.init(&stem, settings, avcWaypointVector(0,0,0));
 
 //	for (int i = 0; i < 500; i++) {
   while (1){

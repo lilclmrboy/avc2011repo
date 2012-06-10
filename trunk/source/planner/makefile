@@ -118,10 +118,13 @@ repulsiveForceTest : $(OBJ)
 .PHONY : posTest
 posTest : $(OBJ)
 	$(CC) -c $(CFLAGS) logger.cpp -o $(OBJ)/logger.o
+	$(CC) -c $(CFLAGS) LSM303DLM.cpp -o $(OBJ)/LSM303DLM.o
+	$(CC) -c $(CFLAGS) CMPS10.cpp -o $(OBJ)/CMPS10.o
+	$(CC) -c $(CFLAGS) compass.cpp -o $(OBJ)/compass.o
 	$(CC) -c $(CFLAGS) mat_math.cpp -o $(OBJ)/mat_math.o
 	$(CC) -c $(CFLAGS) gps.cpp -o $(OBJ)/gps.o
 	$(CC) -c $(CFLAGS) -DaDEBUG_FLOC locModule.cpp -o $(OBJ)/locModule.o
-	$(CC) -g $(CFLAGS) -DaDEBUG_FLOC $(LFLAGS) $(OBJ)/mat_math.o $(OBJ)/locModule.o $(OBJ)/logger.o $(OBJ)/gps.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/posTest 
+	$(CC) -g $(CFLAGS) -DaDEBUG_FLOC $(LFLAGS) $(OBJ)/mat_math.o $(OBJ)/compass.o $(OBJ)/LSM303DLM.o $(OBJ)/locModule.o $(OBJ)/logger.o $(OBJ)/gps.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/posTest 
 
 .PHONY : loggerTest
 loggerTest : $(OBJ)

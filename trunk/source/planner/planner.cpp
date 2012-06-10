@@ -167,8 +167,11 @@ avcPlanner::getMotivation(avcForceVector *pForceResult,
 	motivationVector.x = motivationVector.x < -1.0 ? -1.0 : motivationVector.x;
 	motivationVector.y = motivationVector.y >  1.0 ?  1.0 : motivationVector.y;
 	motivationVector.y = motivationVector.y < -1.0 ? -1.0 : motivationVector.y;
-	
-	m_logger->log(INFO, "Goal\t%1.3f\t%1.3f\tRepulse\t%1.3f\t%1.3f", goal.x, goal.y, repulse.x, repulse.y);
+  
+  // need to flip y magnitude in order to translate between cartesian and heading/bearing space
+	motivationVector.y *= -1;
+  
+	//m_logger->log(INFO, "Goal\t%1.3f\t%1.3f\tRepulse\t%1.3f\t%1.3f", goal.x, goal.y, repulse.x, repulse.y);
 	
 	//may want to re-normalize here (with zero magnitude option)
 	if (1 == m_normalizeMotivationVector) {
@@ -256,6 +259,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 	if (distanceToWaypoint <= m_minUnPassedDistanceToWaypoint) {
 		m_logger->log(INFO, "Passed waypoint minUnPassedDistance %d/%d", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
+    PlaySound("okay.wav");
 		
 		//m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		
@@ -283,6 +287,7 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos) {
 	if (thetaDeg > maxTheta || thetaDeg < minTheta) {
 		m_logger->log(INFO, "Passed waypoint in donut outside of slice %d/%d", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		m_waypoints[firstUnpassedWaypoint].waypointPassed = 1;
+    PlaySound("okay.wav");
 		
 		//m_logger->log(INFO, "First unpassed waypoint (map size): %d (%d)", firstUnpassedWaypoint, (int)m_waypoints.size()-1);
 		
@@ -384,6 +389,7 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 		var brng = Math.atan2(y, x).toDeg();
 	 */
 	double dist=0.0, headingToNextStateRad=0.0, goalHeading=0.0;
+  static int playedFinalMusic=0;
 	
 	// check the force vector pointer validity
 	CHECK_ARG_RETURN(m_logger, pGoalForceVec);
@@ -407,11 +413,17 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	// if the distance to the next point is within the minimum "passed" distance
 	// then we must be at the end of the list. scale the force by the distance (or set to 0)
 	if (dist < m_maxUnPassedDistanceToWaypoint) {
+    
 		//pGoalForceVec->x *= dist/m_maxUnPassedDistanceToWaypoint;
 		//pGoalForceVec->y *= dist/m_maxUnPassedDistanceToWaypoint;
     m_logger->log(INFO, "Within maxUnPassedDistanceToWaypoint");
-		pGoalForceVec->x *= 0.5;
-		pGoalForceVec->y *= 0.5;
+		pGoalForceVec->x *= 0.0;
+		pGoalForceVec->y *= 0.0;
+    if(0==playedFinalMusic){
+      playedFinalMusic =1;
+      PlaySound("yes.wav");
+      PlaySound("finalcountdown.wav");
+    }
 	}
 	
 	m_logger->log(INFO, "dist: %3.2f\tbearing(deg): %3.2f\theading(deg): %3.2f", dist, unwrapAngleDeg(headingToNextStateRad*RAD_TO_DEG), unwrapAngleDeg(goalHeading*RAD_TO_DEG));

@@ -138,7 +138,7 @@ avcMotion::updateControl(const avcForceVector& potential)
   magnitude = sqrt(potential.x * potential.x + potential.y * potential.y);
   delta = atan2(potential.y, potential.x);
   
-  if (cos(delta) < 0)
+  if (potential.x < 0)
   	magnitude = magnitude * -1.0;
   
   if (delta < 0) {
@@ -150,7 +150,7 @@ avcMotion::updateControl(const avcForceVector& potential)
   // rear drive motor.
   // Scale the change window by the throttle window setpoint value
   unsigned char servoDrive = (unsigned char)(SERVO_NEUT 
-					     + (127 * m_fThrottleWindow * magnitude));
+					     + ((SERVO_NEUT-1) * m_fThrottleWindow * magnitude));
   unsigned char servoSteer = SERVO_NEUT;
 
     // Update the servo values
@@ -208,13 +208,14 @@ avcMotion::updateControl(const avcForceVector& potential)
        (m_setpointLast[0] < SERVO_NEUT && servoDrive > SERVO_NEUT)){
       
       m_log->log(INFO, "MotionModule: Detected rapid reversal in throttle (%d to %d)", m_setpointLast[0], servoDrive);
-      m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
-      m_pStem->sleep(10); // short sleep for it to set
+      //m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
+      //m_pStem->sleep(200); // short sleep for it to set
       m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) SERVO_NEUT);
-      m_pStem->sleep(10); // short sleep for it to set      
+      m_pStem->sleep(500); // short sleep for it to set      
     }
   	
-    
+    m_log->log(INFO, "MotionModule: Throttle, Steer: %d, %d", servoDrive, servoSteer);
+  
     m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
     m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, (aUInt8) servoSteer);
     
