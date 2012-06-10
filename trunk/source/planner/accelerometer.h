@@ -16,7 +16,7 @@ public:
   ~avcAccelerometer(void);
   
   virtual int init();
-  virtual int getAccelerometerReadings(int *accX, int *accY, int *accZ);
+  virtual int getAccelerometerReadings(float *accX, float *accY, float *accZ);
   
 protected:
   acpStem *m_pStem;
@@ -37,11 +37,23 @@ public:
   accelerometerLSM303DLM(acpStem *pStem, aSettingFileRef settings);
   ~accelerometerLSM303DLM(void);
   friend int compassLSM303DLM::init();
-  friend int compassLSM303DLM::getAccelerometerReadings(int *accX, int *accY, int *accZ); 
+  friend int compassLSM303DLM::getAccelerometerReadings(float *accX, float *accY, float *accZ); 
   
 private:
   friend int compassLSM303DLM::readTwoByteTwosComplimentLittleEndian(unsigned int firstReg, int *reading);
 
+};
+
+
+class accelerometerADXL335 : public avcAccelerometer {
+public:
+  accelerometerADXL335(acpStem *pStem, aSettingFileRef settings);
+  ~accelerometerADXL335(void);
+  int init();
+  int getAccelerometerReadings(float *accX, float *accY, float *accZ);
+  
+private:
+  
 };
 
 #endif //_accelerometer_H_

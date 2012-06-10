@@ -72,18 +72,7 @@ int avcCompass::resetCalToFactory(){
   return -1;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// get all three axes reading
-int avcCompass::getAccelerometerReadings(int *x, int *y, int *z){
-  // Check the pointers
-  if(!x || !y || !z){
-    m_logger->log(ERROR, "%s: Null pointers passed in", __FUNCTION__);
-    return -1;
-  }
-  
-  m_logger->log(INFO, "%s: not supported by compass type %d", __FUNCTION__, m_compassHwType);
-  return -1;
-}
+
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -146,14 +135,10 @@ int main(int argc, const char* argv[]) {
     compass->getMagnetometerReadings(&magx, &magy, &magz);
     //log->log(INFO, "mag x,y,z: %6d\t%6d\t%6d", magx, magy, magz);
     
-    int accx=0, accy=0, accz=0;
-    compass->getAccelerometerReadings(&accx, &accy, &accz);
-    //log->log(INFO, "accel x,y,z: %6d\t%6d\t%6d", accx, accy, accz);
-    
     float headingDeg=0;
     compass->getHeadingDeg(&headingDeg);
     log->log(INFO, "compass heading: %f", headingDeg);
-    //log->log(INFO, "compass m, a, h: %d,%d,%d; %d,%d,%d; %f", magx, magy, magz, accx, accy, accz, headingDeg);
+    //log->log(INFO, "compass m, a, h: %d,%d,%d; %f", magx, magy, magz, headingDeg);
     
     if(magx < minx) minx = magx;
     if(magy < miny) miny = magy;

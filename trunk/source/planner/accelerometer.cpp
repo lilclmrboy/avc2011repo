@@ -23,7 +23,7 @@ int avcAccelerometer::init(){
 
 /////////////////////////////////////////////////////////////////////////////
 // get all three axes reading
-int avcAccelerometer::getAccelerometerReadings(int *x, int *y, int *z){
+int avcAccelerometer::getAccelerometerReadings(float *x, float *y, float *z){
   // Check the pointers
   if(!x || !y || !z){
     m_logger->log(ERROR, "%s: Null pointers passed in", __FUNCTION__);
@@ -83,21 +83,42 @@ int main(int argc, const char* argv[]) {
   if (timeout == 10) { printf("Failed.\n"); return 1; }
   printf("Got stem.\n");
   
-  avcAccelerometer *accelerometer = new accelerometerLSM303DLM(&stem, &settings);
-  accelerometer->init();
+  avcAccelerometer *accelerometer;
   
+  ///////////////////
   printf("\n\nRunning the LSM303DLM accelerometer test\n");
+ 
+  accelerometer = new accelerometerLSM303DLM(&stem, &settings);
+  accelerometer->init();
   
   for (int i=0; i<100; i++){
   //while(1){
-    int accx=0, accy=0, accz=0;
+    float accx=0, accy=0, accz=0;
     accelerometer->getAccelerometerReadings(&accx, &accy, &accz);
-    log->log(INFO, "accel x,y,z: %6d\t%6d\t%6d", accx, accy, accz);
+    log->log(INFO, "accel x,y,z: %3.2f\t%3.2f\t%3.2f", accx, accy, accz);
     
     stem.sleep(100);
   }
 
   free(accelerometer);
+ 
+  ////////////////////
+  printf("\n\nRunning the AXDL335 accelerometer test\n");
+  
+  accelerometer = new accelerometerADXL335(&stem, &settings);
+  accelerometer->init();
+  
+  for (int i=0; i<100; i++){
+    //while(1){
+    float accx=0, accy=0, accz=0;
+    accelerometer->getAccelerometerReadings(&accx, &accy, &accz);
+    log->log(INFO, "accel x,y,z: %3.2f\t%3.2f\t%3.2f", accx, accy, accz);
+    
+    stem.sleep(100);
+  }
+  
+  free(accelerometer);
+  
   
 }
 

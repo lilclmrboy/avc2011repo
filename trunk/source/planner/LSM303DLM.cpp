@@ -136,7 +136,7 @@ int compassLSM303DLM::init(){
   g_beenInitialized = 1;
   
   // get and store the inital acc readings to be used in compass heading calc
-  int accX=0, accY=0, accZ=0;
+  float accX=0.0, accY=0.0, accZ=0.0;
   if(0 != getAccelerometerReadings(&accX, &accY, &accZ)){
     m_logger->log(ERROR, "%s: Error while getting initial accelerometer readings from the LSM303DLM", __FUNCTION__);
     return -1;
@@ -203,7 +203,7 @@ int compassLSM303DLM::getHeadingDeg(float *headingDeg){
 
 /////////////////////////////////////////////////////////////////////////////
 // read the accelarometer values
-int compassLSM303DLM::getAccelerometerReadings(int *accX, int *accY, int *accZ){
+int compassLSM303DLM::getAccelerometerReadings(float *accX, float *accY, float *accZ){
   // check the pointers
   if(!accX || !accY || !accZ){
     m_logger->log(ERROR, "%s: null pointer passed in", __FUNCTION__);
@@ -212,14 +212,21 @@ int compassLSM303DLM::getAccelerometerReadings(int *accX, int *accY, int *accZ){
   
   CHECK_INITIALIZATION;
   
+  // make some temporary ints for the IIC transfer, then convert to floats
+  int iAccX=0, iAccY=0, iAccZ=0;
   try {
-    readTwoByteTwosComplimentLittleEndian(LSM303DLM_OUT_X_L_A, accX);
-    readTwoByteTwosComplimentLittleEndian(LSM303DLM_OUT_Y_L_A, accY);
-    readTwoByteTwosComplimentLittleEndian(LSM303DLM_OUT_Z_L_A, accZ);
+    readTwoByteTwosComplimentLittleEndian(LSM303DLM_OUT_X_L_A, &iAccX);
+    readTwoByteTwosComplimentLittleEndian(LSM303DLM_OUT_Y_L_A, &iAccY);
+    readTwoByteTwosComplimentLittleEndian(LSM303DLM_OUT_Z_L_A, &iAccZ);
   } catch (int &e) {
     m_logger->log(ERROR, "%s: error while reading accelerometer", __FUNCTION__);
     return -1;
   }
+  
+  // TODO: should scale these relative to 1g in each axis
+  *accX = (float)iAccX;
+  *accY = (float)iAccY;
+  *accZ = (float)iAccZ;
   
   return 0;
 }
@@ -247,7 +254,7 @@ int compassLSM303DLM::calculateHeadingDeg(vector3D magV, float *headingDeg){
   scaledMagV.y = ((double)magV.y - m_compassCalMin.y) / (m_compassCalMax.y - m_compassCalMin.y) * 2.0 - 1.0;
   scaledMagV.z = ((double)magV.z - m_compassCalMin.z) / (m_compassCalMax.z - m_compassCalMin.z) * 2.0 - 1.0;
   
-  //int x, y, z;
+  //float x, y, z;
   //getAccelerometerReadings(&x, &y, &z);
   //m_initalAccelerometerReadings.x = (double)x;
   //m_initalAccelerometerReadings.y = (double)y;
