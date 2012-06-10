@@ -77,6 +77,7 @@ OBJECTS = \
 			$(OBJ)/LSM303DLM.o\
 			$(OBJ)/CMPS10.o\
 			$(OBJ)/compass.o\
+			$(OBJ)/ADXL335.o\
 			$(OBJ)/accelerometer.o
 
 .PHONY : app
@@ -99,6 +100,9 @@ $(OBJ)/LSM303DLM.o: LSM303DLM.cpp
 
 $(OBJ)/CMPS10.o: CMPS10.cpp
 	$(CC) -c $(CFLAGS) CMPS10.cpp -o $(OBJ)/CMPS10.o
+
+$(OBJ)/ADXL335.o: ADXL335.cpp
+	$(CC) -c $(CFLAGS) ADXL335.cpp -o $(OBJ)/ADXL335.o
 
 $(OBJ)/%.o : %.cpp %.h
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -124,8 +128,9 @@ posTest : $(OBJ)
 	$(CC) -c $(CFLAGS) compass.cpp -o $(OBJ)/compass.o
 	$(CC) -c $(CFLAGS) mat_math.cpp -o $(OBJ)/mat_math.o
 	$(CC) -c $(CFLAGS) gps.cpp -o $(OBJ)/gps.o
+	$(CC) -c $(CFLAGS) accelerometer.cpp -o $(OBJ)/accelerometer.o
 	$(CC) -c $(CFLAGS) -DaDEBUG_FLOC locModule.cpp -o $(OBJ)/locModule.o
-	$(CC) -g $(CFLAGS) -DaDEBUG_FLOC $(LFLAGS) $(OBJ)/mat_math.o $(OBJ)/compass.o $(OBJ)/LSM303DLM.o $(OBJ)/locModule.o $(OBJ)/logger.o $(OBJ)/gps.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/posTest 
+	$(CC) -g $(CFLAGS) -DaDEBUG_FLOC $(LFLAGS) $(OBJ)/mat_math.o $(OBJ)/compass.o $(OBJ)/accelerometer.o $(OBJ)/LSM303DLM.o $(OBJ)/locModule.o $(OBJ)/logger.o $(OBJ)/gps.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/posTest 
 
 .PHONY : loggerTest
 loggerTest : $(OBJ)
@@ -159,9 +164,10 @@ compassTest : $(OBJ) $(OBJ)/logger.o
 .PHONY : accelTest
 accelTest : $(OBJ) $(OBJ)/logger.o
 	$(CC) -c $(CFLAGS) LSM303DLM.cpp -o $(OBJ)/LSM303DLM.o
+	$(CC) -c $(CFLAGS) ADXL335.cpp -o $(OBJ)/ADXL335.o
 	$(CC) -c $(CFLAGS) compass.cpp -o $(OBJ)/compass.o
 	$(CC) -c $(CFLAGS) -DaDEBUG_ACCELEROMETER accelerometer.cpp -o $(OBJ)/accelerometer.o
-	$(CC) -g $(CFLAGS) -DaDEBUG_ACCELEROMETER $(LFLAGS) $(OBJ)/logger.o $(OBJ)/LSM303DLM.o $(OBJ)/compass.o $(OBJ)/accelerometer.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/accelTest  
+	$(CC) -g $(CFLAGS) -DaDEBUG_ACCELEROMETER $(LFLAGS) $(OBJ)/logger.o $(OBJ)/LSM303DLM.o $(OBJ)/ADXL335.o $(OBJ)/compass.o $(OBJ)/accelerometer.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/accelTest  
 
 
 .PHONY : clean

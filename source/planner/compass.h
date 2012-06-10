@@ -19,7 +19,6 @@ public:
   virtual int getHeadingRad(float *headingRad);
   virtual int getMagnetometerReadings(int *x, int *y, int *z);
   virtual int resetCalToFactory();
-  virtual int getAccelerometerReadings(int *accX, int *accY, int *accZ);
   
 protected:
   acpStem *m_pStem;
@@ -76,7 +75,7 @@ private:
   int getMagneticX(int *x);
   int getMagneticY(int *y);
   int getMagneticZ(int *z);
-  int getAccelerometerReadings(int *accX, int *accY, int *accZ); // this should be moved to the accelerometer class
+  int getAccelerometerReadings(float *accX, float *accY, float *accZ); // this should be moved to the accelerometer class
   
   int calculateHeadingDeg(vector3D magV, float *headingDeg);
     

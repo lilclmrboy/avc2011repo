@@ -388,100 +388,6 @@ avcPosition::getMotorSetPoint(void) {
 }
 
 
-/////////////////////////////////////////////////////////////////////////////
-// Read the accelerometer sensor data
-// See the datasheet for more information
-// http://www.analog.com/static/imported-files/data_sheets/ADXL335.pdf
-
-int
-avcPosition::getAccelerometerReadings (float *ddx, float *ddy, float *ddz) {
-  
-  // Scaling is radiometric
-  /* From datasheet:
-     VCC(3.6V) = 360 mV/g
-     VCC(2.0V) = 195 mV/g
-     thus
-     VCC(3.3V) = 329.0625 mV/g
-     our readings are in normalized 0 - 1.0 values across a 3.3V range
-     
-  */
-  const float a2d_ref = 3.3f; // V
-  float scale_factor = a2d_ref * 1.0f / 0.3290625f; // g
-   
-    
-  if(!ddx || !ddy || !ddz){
-    m_logger->log(ERROR, "%s: Null pointer passed to getAccelerometerReadings", __FUNCTION__);
-    return -1;
-  }
- 
-#ifdef aACCEL_BULK_CAPTURE
-  
-  aUInt8 slot = 9;
-  unsigned int samples = 50;
-  unsigned short pace = 10;
-  aStreamRef s = NULL;
-  aErr e = aErrNone;
-  aMemSize len = 0;
-  char *pData;
-  unsigned int index = 0;
-  
-  m_logger->log(INFO, "Starting bulk capture\n");
-  
-  // Tell the stem to fire off the readings
-  m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_X_CHAN, slot, pace, samples);
-  
-  // Read the data back from the Stem
-  // First create a memory buffer to write the capture to
-  if (aStreamBuffer_Create(m_ioRef, 4092, &s, &e))
-      throw acpException(e, "creating bulk read buffer");
-  
-  // Unload the slot data capture into a buffer
-  m_pStem->unloadSlot(aUSBSTEM_MODULE, slot, s);
-  
-  // Put the data into the storage array
-  if (aStreamBuffer_Get(m_ioRef, s, &len, &pData, &e))
-      throw acpException(e, "getting buffer data");
-  
-  // Debug what we have read from the stem
-  m_logger->log(INFO, "Retreived %d data points from bulk capture\n", len);
-  
-  // Once we get data back, then we can chip through it
-  // The bulk raw data is stored in 2 byte pairs creating a 16 bit word
-  if (len > 1) {
-    
-    for (unsigned int i = 0; i < samples; i++) {
-      m_logger->log(DEBUG, "[%d]: %d\n", 
-                    i, 
-                    pData[index] << 8 + pData[index + 1]);
-      index+=2;
-    }
-    
-  }
-  
-  // Clean up the stream reference
-  if (aStream_Destroy(m_ioRef, s, &e))
-    throw acpException(e, "destroying bulk stream");
-  
-  // let us know we are finished
-  m_logger->log(INFO, "Ending bulk capture\n");
-  
-#endif // end of buik capture
-	
-  // Take the reading values and average them
-  *ddx = scale_factor * m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_X_CHAN);
-  *ddy = scale_factor * m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Y_CHAN);
-  *ddz = scale_factor * m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Z_CHAN);
-  
-  if (-1 == *ddx || -1 == *ddy || -1 == *ddz){
-    m_logger->log(ERROR, "%s: A2D timeout while reading accelerometer", __FUNCTION__);
-    return -1;
-  }
-  
-  return 0;
-  
-}
-
-
 ///////////////////////////////////////////////////////////////////////////
 // This section is for isolating and debugging this module. 
 // You will need to set up a stem object and work from that.
@@ -549,8 +455,6 @@ main(int argc,
     printf("GPS Quality: %s\n", (position.getGPSQuality())? "good": "bad");
     printf("GPS sat count: %d\n", aGPM_GetSatellitesInUse(&stem));
     printf("GPS time: %d:%d:%d\n", aGPM_GetHours(&stem), aGPM_GetMinutes(&stem), aGPM_GetSeconds(&stem));
-    //position.getAccelerometerReadings(&acc_x, &acc_y, &acc_z);
-    //printf("Accel: %3.2f, %3.2f, %3.2f\n", acc_x, acc_y, acc_z);
 		
 		aIO_MSSleep(ioRef, 50, NULL);
 	}
