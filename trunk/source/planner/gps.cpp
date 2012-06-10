@@ -1,5 +1,46 @@
 #include "gps.h"
 
+////////////////////////////////////////////////////////////////////////////
+// This is a private static member of the gps class and cannot be 
+// accessed directly. To access the gps, use gps::getInstance();
+gps* gps::m_pInstance = NULL;
+
+///////////////////////////////////////////////////////////////////////////
+// This is simple, In a multithreaded environment we'd need a handle on a 
+// lock before entering this function.
+gps*
+gps::getInstance() {
+	
+	if (!m_pInstance) //only one instance is ever created.
+		m_pInstance = new gps;
+	
+	return m_pInstance;
+	
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+aErr gps::init(aSettingFileRef settings) {
+	
+	return aErrNone;
+}
+
+// Returns the resultant force vector
+aErr gps::getPosition(double *lon, double *lat, double* heading) {
+	
+	return aErrNone;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+int gps::run(void) {
+	
+	return 0;
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 int aGPM_Get2DigitInt(acpStem* pStem, char addr, char reg)
 {

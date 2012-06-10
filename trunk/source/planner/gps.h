@@ -7,6 +7,53 @@
 #ifndef _gps_H_
 #define _gps_H_
 #include "avc.h"
+#include "TinyGPS.h"
+#include "aIO.h"
+
+/////////////////////////////////////////////////////////////////////////
+// This is the base class that handles all the repulsive force
+// management on the robot system.
+class gps : public acpRunable {
+  
+public:
+  
+	// General destructor.
+  ~gps(void) {};
+  
+	static gps* getInstance();
+	
+  // Must call this first before doing any updates. Failure to do so will
+  // cause all calls on updateControl to return an error.
+  aErr init(aSettingFileRef settings);
+  
+  // Returns the resultant force vector
+  aErr getPosition(double *lon, double *lat, double* heading);
+  
+  // acpThread run handle
+  int run(void);
+  
+private: 
+	
+	static gps* m_pInstance;
+	
+	gps(void) : m_bInit(false), m_threadDelay(200) {};
+	gps(gps const&){};
+	gps& operator=(gps const&);
+	
+  TinyGPS m_gps;
+	aIOLib m_ioRef;
+  
+  //Our controller owns this we'll let them delete.	
+  aSettingFileRef m_settings;
+  logger *m_log;
+  
+  bool m_bInit;
+  unsigned long m_threadDelay;
+  
+  // Handle on thread object
+  acpThread* m_pThread;
+  
+};
 
 #define GPS_IIC_ADDR 0xD0
 

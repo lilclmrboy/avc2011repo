@@ -153,7 +153,9 @@ avcController::run(void) {
   //bool running = true;
   avcStateVector pos;
   avcForceVector rv;
-  avcRepulsiveForces frepulsive;
+	
+	//Need to start taking repulsive forces.
+	m_repulse.run();
 
   bool bManualOverride = false;
   bool bNotStarted = true;
