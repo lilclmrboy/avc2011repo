@@ -284,7 +284,7 @@ avcController::run(void) {
 				m_log->log(INFO, "Input system voltage: %fV", 
 									 a40PINSTEM_VPWR_VOLTS(inputVoltage));
 				
-				PlaySound("sonofabitch.wav");
+				//PlaySound("sonofabitch.wav");
 				
 			} // end of if for checking input voltage
 		} // end if for modulus of iterations that check input voltage
