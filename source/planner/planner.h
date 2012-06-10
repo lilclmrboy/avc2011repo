@@ -27,7 +27,7 @@ public:
 	//The main operation, we'll take some inputs, and product a unit
 	//vector output.
 	aErr getMotivation(avcForceVector *pForceResult, const avcStateVector& pos, 	
-				     const avcForceVector& repulse);
+				     const avcForceVector& repulse, int *wayPointWasPassed);
 	
 
 	// inserts waypoints into the map of waypoints
@@ -53,7 +53,7 @@ private:
 	logger* m_logger;
 	
 	// used by getMotivation to check for and update passed waypoints
-	aErr checkForPassedWayPoints(const avcStateVector& pos);
+	aErr checkForPassedWayPoints(const avcStateVector& pos, int *wayPointWasPassed);
 	
 	// used by planner functions to get the index of the first unpassed waypoint
 	int getFirstUnpassedWayPoint(void);

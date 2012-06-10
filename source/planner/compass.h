@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// File gyro.h
-// Provides access and interface to the (I2C) gyro L3G4200D
+// File compass.h
+// Provides access and interface to the (I2C) compass
 // 
 
 #ifndef _compass_H_
@@ -54,7 +54,8 @@ public:
   int init();
   int getHeadingDeg(float *heading);
   int getMagnetometerReadings(int *x, int *y, int *z);
-  int getAccelerometerReadings(int *accX, int *accY, int *accZ); // this should be moved to the accelerometer class
+  
+  friend class accelerometerLSM303DLM;
   
 private:
   typedef struct vector3D{
@@ -75,6 +76,7 @@ private:
   int getMagneticX(int *x);
   int getMagneticY(int *y);
   int getMagneticZ(int *z);
+  int getAccelerometerReadings(int *accX, int *accY, int *accZ); // this should be moved to the accelerometer class
   
   int calculateHeadingDeg(vector3D magV, float *headingDeg);
     
@@ -83,9 +85,6 @@ private:
   vector3D m_initalAccelerometerReadings;
   vector3D m_compassCalMin;
   vector3D m_compassCalMax;
-  
-  // flag to indication if the LSM303DLM has been initialized
-  int m_beenInitialized;
   
   // vector helper functions
   void normalizeVector3D(vector3D *vec);
@@ -112,4 +111,4 @@ private:
   int getMagneticZ(int *z);
 };
 
-#endif //_gyro_H_
+#endif //_compas_H_

@@ -1,5 +1,6 @@
 #include "avc.h"
 #include "compass.h"
+#include "accelerometer.h"
 #include <math.h>
 
 #define DEG_TO_RAD (aPI/180)
@@ -47,7 +48,10 @@
 #define LSM303DLM_IRC_REG_M 0x0C
 #define LSM303DLM_WHO_AM_I_M 0x0F
 
-#define CHECK_INITIALIZATION if(0==m_beenInitialized){m_logger->log(ERROR, "%s: LSM303DLM is not initialized", __FUNCTION__);return -1;}
+#define CHECK_INITIALIZATION if(0==g_beenInitialized){m_logger->log(ERROR, "%s: LSM303DLM is not initialized", __FUNCTION__);return -1;}
+
+// flag to indication if the LSM303DLM has been initialized
+int g_beenInitialized=0;
 
 /////////////////////////////////////////////////////////////////////////////
 // Constructor that calls parent constructor
@@ -55,7 +59,7 @@ compassLSM303DLM::compassLSM303DLM(acpStem *pStem, aSettingFileRef settings)
 	: avcCompass(pStem, settings)
 {
 	m_compassHwType = kCompass_LSM303DLM;
-  m_beenInitialized = 0;
+  //g_beenInitialized = 0; // moved to global (static)
   
   // set the compass calibration values
   m_compassCalMin.x = -544;
@@ -72,6 +76,7 @@ compassLSM303DLM::compassLSM303DLM(acpStem *pStem, aSettingFileRef settings)
 compassLSM303DLM::~compassLSM303DLM(){
 }
 
+
 /////////////////////////////////////////////////////////////////////////////
 int compassLSM303DLM::init(){
   // setup the various control registers
@@ -83,7 +88,7 @@ int compassLSM303DLM::init(){
   // and accelerometer classes (compass requires accelerometer readings to compute
   // heading). We don't want someone calling init while somewhere else is making
   // readings
-  if(1 == m_beenInitialized){
+  if(1 == g_beenInitialized){
     m_logger->log(INFO, "%s: LSM303DLM has already been initialized", __FUNCTION__);
     return 0;
   }
@@ -128,7 +133,7 @@ int compassLSM303DLM::init(){
     m_logger->log(ERROR, "%s: Stem error while initializing LSM303DLM: %s", __FUNCTION__, e.msg());
   }
   
-  m_beenInitialized = 1;
+  g_beenInitialized = 1;
   
   // get and store the inital acc readings to be used in compass heading calc
   int accX=0, accY=0, accZ=0;
@@ -418,7 +423,23 @@ int compassLSM303DLM::getMagneticZ(int *z){
 }
 
 
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// Accelerometer stuff
+/////////////////////////////////////////////////////////////////////////////
+accelerometerLSM303DLM::accelerometerLSM303DLM (acpStem *pStem, aSettingFileRef settings)
+: avcAccelerometer(pStem, settings)
+{
+	m_accelerometerHwType = kAccelerometer_LSM303DLM;
+  
+}
+/////////////////////////////////////////////////////////////////////////////  
+accelerometerLSM303DLM::~accelerometerLSM303DLM(){};
 
 
+  
+  
+  
 
 
