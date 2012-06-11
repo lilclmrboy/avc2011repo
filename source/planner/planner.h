@@ -35,6 +35,7 @@ public:
 	// should be used by camera/laser system to add "bonus" waypoints
 	aErr insertMapPoint(const avcStateVector newPosition);
 	const avcWaypointVector& getFirstMapPoint(void) { return m_waypoints.front(); }
+  avcWaypointVector getNextMapPoint(void);
   
 #ifdef aDEBUG_PLANNER
 	friend int main(int, const char**);
