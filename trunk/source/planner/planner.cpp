@@ -387,6 +387,20 @@ avcPlanner::getFirstUnpassedWayPoint(void) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// public accessor function for the next waypoint
+avcWaypointVector avcPlanner::getNextMapPoint(void) { 
+  int nextWaypointIdx = 0;
+  try {
+    nextWaypointIdx = getFirstUnpassedWayPoint();
+  } catch (int &e) {
+    nextWaypointIdx = m_waypoints.size()-1;
+  }
+    
+  return m_waypoints[nextWaypointIdx];
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
 
 aErr
 avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avcStateVector& state2, 

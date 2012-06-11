@@ -173,7 +173,6 @@ avcController::run(void) {
     // Read the scratchpad for the RC enable bit
     // Need to read the second byte, since the PAD_IO writes 2 bytes at a time
     int rcswitch = m_stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE);
-		int firstTimeAutoControl;
     // All this junk is about the RC stuff getting enabled. It is
     // a little more confusing since we want to trigger a sound
     // That is different depending on if we want to go to manual
@@ -226,7 +225,6 @@ avcController::run(void) {
         PlaySound("clucking.wav");
         break;
 
-      firstTimeAutoControl=0;
       }
 
       if(bNotStarted) {
@@ -245,14 +243,31 @@ avcController::run(void) {
       ///////////////////////////////////////////////////////
       // go time!
       //First do the localization step. Let's find out what our system is at.
-      if(firstTimeAutoControl == 1){
-        m_pos.updateState(m_mot.getLastThrottle());
+      m_pos.updateState(m_mot.getLastThrottle());
+      
+      // motion planning step
+      wayPointWasPassed=0; //reset before getting update from planner
+      m_planner.getMotivation(&motivation, m_pos.getPosition(), rv, &wayPointWasPassed);
+      m_log->log(INFO, "Motivation: %f,%f", motivation.x, motivation.y);
+      
+      if(0){//(0 != wayPointWasPassed){
+        avcForceVector tempMotivation(0.0,0.0);
+        m_mot.updateControl(tempMotivation);
+        char inputStr[256];
+        gets(inputStr);
+      }
+      
+      //make plotable log entry
+      {
+        avcStateVector tempPos = m_pos.getPosition();
+        avcWaypointVector tempTarget = m_planner.getNextMapPoint();
+        
+        m_log->log(DEBUG, "Plot:\t%f\t%f\t%f\t%f\t%f\t%f", tempPos.x, tempPos.y, tempTarget.state.x, tempTarget.state.y, motivation.x, motivation.y);
       }
       
       // get repulsive forces
       //m_repulse.getForceResultant(&rv);
       //m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
-
       
 
       // Update the control system
@@ -272,22 +287,6 @@ avcController::run(void) {
 
       // We get this here to maintain correct elapsed time in the loop.
       aIO_GetMSTicks(m_ioRef, &prevTime, NULL);
-      
-      
-      //do the localization step. Let's find out what our system is at.
-      m_pos.updateState(m_mot.getLastThrottle());
-      
-      // motion planning step
-      wayPointWasPassed=0; //reset before getting update from planner
-      m_planner.getMotivation(&motivation, m_pos.getPosition(), rv, &wayPointWasPassed);
-      m_log->log(INFO, "Motivation: %f,%f", motivation.x, motivation.y);
-      
-      if(0){//(0 != wayPointWasPassed){
-        avcForceVector tempMotivation(0.0,0.0);
-        m_mot.updateControl(tempMotivation);
-        char inputStr[256];
-        gets(inputStr);
-      }
       
 
     } // end if not Manual Override
