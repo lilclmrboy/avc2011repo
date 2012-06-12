@@ -18,16 +18,18 @@ class gps : public acpRunable {
 public:
   
 	// General destructor.
-  ~gps(void) {};
+  ~gps(void) {
+        aIO_ReleaseLibRef(m_ioRef, NULL);
+    };
   
 	static gps* getInstance();
 	
   // Must call this first before doing any updates. Failure to do so will
   // cause all calls on updateControl to return an error.
-  aErr init(aSettingFileRef settings);
+  aErr init(const acpString& port, const int baud);
   
   // Returns the resultant force vector
-  aErr getPosition(double *lon, double *lat, double* heading);
+  aErr getPosition(float *lon, float *lat, float* heading);
   
   // acpThread run handle
   int run(void);
@@ -36,18 +38,26 @@ private:
 	
 	static gps* m_pInstance;
 	
-	gps(void) : m_bInit(false), m_threadDelay(200) {};
+    gps(void) :
+        m_bInit(false),
+        m_bRunning(true),
+        m_threadDelay(200)
+    {
+        aIO_GetLibRef(&m_ioRef, NULL);
+    };
 	gps(gps const&){};
 	gps& operator=(gps const&);
 	
-  TinyGPS m_gps;
+    TinyGPS m_gps;
 	aIOLib m_ioRef;
+    aStreamRef m_serialStream;
   
   //Our controller owns this we'll let them delete.	
-  aSettingFileRef m_settings;
   logger *m_log;
+
   
   bool m_bInit;
+  bool m_bRunning;
   unsigned long m_threadDelay;
   
   // Handle on thread object

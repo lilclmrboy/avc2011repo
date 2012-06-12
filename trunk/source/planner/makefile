@@ -107,6 +107,13 @@ $(OBJ)/ADXL335.o: ADXL335.cpp
 
 $(OBJ)/%.o : %.cpp %.h
 	$(CC) -c $(CFLAGS) $< -o $@
+
+.PHONY : gpsTest
+gpsTest :  $(OBJ)
+	$(CC) -c $(CFLAGS) TinyGPS.cpp -o $(OBJ)/TinyGPS.o
+	$(CC) -c $(CFLAGS) logger.cpp -o $(OBJ)/logger.o
+	$(CC) -c $(CFLAGS) -DGPS_TEST gps.cpp -o $(OBJ)/gps.o
+	$(CC) -g $(CFLAGS) -DGPS_TEST $(LFLAGS) $(OBJ)/TinyGPS.o $(OBJ)/gps.o $(OBJ)/logger.o $(LIBS) $(FRAMEWORKS) -o $(BIN)/gpsTest
 	
 .PHONY : motModuleTest
 motModuleTest : $(OBJ)
