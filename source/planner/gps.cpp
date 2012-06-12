@@ -1,5 +1,5 @@
 #include "gps.h"
-
+#include "logger.h"
 ////////////////////////////////////////////////////////////////////////////
 // This is a private static member of the gps class and cannot be 
 // accessed directly. To access the gps, use gps::getInstance();
@@ -21,14 +21,26 @@ gps::getInstance() {
 
 /////////////////////////////////////////////////////////////////////////////
 
-aErr gps::init(aSettingFileRef settings) {
+aErr gps::init(const acpString& port, const int baudrate) {
 	
-	return aErrNone;
+    //Start up the serial stream.
+
+    aErr e = aErrNone;
+
+    if(!m_bInit) {
+        m_log = logger::getInstance();
+
+        if (aStream_CreateSerial(m_ioRef, port, baudrate, &m_serialStream, &e))
+            m_log->log(ERROR, "Error creating serial stream %d", e);
+        m_bInit = true;
+    }
+    return e;
 }
 
 // Returns the resultant force vector
-aErr gps::getPosition(double *lon, double *lat, double* heading) {
-	
+aErr gps::getPosition(float *lon, float* lat, float* heading) {
+    m_gps.f_get_position(lat, lon);
+    (*heading) = m_gps.f_course();
 	return aErrNone;
 }
 
@@ -36,11 +48,20 @@ aErr gps::getPosition(double *lon, double *lat, double* heading) {
 /////////////////////////////////////////////////////////////////////////////
 
 int gps::run(void) {
-	
+    aErr e = aErrNone;
+    while (m_bRunning) {
+        char s;
+        aStream_Read(m_ioRef, m_serialStream, &s, 1, &e);
+        if(e == aErrNone) {
+            m_gps.encode(s);
+            //m_log->log(RAW, "%c", s);
+        } else if(e != aErrNotReady)
+            return aErrIO;
+    }
 	return 0;
 }
 
-
+#if 0
 /////////////////////////////////////////////////////////////////////////////
 int aGPM_Get2DigitInt(acpStem* pStem, char addr, char reg)
 {
@@ -147,7 +168,36 @@ int aGPM_GetTrueHeading(acpStem* pStem){return aGPM_Get3DigitInt(pStem, GPS_IIC_
 int aGPM_GetMagHeading(acpStem* pStem){return aGPM_Get3DigitInt(pStem, GPS_IIC_ADDR, 48);}
 
 int aGPM_GetSpeed(acpStem* pStem){return aGPM_Get3DigitInt(pStem, GPS_IIC_ADDR, 52);}
+#endif
 
+#ifdef GPS_TEST
 
+////////////////////////////////////////
+// main testing routine for motModule
+int
+main(int argc,
+     const char* argv[])
+{
 
+   aIOLib ioRef;
+   aIO_GetLibRef(&ioRef, NULL);
+
+  acpThread* gpsThread = acpOSFactory::thread("gps");
+  logger*  mlog= logger::getInstance();
+  mlog->log(INFO, "Starting GPS test");
+  gps* gps = gps::getInstance();
+  gps->init("ttyUSB1", 57600);
+  gpsThread->start(gps);
+  float lat = 0.0f, lon = 0.0f, head = 0.0f;
+  while(1) {
+      gps->getPosition(&lon, &lat, &head);
+      mlog->log(INFO, "Lon, Lat, Head: %lf, %lf, %lf", lon,lat,head);
+    aIO_MSSleep(ioRef, 200, NULL);
+  }
+
+  aIO_ReleaseLibRef(ioRef, NULL);
+
+}
+
+#endif
 
