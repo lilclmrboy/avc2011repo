@@ -1,6 +1,9 @@
 #include "controller.h"
 #define aSTEM_CONN_TIMEOUT 10
 
+#define DEG_TO_RAD (aPI/180)
+#define RAD_TO_DEG (180/aPI)
+
 /////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////
@@ -166,6 +169,24 @@ avcController::run(void) {
 	unsigned long int nIterations = 0;
   //Initialize the previous time to something reasonable
   aIO_GetMSTicks(m_ioRef, &prevTime, NULL);
+  
+  // open a file for logging of loc/plan data
+  char buffer[100];
+	time_t rawtime;
+	struct tm* timeinfo;
+	time(&rawtime);
+  timeinfo = localtime( &rawtime );
+	strftime(buffer,100, "locPlanTrack_%d_%m_%H_%M.data", timeinfo);
+  FILE* locPlanTrackFile;
+  
+  locPlanTrackFile = fopen(buffer, "w");
+	if (!locPlanTrackFile) {
+    m_log->log(ERROR, "Not able to write locPlanTrack.");
+		return aErrIO;
+  }
+  
+	fprintf(locPlanTrackFile, "Long\tLat\tHeading\tTargetLong\tTargetLat\tDistToNextPoint\tHeadingToNextPointRad\n");
+	fflush(locPlanTrackFile);
 
 
   while (aErrNone == checkAndWaitForStem() && !bSuccess) {
@@ -261,8 +282,20 @@ avcController::run(void) {
       {
         avcStateVector tempPos = m_pos.getPosition();
         avcWaypointVector tempTarget = m_planner.getNextMapPoint();
+        // distance to point and heading to point
+        double tempHeadingToNextPointRad = m_planner.getHeadingToNextPointRad() ; 
+        double tempDistanceToNextPoint = m_planner.getDistanceToNextPoint();
         
-        m_log->log(DEBUG, "Plot:\t%f\t%f\t%f\t%f\t%f\t%f", tempPos.x, tempPos.y, tempTarget.state.x, tempTarget.state.y, motivation.x, motivation.y);
+        m_log->log(DEBUG, "Plot: %f,%f,%f,%f,%f,%f,%f", tempPos.x, tempPos.y, tempPos.h, tempTarget.state.x, tempTarget.state.y, tempDistanceToNextPoint, tempHeadingToNextPointRad*RAD_TO_DEG);
+        fprintf(locPlanTrackFile, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
+                tempPos.x/aLON_PER_METER, 
+                tempPos.y/aLON_PER_METER, 
+                (-1.0*tempPos.h*DEG_TO_RAD+(aPI/2.0)), //shift bearing to account for plotting frame difference 0=N and CW vs CCW
+                tempTarget.state.x/aLON_PER_METER,
+                tempTarget.state.y/aLON_PER_METER,
+                tempDistanceToNextPoint,
+                (-1.0*tempHeadingToNextPointRad) + (aPI/2.0));
+        fflush(locPlanTrackFile); 
       }
       
       // get repulsive forces
@@ -324,6 +357,7 @@ avcController::run(void) {
     return 0;
   }
 
+  fclose(locPlanTrackFile);
 
 }
 

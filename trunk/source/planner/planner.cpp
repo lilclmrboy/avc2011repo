@@ -368,7 +368,7 @@ avcPlanner::calcPolarVectorBetweenStates(const avcStateVector& state1,
 	c = 2.0 * atan2(sqrt(a), sqrt(1-a));
 	*distanceToWaypoint = earthRadiusKM * c * 1000;
   
-  m_logger->log(INFO, "%s: To next map point (dist,heading): %f, %f", __FUNCTION__, *distanceToWaypoint, *thetaRad); 
+  //m_logger->log(INFO, "%s: To next map point (dist,heading): %f, %f", __FUNCTION__, *distanceToWaypoint, *thetaRad); 
 	
 	return aErrNone;
 }
@@ -398,6 +398,16 @@ avcWaypointVector avcPlanner::getNextMapPoint(void) {
     
   return m_waypoints[nextWaypointIdx];
 }
+/////////////////////////////////////////////////////////////////////////////
+// public accessor functions for motivation info
+double avcPlanner::getHeadingToNextPointRad(void) { 
+  return m_headingToNextPointRad;
+}
+
+double avcPlanner::getDistanceToNextPoint(void) { 
+  return m_distanceToNextPoint;
+}
+
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -430,6 +440,11 @@ avcPlanner::calcForceVectorBetweenStates(const avcStateVector& state1, const avc
 	// a heading relative to the bot's current heading
 	//goalHeading = (state1.h * DEG_TO_RAD) - headingToNextStateRad;
 	goalHeading = headingToNextStateRad - (state1.h * DEG_TO_RAD);
+  
+  //store dist and heading for later reporting if needed
+  m_distanceToNextPoint = dist;
+  //m_headingToNextPointRad = unwrapAngleDeg(goalHeading*RAD_TO_DEG)*DEG_TO_RAD;
+  m_headingToNextPointRad = unwrapAngleDeg(headingToNextStateRad*RAD_TO_DEG)*DEG_TO_RAD;
 	
 	//convert bearing to an x-y force unit vector
 	// this conversion to cartesian will eliminate >|pi| headings

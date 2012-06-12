@@ -35,7 +35,11 @@ public:
 	// should be used by camera/laser system to add "bonus" waypoints
 	aErr insertMapPoint(const avcStateVector newPosition);
 	const avcWaypointVector& getFirstMapPoint(void) { return m_waypoints.front(); }
+  
+  // accessor functions for reporting and debug
   avcWaypointVector getNextMapPoint(void);
+  double getDistanceToNextPoint(void);
+  double getHeadingToNextPointRad(void);
   
 #ifdef aDEBUG_PLANNER
 	friend int main(int, const char**);
@@ -77,4 +81,8 @@ private:
 	// Attempts to load map from file. If error, inits the map with one
 	// point (0.0,0.0,0.0).
 	void loadMap(const char* mapfile);
+  
+  // member variables for storing and report results of planning
+  double m_headingToNextPointRad;
+  double m_distanceToNextPoint;
 };
