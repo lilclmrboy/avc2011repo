@@ -85,6 +85,8 @@ int main(int argc, const char* argv[]) {
   
   avcAccelerometer *accelerometer;
   
+#if 1
+  
   ///////////////////
   printf("\n\nRunning the LSM303DLM accelerometer test\n");
  
@@ -101,6 +103,8 @@ int main(int argc, const char* argv[]) {
   }
 
   free(accelerometer);
+  
+#endif
  
   ////////////////////
   printf("\n\nRunning the AXDL335 accelerometer test\n");
@@ -114,7 +118,7 @@ int main(int argc, const char* argv[]) {
     accelerometer->getAccelerometerReadings(&accx, &accy, &accz);
     log->log(INFO, "accel x,y,z: %3.2f\t%3.2f\t%3.2f", accx, accy, accz);
     
-    stem.sleep(100);
+    stem.sleep(5);
   }
   
   free(accelerometer);
