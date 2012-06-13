@@ -12,6 +12,7 @@
 #include "compass.h"
 #include "motModule.h"
 #include "gps.h"
+#include "accelerometer.h"
 
 #define aUSE_GPS
 
@@ -117,6 +118,8 @@ private:
   double m_wheelBase;
   
   avcCompass *m_compass;
+  avcAccelerometer *m_accel;
+  avcAccelerometerThread *m_accelThread;
 
 	//Our controller owns this we'll let them delete.	
 	aSettingFileRef m_settings;

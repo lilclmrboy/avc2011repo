@@ -213,6 +213,7 @@ int main(int argc, const char* argv[]) {
   printf("Got stem.\n");
   
   avcAccelerometer *accelerometer;
+  avcAccelerometerThread *accelThread;
   
 #if 1
   
@@ -221,6 +222,7 @@ int main(int argc, const char* argv[]) {
  
   accelerometer = new accelerometerLSM303DLM(&stem, &settings);
   accelerometer->init();
+  accelThread = new avcAccelerometerThread(accelerometer);
   
   for (int i=0; i<100; i++){
   //while(1){
@@ -228,12 +230,16 @@ int main(int argc, const char* argv[]) {
     accelerometer->getAccelerometerReadings(&accx, &accy, &accz);
     log->log(INFO, "accel x,y,z: %3.2f\t%3.2f\t%3.2f", accx, accy, accz);
     
+    double avgAccx=0, avgAccy=0, avgAccz=0;
+    accelThread->getAverageAccerlerometerMeasurements(&avgAccx, &avgAccy, &avgAccz);
+    log->log(INFO, "avg accel x,y,z: %3.2f\t%3.2f\t%3.2f", avgAccx, avgAccy, avgAccz);
+    
     stem.sleep(100);
   }
 
   free(accelerometer);
   
-#endif
+#else
  
   ////////////////////
   printf("\n\nRunning the AXDL335 accelerometer test\n");
@@ -251,7 +257,8 @@ int main(int argc, const char* argv[]) {
   }
   
   free(accelerometer);
-  
+#endif
+
   
 }
 

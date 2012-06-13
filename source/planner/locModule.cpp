@@ -1,6 +1,5 @@
 #include "locModule.h"
 #include <sys/time.h>
-#include "gps.h"
 
 //We'll wait up to 30 seconds for a GPS lock on initialization.
 #define aGPS_LOCK_STEPS 3
@@ -18,6 +17,11 @@ avcPosition::init(acpStem* pStem,
   m_compass = new compassLSM303DLM(m_pStem, m_settings);
   m_compass->init();
 	aErr e = aErrNone;
+  
+  // make an accelerometer class and start a thread for the EKF
+  m_accel = new accelerometerLSM303DLM(m_pStem, m_settings);
+  m_accel->init();
+  m_accelThread = new avcAccelerometerThread(m_accel);
 
 	char buffer[100];
 	time_t rawtime;
