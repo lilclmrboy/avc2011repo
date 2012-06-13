@@ -34,6 +34,9 @@ public:
   // acpThread run handle
   int run(void);
   
+  // returns the HDOP as an indicator of quality
+  unsigned long hdop();
+  
 private: 
 	
 	static gps* m_pInstance;

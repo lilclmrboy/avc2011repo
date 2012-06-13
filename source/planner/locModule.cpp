@@ -77,6 +77,9 @@ avcPosition::init(acpStem* pStem,
 		* our starting position from the GPS position information
 		* else we'll assume we're at the 0,0,0 position.	
 	  */
+    
+    m_gps = gps::getInstance();
+    m_gps->init("ttyUSB1", 57600);
 		int timeout = 0;
 		bool haveGPS = false;
 		while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
@@ -297,12 +300,13 @@ avcPosition::recordGPSPoint(void) {
 bool 
 avcPosition::getGPSQuality(void) {
 
-  unsigned char value = 0;
-  value = aGPM_GetGPSQuality(m_pStem);
+  unsigned long value = 0;
+  //value = aGPM_GetGPSQuality(m_pStem);
+  value = m_gps->hdop();
 
-  m_logger->log(INFO, "Quality value: %d", value);
+  m_logger->log(INFO, "GPS HDOP value: %ld", value);
   
-	return !!(value);
+	return ( value > 5000 ? false : true);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -312,12 +316,14 @@ avcPosition::getGPSLongitude(void)
 {
 
 	//We're in the western hemisphere, so we'll have a negative longitude.
-	double retVal = 0.0;
-  retVal = (double)(aGPM_GetLongitudeDegrees(m_pStem));
-  retVal += (double)(aGPM_GetLongitudeMinutes(m_pStem)) / 60.0;
-  retVal += (double)(aGPM_GetLongitudeFrac(m_pStem)) / 600000.0;
+	float longitude=0.0, latitude=0.0, heading=0.0;
+  //retVal = (double)(aGPM_GetLongitudeDegrees(m_pStem));
+  //r/etVal += (double)(aGPM_GetLongitudeMinutes(m_pStem)) / 60.0;
+  //retVal += (double)(aGPM_GetLongitudeFrac(m_pStem)) / 600000.0;
+  
+  m_gps->getPosition(&longitude, &latitude, &heading);
 	
-	return retVal * -1.0;
+	return (double)longitude * -1.0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -325,11 +331,12 @@ avcPosition::getGPSLongitude(void)
 double 
 avcPosition::getGPSLatitude(void)
 {
-	double retVal = 0.0;
-  retVal = aGPM_GetLatitudeDegrees(m_pStem);
-  retVal += (double)(aGPM_GetLatitudeMinutes(m_pStem)) / 60.0;
-  retVal += (double)(aGPM_GetLatitudeFrac(m_pStem)) / 600000.0;
-	return retVal;
+	float longitude=0.0, latitude=0.0, heading=0.0;
+  //retVal = aGPM_GetLatitudeDegrees(m_pStem);
+  //retVal += (double)(aGPM_GetLatitudeMinutes(m_pStem)) / 60.0;
+  //retVal += (double)(aGPM_GetLatitudeFrac(m_pStem)) / 600000.0;
+  m_gps->getPosition(&longitude, &latitude, &heading);
+	return (double) latitude;
 }
 
 
@@ -339,7 +346,7 @@ avcPosition::getGPSLatitude(void)
 double
 avcPosition::getHeading(void) {
 	
-  double retVal = 0.0;
+  double retVal=0.0;
 	float headingDeg=0.0f;
   if(0 != m_compass->getHeadingDeg(&headingDeg)){
     m_logger->log(ERROR, "%s: Error getting current heading", __FUNCTION__);

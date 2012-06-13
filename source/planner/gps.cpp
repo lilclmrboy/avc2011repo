@@ -44,6 +44,10 @@ aErr gps::getPosition(float *lon, float* lat, float* heading) {
 	return aErrNone;
 }
 
+// Returns the HDOP as an indicator of quality
+unsigned long gps::hdop(){
+  return m_gps.hdop();
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

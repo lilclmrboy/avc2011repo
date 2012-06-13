@@ -38,6 +38,135 @@ int avcAccelerometer::getAccelerometerReadings(float *x, float *y, float *z){
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+// Accelerometer thread
+/////////////////////////////////////////////////////////////////////////////
+avcAccelerometerThread::avcAccelerometerThread(avcAccelerometer *avcAccelReference){
+  // get a logger reference
+  m_logger = logger::getInstance();
+  
+  // check the pointer
+  if(!avcAccelReference)
+    m_logger->log(ERROR, "Null reference to avcAccelerometer passed into avcAccelerometerThread");
+
+  // store the accelerometer reference
+  m_accerlerometer = avcAccelReference;
+    
+  // set the cumulative average and counters to 0
+  m_currentCumulativeAverage.x=0.0;
+  m_currentCumulativeAverage.y=0.0;
+  m_currentCumulativeAverage.z=0.0;
+  m_readingCounter = 0;
+  
+  // the accelerometer update rate is 50Hz
+  // set the thread delay to be half that (25Hz = 40ms delay)
+	m_threadDelay = 40;
+  
+  m_logger->log(INFO, "Starting acceleromter thread process");
+  
+  // Fire off the thread
+  m_pThread = acpOSFactory::thread("acclerometerAveraging");
+  m_accelReadingLock = acpOSFactory::mutex("accelerometerLock");
+  m_pThread->start(this);
+  
+}
+
+avcAccelerometerThread::~avcAccelerometerThread(void){
+  
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// read the average accelerometer measurements since the last reading
+int avcAccelerometerThread::getAverageAccerlerometerMeasurements(double *x, double *y, double *z){
+  // check the pointers
+  if(!x || !y || !z){
+    m_logger->log(ERROR, "%s: Null pointer passed in", __FUNCTION__);
+    return -1;
+  }
+  
+  // grab the mutex lock
+  m_accelReadingLock->lock();
+  
+  // stuff the reading into the pointers
+  *x = m_currentCumulativeAverage.x;
+  *y = m_currentCumulativeAverage.y;
+  *z = m_currentCumulativeAverage.z;
+  
+  // reset the readings
+  //m_currentCumulativeAverage.x = 0.0;
+  //m_currentCumulativeAverage.y = 0.0;
+  //m_currentCumulativeAverage.z = 0.0;
+  // since we're computing the cumulative average directly, we just have to reset the counter
+  m_readingCounter=0;
+  
+  // release the loc
+  m_accelReadingLock->unlock();
+  
+  return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// unused virtual function from acpThread
+//void avcAccelerometerThread::step (const double time){
+//  
+//}
+
+/////////////////////////////////////////////////////////////////////////////
+// main thread function to update cumulative average of accelerometer readings
+int avcAccelerometerThread::run(void){
+  
+  while (!m_pThread->isDone()) {
+    bool bIdle = true;
+    
+    // make a new measurement
+    makeNewMeasurement();
+    
+    // handle any messages first
+    if (m_pThread->handleMessage())
+      bIdle = false;
+    
+    // yield if nothing is happening
+    if (bIdle)
+      m_pThread->yield(m_threadDelay);
+  }
+
+  return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// go make an accelerometer reading and push it into the cumulative average
+int avcAccelerometerThread::makeNewMeasurement(void){
+  
+  // get new readings from the accelerometer
+  float newX=0, newY=0, newZ=0;
+  if(0 != m_accerlerometer->getAccelerometerReadings(&newX, &newY, &newZ)){
+    m_logger->log(ERROR, "%s: not able to get accelerometer readings", __FUNCTION__);
+  }
+  
+  // get the lock
+  m_accelReadingLock->lock();
+  
+  //update the cumulative average
+  //m_currentCumulativeAverage.x += ((double)newX - m_currentCumulativeAverage.x) / (double)(m_readingCounter+1);
+  //m_currentCumulativeAverage.y += ((double)newY - m_currentCumulativeAverage.y) / (double)(m_readingCounter+1);
+  //m_currentCumulativeAverage.z += ((double)newZ - m_currentCumulativeAverage.z) / (double)(m_readingCounter+1);
+  
+  //do the cumulative average with a multiply so we can simply reset the counter to clear the averaging
+  m_currentCumulativeAverage.x += ((double)newX + (double)m_readingCounter * m_currentCumulativeAverage.x) / (double)(m_readingCounter+1);
+  m_currentCumulativeAverage.y += ((double)newY + (double)m_readingCounter * m_currentCumulativeAverage.y) / (double)(m_readingCounter+1);
+  m_currentCumulativeAverage.z += ((double)newZ + (double)m_readingCounter * m_currentCumulativeAverage.z) / (double)(m_readingCounter+1);
+  m_readingCounter++;
+  
+  // release the lock
+  m_accelReadingLock->unlock();
+  
+  return 0;
+  
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 #ifdef aDEBUG_ACCELEROMETER
 int main(int argc, const char* argv[]) {
   
