@@ -11,6 +11,7 @@
 #include "mat_math.h"
 #include "compass.h"
 #include "motModule.h"
+#include "gps.h"
 
 #define aUSE_GPS
 
@@ -87,6 +88,9 @@ public:
     m_curPos.y = newPos.state.y;
     m_curPos.h = newPos.state.h; 
   }
+  
+  // gps member class
+  gps* m_gps;
 	
 
 #ifdef aDEBUG_FLOC
