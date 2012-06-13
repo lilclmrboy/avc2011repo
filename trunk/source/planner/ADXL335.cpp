@@ -2,6 +2,19 @@
 #include "accelerometer.h"
 
 
+#define STEM_A2D_VREF       3.3f     // V
+#define GRAVITATIONAL_CONST 9.80665f // (m/s^2)/g
+
+/* From datasheet, page 12:
+ VCC(3.6V) = 360 mV/g
+ VCC(2.0V) = 195 mV/g
+ thus
+ VCC(3.3V) = 329.0625 mV/g   
+ */
+#define ADXL335_SCALE_FACTOR 0.3290625f // V/g
+#define ADXL335_AVERAGE_SAMPLES 3
+#define ADXL335_AVERAGE_DELAY 3
+
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -37,19 +50,6 @@ int accelerometerADXL335::getAccelerometerReadings (float *ddx, float *ddy, floa
     m_logger->log(ERROR, "%s: null pointer passed in", __FUNCTION__);
     return -1;
   }
-  
-  // Scaling is radiometric
-  /* From datasheet:
-   VCC(3.6V) = 360 mV/g
-   VCC(2.0V) = 195 mV/g
-   thus
-   VCC(3.3V) = 329.0625 mV/g
-   our readings are in normalized 0 - 1.0 values across a 3.3V range
-   
-   */
-  const float a2d_ref = 3.3f; // V
-  float scale_factor = a2d_ref * 1.0f / 0.3290625f; // g
-  
   
   if(!ddx || !ddy || !ddz){
     m_logger->log(ERROR, "%s: Null pointer passed to getAccelerometerReadings", __FUNCTION__);
@@ -108,11 +108,46 @@ int accelerometerADXL335::getAccelerometerReadings (float *ddx, float *ddy, floa
   m_logger->log(INFO, "Ending bulk capture\n");
   
 #endif // end of buik capture
+  
+  // Scaling is radiometric
+  // ((m/s^2 / g) * V) / (V/g) = m/sec^2
+  float scale_factor = GRAVITATIONAL_CONST *
+    STEM_A2D_VREF *
+    (1.0f / ADXL335_SCALE_FACTOR);   
 	
-  // Take the reading values and average them
-  *ddx = scale_factor * m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_X_CHAN);
-  *ddy = scale_factor * m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Y_CHAN);
-  *ddz = scale_factor * m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Z_CHAN);
+  //  we get 0 g from the sensor
+  //  when less than half vreferenc, we get negative acceleration
+  //  when greater than half vreference, we get positive accel
+  
+  float ax = 0.0f;
+  float ay = 0.0f;
+  float az = 0.0f;
+  
+  // Get the readings from the Stem. Running average if we want
+  int nSamples = ADXL335_AVERAGE_SAMPLES;
+  do {
+    
+    // A2D delay if doing more than one sample
+    if (ADXL335_AVERAGE_SAMPLES > 1)
+      m_pStem->sleep(ADXL335_AVERAGE_DELAY);
+    
+    // Add up some readings from each channel
+    ax += m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_X_CHAN) - 0.5f;
+    ay += m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Y_CHAN) - 0.5f;
+    az += m_pStem->A2D(aUSBSTEM_MODULE, aACCEL_Z_CHAN) - 0.5f;
+    
+  } while (--nSamples);
+  
+  // Compute the running average result
+  ax = ax / (float) ADXL335_AVERAGE_SAMPLES;
+  ay = ay / (float) ADXL335_AVERAGE_SAMPLES;
+  az = az / (float) ADXL335_AVERAGE_SAMPLES;
+
+  
+  // Ship the result off to who ever wants it
+  *ddx = scale_factor * ax;
+  *ddy = scale_factor * ay;
+  *ddz = scale_factor * az;
   
   if (-1 == *ddx || -1 == *ddy || -1 == *ddz){
     m_logger->log(ERROR, "%s: A2D timeout while reading accelerometer", __FUNCTION__);

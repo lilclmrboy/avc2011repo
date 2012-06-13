@@ -17,7 +17,7 @@ avcPosition::init(acpStem* pStem,
 	m_logger = logger::getInstance();	
   m_compass = new compassLSM303DLM(m_pStem, m_settings);
   m_compass->init();
-	aErr e;
+	aErr e = aErrNone;
 
 	char buffer[100];
 	time_t rawtime;
