@@ -156,7 +156,9 @@ avcPosition::updateState(short lastThrottleSetPoint) {
 	*/
 	
 	//Get the new encoder readings.
-	int curEnc = getEncoderValue();
+	int curEnc = 0;
+	if(getEncoderValue(&curEnc))
+		m_logger->log(ERROR, "%s: Encoder reading is fuct.", __FUNCTION__);
   
 	// Calculate the rear wheel velociy in meters / second.
   if(tmElapsed <= 0)
@@ -361,12 +363,15 @@ avcPosition::getHeading(void) {
 
 
 /////////////////////////////////////////////////////////////////////////////
+
+#define		cmdMO_ENC32		66
+
 bool 
-avcPosition::getEncoderValue(long int *pValue) {
+avcPosition::getEncoderValue(int *pValue) {
 	
 	int value = 0;
-  aUInt8 data[2] = {cmdMO_ENC32, channel};
-  aPacketRef p = createPacket(module, 2, data);
+  aUInt8 data[2] = {cmdMO_ENC32, 0};
+  aPacketRef p = m_pStem->createPacket(aMOTO_MODULE, 2, data);
 	int nAttemptsReadMax = 250;
 	int nAttemptsWriteMax = 5;
 	bool bValueGood = false;
@@ -379,16 +384,16 @@ avcPosition::getEncoderValue(long int *pValue) {
 	// Otherwise we get to send off the read request
 	do {
 		// Send the request to the Moto
-		m_pThread->sendMessage(new acpSendPacketMessage(m_stemRef, p), true);
+		m_pStem->sendPacket(p);
 		
 		// Begin polling over and over for the encoder 32 value
 		do {
 			
 			// Delay
-			aIO_MSSleep(m_ioRef, 1, NULL);
+			m_pStem->sleep(1);
 			
 			// await the response packet
-			acpPacket* pPacket = peekPacket(module, cmdMO_ENC32);
+			acpPacket* pPacket = m_pStem->peekPacket(aMOTO_MODULE, cmdMO_ENC32);
 			if (pPacket) {
 				const aUInt8* pData = pPacket->getData();
 				value = aUtil_RetrieveInt((const char*)&pData[2]);
