@@ -35,7 +35,7 @@ public:
   int run(void);
   
   // returns the HDOP as an indicator of quality
-  unsigned long hdop();
+  unsigned int getQuality();
   
 private: 
 	
@@ -68,6 +68,7 @@ private:
   
 };
 
+#if 0
 #define GPS_IIC_ADDR 0xD0
 
 int aGPM_Get2DigitInt(acpStem* pStem, char addr, char reg);
@@ -120,6 +121,8 @@ int aGPM_SetPortDir(acpStem* pStem, char dir);
 int aGPM_SetPortBits(acpStem* pStem, char bits);
 
 int aGPM_GetGPSQuality(acpStem* pStem);
+
+#endif // 0
 
 
 #endif //_gps_H_
