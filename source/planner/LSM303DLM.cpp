@@ -310,14 +310,15 @@ int compassLSM303DLM::readTwoByteTwosComplimentLittleEndian(unsigned int firstRe
   
   short ret_value = 0;
   aUInt8 read_buffer[2]={0,0};
-  aUInt8 reg_buffer[1] = {firstReg};
+
+  // assert the MSB of the address to get the gyro
+  // to do slave-transmit register auto-increment
+  aUInt8 reg_buffer = firstReg | (1 << 7);
   
-  // assert the MSB of the address to get the gyro 
-	// to do slave-transmit register auto-increment
-  reg_buffer[0] = firstReg | (1 << 7);
+
   
   try {
-    aPacketRef regPacket = m_pStem->createPacket(LSM303DLM_ACCEL_IIC_ADDR, 1, reg_buffer);
+    aPacketRef regPacket = m_pStem->createPacket(LSM303DLM_ACCEL_IIC_ADDR, 1, &reg_buffer);
     m_pStem->sendPacket(regPacket);
     m_pStem->IIC_RD(aUSBSTEM_MODULE, LSM303DLM_ACCEL_IIC_ADDR+1, 2, read_buffer);
   } catch (acpException &e){
@@ -350,10 +351,10 @@ int compassLSM303DLM::readTwoByteTwosComplimentBigEndian(unsigned int firstReg, 
   
   short ret_value = 0;
   aUInt8 read_buffer[2]={0,0};
-  aUInt8 reg_buffer[1] = {firstReg};
+  aUInt8 reg_buffer = firstReg;
   
   try {
-    aPacketRef regPacket = m_pStem->createPacket(LSM303DLM_MAG_IIC_ADDR, 1, reg_buffer);
+    aPacketRef regPacket = m_pStem->createPacket(LSM303DLM_MAG_IIC_ADDR, 1, &reg_buffer);
     m_pStem->sendPacket(regPacket);
     m_pStem->IIC_RD(aUSBSTEM_MODULE, LSM303DLM_MAG_IIC_ADDR+1, 2, read_buffer);
   } catch (acpException &e){

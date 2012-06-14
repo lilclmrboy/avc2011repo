@@ -283,11 +283,9 @@ avcPosition::recordGPSPoint(void) {
 	
 	if(timeElapsed > 2000 ) {//&& getGPSQuality()) {
 	
-		double curLat= 0.0, curLon= 0.0, curHed = 0.0;
+        float curLat= 0.0f, curLon= 0.0f, curHed = 0.0f;
 		
-		curLat = getGPSLatitude();
-		curLon = getGPSLongitude();
-		curHed = getHeading();
+        m_gps->getPosition(&curLon, &curLat, &curHed);
 		
 		fprintf(gps_track, "%3.12f, %2.12f, %3.1f\n", 
 						curLon, curLat, curHed);
@@ -299,7 +297,6 @@ avcPosition::recordGPSPoint(void) {
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
 
 bool 
 avcPosition::getGPSQuality(void) {

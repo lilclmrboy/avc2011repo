@@ -41,7 +41,7 @@ private:
 	int gyroL3G4200DgetX(int *dddx);
   int gyroL3G4200DgetY(int *dddy);
   int gyroL3G4200DgetZ(int *dddz);
-  int gyroL3G4200DreadTwoByteTwosCompliment(unsigned int firstReg, int *reading);
+  int gyroL3G4200DreadTwoByteTwosCompliment(unsigned char firstReg, int *reading);
   
 };
 
