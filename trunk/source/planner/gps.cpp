@@ -37,16 +37,32 @@ aErr gps::init(const acpString& port, const int baudrate) {
     return e;
 }
 
-// Returns the resultant force vector
+
 aErr gps::getPosition(float *lon, float* lat, float* heading) {
     m_gps.f_get_position(lat, lon);
     (*heading) = m_gps.f_course();
-	return aErrNone;
+
+    if((*lat) == TinyGPS::GPS_INVALID_ANGLE
+       || (*lon) == TinyGPS::GPS_INVALID_ANGLE
+       || (*heading) == TinyGPS::GPS_INVALID_ANGLE)
+      return aErrNotReady;
+    else
+      return aErrNone;
 }
 
 // Returns the HDOP as an indicator of quality
-unsigned long gps::hdop(){
-  return m_gps.hdop();
+unsigned int gps::getQuality(){
+  unsigned long hdop = m_gps.hdop();
+
+  m_log->log(DEBUG, "HDOP from gps: %f", hdop / 0.0f);
+
+  // No valid sentences, or HDOP > 10.0
+  if (hdop == TinyGPS::GPS_INVALID_HDOP || hdop > 1000)
+    return 0;
+  else if (hdop > 200) // HDOP in bad range > 3.0
+    return 1;
+  else // HDOP good.
+    return 2;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -59,9 +75,12 @@ int gps::run(void) {
         if(e == aErrNone) {
             m_gps.encode(s);
             //m_log->log(RAW, "%c", s);
-        } else if(e != aErrNotReady)
-            return aErrIO;
+        } else if(e != aErrNotReady) {
+          m_bRunning = false;
+          return aErrIO;
+        }
     }
+    m_bRunning = false;
 	return 0;
 }
 

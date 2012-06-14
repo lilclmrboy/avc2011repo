@@ -304,7 +304,7 @@ avcPosition::getGPSQuality(void) {
 
   unsigned long value = 0;
   //value = aGPM_GetGPSQuality(m_pStem);
-  value = m_gps->hdop();
+  value = m_gps->getQuality();
 
   m_logger->log(INFO, "GPS HDOP value: %ld", value);
   

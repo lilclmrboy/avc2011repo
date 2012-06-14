@@ -16,7 +16,6 @@
 #include "gps.h"
 
 #include "accelerometer.h"
-//#include "LSM303DLM.h" // done above
 
 #define aUSE_GPS
 
