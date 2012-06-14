@@ -167,8 +167,8 @@ avcPosition::updateState(short lastThrottleSetPoint) {
   //int motorSetPoint = getMotorSetPoint();
   int motorSetPoint = lastThrottleSetPoint;
 	
-  double fVelocity = (motorSetPoint < SERVO_NEUT ? -1 : 1) * m_metersPerTick * (double)(curEnc - m_Encoder) / ((double)tmElapsed / 1000.0);
-  double fDistRolled = (motorSetPoint < SERVO_NEUT ? -1 : 1) * m_metersPerTick * (double)(curEnc - m_Encoder);
+  double fVelocity =  m_metersPerTick * (double)(curEnc - m_Encoder) / ((double)tmElapsed / 1000.0);
+  double fDistRolled =  m_metersPerTick * (double)(curEnc - m_Encoder);
 	m_logger->log(INFO, "Current Speed (m/s): %lf (tick/time=%d/%d)", fVelocity, (curEnc - m_Encoder), tmElapsed);
   
   m_curPos.h = getHeading();
