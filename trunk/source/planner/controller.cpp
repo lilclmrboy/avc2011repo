@@ -154,6 +154,7 @@ avcController::run(void) {
 
   //Lets allow a condition to gracefully end the application.
   //bool running = true;
+  aErr e = aErrNone;
   avcStateVector pos;
   avcForceVector rv;
   avcForceVector motivation;
@@ -166,28 +167,56 @@ avcController::run(void) {
   bool bSuccess = false;
   int extraDelay = 0;
   unsigned long int prevTime = 0;
-	unsigned long int nIterations = 0;
+  unsigned long int nIterations = 0;
   //Initialize the previous time to something reasonable
   aIO_GetMSTicks(m_ioRef, &prevTime, NULL);
   
-  // open a file for logging of loc/plan data
-  char buffer[100];
-	time_t rawtime;
-	struct tm* timeinfo;
-	time(&rawtime);
-  timeinfo = localtime( &rawtime );
-	strftime(buffer,100, "locPlanTrack_%d_%m_%H_%M.data", timeinfo);
-  FILE* locPlanTrackFile;
-  
-  locPlanTrackFile = fopen(buffer, "w");
-	if (!locPlanTrackFile) {
-    m_log->log(ERROR, "Not able to write locPlanTrack.");
-		return aErrIO;
-  }
-  
-	fprintf(locPlanTrackFile, "Long\tLat\tHeading\tTargetLong\tTargetLat\tDistToNextPoint\tHeadingToNextPointRad\n");
-	fflush(locPlanTrackFile);
+  aBool doRecord;
+  if(aSettingFile_GetBool(m_ioRef, m_settings, aKEY_MAKE_RECORD,
+                           &doRecord, MAKE_RECORD, &e))
+    throw acpException(e, "makelogs");
 
+  FILE* locPlanTrackFile;
+#ifdef aUSE_GPS
+  FILE* gps_track;
+#endif
+
+  if(doRecord) {
+      // open a file for logging of loc/plan data
+      char buffer[100];
+      time_t rawtime;
+      struct tm* timeinfo;
+      time(&rawtime);
+      timeinfo = localtime( &rawtime );
+      strftime(buffer,100, "locPlanTrack_%d_%m_%H_%M.data", timeinfo);
+
+      locPlanTrackFile = fopen(buffer, "w");
+      if (!locPlanTrackFile) {
+          m_log->log(ERROR, "Not able to write locPlanTrack.");
+          return aErrIO;
+      }
+
+      fprintf(locPlanTrackFile, "Long\tLat\tHeading\tTargetLong\tTargetLat\tDistToNextPoint\tHeadingToNextPointRad\n");
+      fflush(locPlanTrackFile);
+
+#ifdef aUSE_GPS
+      // Set up GPS track record.
+      time(&rawtime);
+      timeinfo = localtime( &rawtime );
+      strftime(buffer, 100, "GPS_Track_%d_%m_%H_%M.gpx", timeinfo);
+
+      m_log->log(DEBUG, "Writing GPS track: %s", buffer);
+
+      gps_track = fopen(buffer, "w");
+      if (!gps_track) {
+          m_log->log(ERROR, "Not able to write GPS track. e = %d", e);
+          return aErrIO;
+      }
+
+      fprintf(gps_track, "Chicken GPS track\n");
+      fflush(gps_track);
+#endif
+  } // end if doRecord
 
   while (aErrNone == checkAndWaitForStem() && !bSuccess) {
 
@@ -248,10 +277,21 @@ avcController::run(void) {
 
       }
 
-      if(bNotStarted) {
+#ifdef aUSE_GPS
+      if(bNotStarted && doRecord) {
+
         //Record a gps point
-        //m_pos.recordGPSPoint();
+        float curLat= 0.0f, curLon= 0.0f, curHed = 0.0f;
+        gps* tmpGPS = gps::getInstance();
+
+        if(tmpGPS->getPosition(&curLon, &curLat, &curHed) == aErrNone) {
+          fprintf(gps_track, "%3.12f, %2.12f, %3.1f\n",
+                  curLon, curLat, curHed);
+          fflush(gps_track);
+        }
+
       }
+#endif
 
       extraDelay = (int) random() % 1000;
       // Wait for 1600 msec (long enough for clucking to finish
@@ -264,7 +304,7 @@ avcController::run(void) {
       ///////////////////////////////////////////////////////
       // go time!
       //First do the localization step. Let's find out what our system is at.
-      m_pos.updateState(m_mot.getLastThrottle());
+      m_pos.updateState();
       
       // motion planning step
       wayPointWasPassed=0; //reset before getting update from planner
@@ -279,7 +319,7 @@ avcController::run(void) {
       }
       
       //make plotable log entry
-      {
+      if (doRecord) {
         avcStateVector tempPos = m_pos.getPosition();
         avcWaypointVector tempTarget = m_planner.getNextMapPoint();
         // distance to point and heading to point
@@ -358,7 +398,9 @@ avcController::run(void) {
   }
 
   fclose(locPlanTrackFile);
-
+#ifdef aUSE_GPS
+  fclose(gps_track);
+#endif
 }
 
 

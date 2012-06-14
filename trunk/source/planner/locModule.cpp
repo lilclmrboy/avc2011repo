@@ -10,130 +10,139 @@ aErr
 avcPosition::init(acpStem* pStem, 
                   aSettingFileRef settings, 
                   avcWaypointVector firstMapPoint) {
-	
-	m_pStem = pStem;
-	m_settings = settings;
-	m_logger = logger::getInstance();	
+
+
+  aErr e = aErrNone;
+
+  m_pStem = pStem;
+  m_settings = settings;
+  m_logger = logger::getInstance();
+
   m_pCompass = new LSM303DLM(m_pStem, m_settings);
   m_pCompass->init();
-	aErr e = aErrNone;
-  
+
   // make an accelerometer class and start a thread for the EKF
   m_pAccel = new accelerometerADXL335(m_pStem, m_settings);
   m_pAccel->init();
   m_pAccelThread = new avcAccelerometerThread(m_pAccel);
 
-	char buffer[100];
-	time_t rawtime;
-	struct tm* timeinfo;
-	time(&rawtime);
-        timeinfo = localtime( &rawtime );
-	strftime(buffer,100, "GPS_Track_%d_%m_%H_%M.gpx", timeinfo);
-  
-  m_logger->log(DEBUG, "Writing GPS track: %s", buffer);
- 
-	gps_track = fopen(buffer, "w");
-	if (!gps_track) {
-    m_logger->log(ERROR, "Not able to write GPS track. e = %d", e);
-		return aErrIO;
-  }
 
-	fprintf(gps_track, "Chicken GPS track\n");
-	fflush(gps_track);
 	
-	//first we'll grab some settings from the settings file.
-	float fSetVar;
-	//if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_RADIUS,  
-	//		&fSetVar, aWHEEL_RADIUS, &e)) 
-	//	throw acpException(e, "getting wheel radius from settings");
-	//m_wheelRd = fSetVar;
+  //first we'll grab some settings from the settings file.
+  float fSetVar;
 
-	//if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_TRACK,  
-	//		&fSetVar, aWHEEL_TRACK, &e)) 
-	//	throw acpException(e, "getting wheel track from settings");
-	//m_wheelTrk = fSetVar;
-
-	if(aSettingFile_GetFloat(m_ioRef, m_settings, KEY_METER_PER_TICK,  
-			&fSetVar, METER_PER_TICK, &e)) 
-		throw acpException(e, "getting meter per tick");	
-  m_metersPerTick = fSetVar;
+  if(aSettingFile_GetFloat(m_ioRef, m_settings, KEY_METER_PER_TICK,
+                           &fSetVar, METER_PER_TICK, &e))
+    throw acpException(e, "getting meter per tick");
+    m_metersPerTick = fSetVar;
   
   if(aSettingFile_GetFloat(m_ioRef, m_settings, aKEY_WHEEL_BASE,  
-			&fSetVar, WHEEL_BASE, &e)) 
-		throw acpException(e, "getting wheel track from settings");
-	m_wheelBase = fSetVar;
+                           &fSetVar, WHEEL_BASE, &e))
+    throw acpException(e, "getting wheel track from settings");
+  m_wheelBase = fSetVar;
   
   // Set the first position waypoint that we passed in
   setPosition(firstMapPoint);
 
-
-	if (m_pStem && m_pStem->isConnected()) {
+  if (m_pStem && m_pStem->isConnected()) {
 		
-		//Set current time.	
-		aIO_GetMSTicks(m_ioRef, (unsigned long int*)&m_gpsClock, NULL);
+    //Set current time.
+    aIO_GetMSTicks(m_ioRef, (unsigned long int*)&m_gpsClock, NULL);
 		
     //Lets initialize the encoders to zero.
-		m_pStem->MO_ENC32(aMOTO_MODULE, ENCODER_IDX, 0);
-		m_Encoder = 0;
+    m_pStem->MO_ENC32(aMOTO_MODULE, ENCODER_IDX, 0);
+    m_Encoder = 0;
 		
-//#ifdef aUSE_GPS
-#if 0
-		/*lets do some initialization. First we need to find out
-		* whether we have a good GPS signal. If we do, we'll init
-		* our starting position from the GPS position information
-		* else we'll assume we're at the 0,0,0 position.	
-	  */
+#ifdef aUSE_GPS
+
+    /*lets do some initialization. First we need to find out
+    * whether we have a good GPS signal. If we do, we'll init
+    * our starting position from the GPS position information
+    * else we'll assume we're at the 0,0,0 position.
+    */
     
-    //m_gps = gps::getInstance();
-    //m_gps->init("ttyUSB1", 57600);
-		int timeout = 0;
-		bool haveGPS = false;
-		while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
-			m_logger->log(INFO, "Setting up GPS subsystem %d", timeout);
-			aIO_MSSleep(m_ioRef, 1000, NULL);
-			++timeout;
-			
-		}
+    m_pGPS = gps::getInstance();
+
+    char* buf;
+    acpString portname;
+    if(aSettingFile_GetString(m_ioRef, m_settings, aKEY_GPS_PORTNAME,
+                             &buf, GPS_PORTNAME, &e))
+      throw acpException(e, "gps Portname");
+
+    int baud;
+    if(aSettingFile_GetInt(m_ioRef, m_settings, aKEY_GPS_BAUDRATE,
+                             &baud, GPS_BAUDRATE, &e))
+      throw acpException(e, "gps Baudrate");
+
+    m_pGPS->init(portname, baud);
+    m_pGPS->run();
+
+    int timeout = 0;
+    bool haveGPS = false;
+    while (timeout < aGPS_LOCK_STEPS) {
+        m_logger->log(INFO, "Getting GPS Lock %d", timeout);
+        int quality = m_pGPS->getQuality();
+        if(quality) {
+            m_logger->log(INFO, "Locked GPS: quality(%d)", quality);
+            haveGPS = true;
+            break;
+        }
+        aIO_MSSleep(m_ioRef, 2000, NULL);
+        ++timeout;
+    }
 	  
-		if (0){//(haveGPS) {
-			//Lets get a lat, lon, and heading. We shouldn't
-		  //be moving yet.
-      setPosition(avcWaypointVector(getGPSLongitude(), 
-                                    getGPSLatitude(), 
-                                    getHeading()));
-	
-    } //else the default initilization of the state vector
-			//and probability matrix is zero'd.
+    if (haveGPS) {
+        // Lets get a lat, lon, and heading. We shouldn't
+        // be moving yet. We're also not going to get
+        // a good heading from our GPS, so we use the
+        // compass.
+        float lon, lat, head;
+        if(m_pGPS->getPosition(&lon, &lat, &head) == aErrNone) {
+
+            // We want heading from the compass, but
+            // we'll fall back on the gps heading if we can't
+            // get it.
+            m_pCompass->getHeadingDeg(&head);
+
+            setPosition(avcWaypointVector(lon,
+                                          lat,
+                                          head));
+        }
+    }
+    //else the default initilization of the state vector
+    //and probability matrix is zero'd.
 #endif
 
     //Initialize the Variance matrix Q.
     //1 meter x and y, and 1 degree heading.
-    // ~ .31 meters per reading. * 10% is .0312 
+    // ~ .31 meters per reading. * 10% is .0312
     m_Q(1,1) = aLAT_PER_METER * .0312;
     m_Q(2,2) = aLON_PER_METER * .0312;
-    // heading variance 
+    // heading variance
     m_Q(3,3) = DEG_TO_RAD * .25;
 
-    //The GPS is accurate to a meter, but I don't really trust that. 
+    //The GPS is accurate to a meter, but I don't really trust that.
     m_W(1,1) = aLAT_PER_METER * 1.25;
     m_W(2,2) = aLON_PER_METER * 1.25;
     //Compass is accurate to 4 degrees.
     m_W(3,3) = DEG_TO_RAD * 2.5;
-		return aErrNone;
-	} 
+
+    return aErrNone;
+
+  } // stem is connected.
+
+  else {
+    return aErrConnection;
+  }
 	
-	else {
-		return aErrConnection;
-	}
-	
-	return aErrNone;
+  return aErrNone;
 	
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 void 
-avcPosition::updateState(short lastThrottleSetPoint) {
+avcPosition::updateState() {
 	
 	// Grab the clock. Use the aIO verison, clock is not accurate when 
 	// we have stem processes running
@@ -164,34 +173,27 @@ avcPosition::updateState(short lastThrottleSetPoint) {
   if(tmElapsed <= 0)
     m_logger->log(ERROR, "%s: Elapsed time is invalid", __FUNCTION__);
   
-	// Get the steering angle.
-	//double steerAngleRad = getSteeringAngleRad();
-  //int motorSetPoint = getMotorSetPoint();
-  int motorSetPoint = lastThrottleSetPoint;
 	
   double fVelocity =  m_metersPerTick * (double)(curEnc - m_Encoder) / ((double)tmElapsed / 1000.0);
   double fDistRolled =  m_metersPerTick * (double)(curEnc - m_Encoder);
-	m_logger->log(INFO, "Current Speed (m/s): %lf (tick/time=%d/%d)", fVelocity, (curEnc - m_Encoder), tmElapsed);
-  
-  m_curPos.h = getHeading();
+  m_logger->log(INFO, "Current Speed (m/s): %lf (tick/time=%d/%d)", fVelocity, (curEnc - m_Encoder), tmElapsed);
 	
   // These calculations are predictions of where we think we need to be
-	// estimate change in x and y and heading
-	// TODO - we should use previous state vector to calculate position here.
-	// previous velocity.
-	double dx = sin(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLON_PER_METER;
-	double dy = cos(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLAT_PER_METER;
+  // estimate change in x and y and heading
+  // TODO - we should use previous state vector to calculate position here.
+  // previous velocity.
+  double dx = sin(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLON_PER_METER;
+  double dy = cos(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLAT_PER_METER;
     
-	// Change in heading due to the previous steering angle
+  // Change in heading due to the previous steering angle
   //double fRot = fDistRolled/m_wheelBase * tan(steerAngleRad) * RAD_TO_DEG;
   
+
+
   if(1){//(curEnc - m_Encoder) {
-    //m_logger->log(INFO, "%s: --- SteerAng(Rad): %f", __FUNCTION__, steerAngleRad);
-    m_logger->log(INFO, "%s: --- Throt: %d", __FUNCTION__, motorSetPoint);
   	m_logger->log(INFO, "%s: --- fDist: %f", __FUNCTION__, fDistRolled);
     m_logger->log(INFO, "%s: --- dx(m): %f", __FUNCTION__, dx/aLON_PER_METER);
     m_logger->log(INFO, "%s: --- dy(m): %f", __FUNCTION__, dy/aLAT_PER_METER);
-    //m_logger->log(INFO, "%s: --- fRot(deg): %f", __FUNCTION__, fRot);
     m_logger->log(INFO, "%s: --- hed: %f", __FUNCTION__, m_curPos.h);
   }
 	// Store current readings (for the next predict phase)
@@ -200,9 +202,9 @@ avcPosition::updateState(short lastThrottleSetPoint) {
 	
   // Update the current control state vector
   // These vector values should be in latitude, longitude and degrees
-	m_curPos.x += dx;
-	m_curPos.y += dy;
-	//m_curPos.h += fRot; 
+  m_curPos.x += dx;
+  m_curPos.y += dy;
+  m_pCompass->getHeadingDeg((float *)&m_curPos.h);
 	
 	/*
 	Matrix state(3,1);
@@ -272,95 +274,6 @@ avcPosition::updateState(short lastThrottleSetPoint) {
 	*/
 	 
 }
-
-
-/////////////////////////////////////////////////////////////////////////////
-
-void
-avcPosition::recordGPSPoint(void) {
-
-	long unsigned int curTime, timeElapsed;
-	aIO_GetMSTicks(m_ioRef, &curTime, NULL);
-	
-	timeElapsed = curTime - m_gpsClock;
-	
-	if(timeElapsed > 2000 ) {//&& getGPSQuality()) {
-	
-        float curLat= 0.0f, curLon= 0.0f, curHed = 0.0f;
-		
-        m_gps->getPosition(&curLon, &curLat, &curHed);
-		
-		fprintf(gps_track, "%3.12f, %2.12f, %3.1f\n", 
-						curLon, curLat, curHed);
-		fflush(gps_track);
-		
-    // Store the reading for the next time around
-		m_gpsClock = curTime;
-		
-	}
-}
-
-
-bool 
-avcPosition::getGPSQuality(void) {
-
-  unsigned long value = 0;
-  //value = aGPM_GetGPSQuality(m_pStem);
-  value = m_gps->getQuality();
-
-  m_logger->log(INFO, "GPS HDOP value: %ld", value);
-  
-	return ( value > 5000 ? false : true);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-double 
-avcPosition::getGPSLongitude(void)
-{
-
-	//We're in the western hemisphere, so we'll have a negative longitude.
-	float longitude=0.0, latitude=0.0, heading=0.0;
-  //retVal = (double)(aGPM_GetLongitudeDegrees(m_pStem));
-  //r/etVal += (double)(aGPM_GetLongitudeMinutes(m_pStem)) / 60.0;
-  //retVal += (double)(aGPM_GetLongitudeFrac(m_pStem)) / 600000.0;
-  
-  m_gps->getPosition(&longitude, &latitude, &heading);
-	
-	return (double)longitude * -1.0;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-double 
-avcPosition::getGPSLatitude(void)
-{
-	float longitude=0.0, latitude=0.0, heading=0.0;
-  //retVal = aGPM_GetLatitudeDegrees(m_pStem);
-  //retVal += (double)(aGPM_GetLatitudeMinutes(m_pStem)) / 60.0;
-  //retVal += (double)(aGPM_GetLatitudeFrac(m_pStem)) / 600000.0;
-  m_gps->getPosition(&longitude, &latitude, &heading);
-	return (double) latitude;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Compass wrapper class for whatever widget we are using.
-
-double
-avcPosition::getHeading(void) {
-	
-  double retVal=0.0;
-	float headingDeg=0.0f;
-  if(0 != m_pCompass->getHeadingDeg(&headingDeg)){
-    m_logger->log(ERROR, "%s: Error getting current heading", __FUNCTION__);
-  	return 0.0;
-  }
-  
-  retVal = (double) headingDeg;
-	return retVal;
-}
-
 
 /////////////////////////////////////////////////////////////////////////////
 

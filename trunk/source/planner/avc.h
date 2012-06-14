@@ -58,7 +58,14 @@
 //#define METER_PER_TICK	0.04358f // 0.47244 meters/rev divided by 10.84 ticks/rev
 #define METER_PER_TICK 0.0010860502f // 6.09600/5613 //meters/ticks
 
+#define aKEY_GPS_PORTNAME "gps_portname"
+#define GPS_PORTNAME "dev/ttyS0"
 
+#define aKEY_GPS_BAUDRATE "gps_baudrate"
+#define GPS_BAUDRATE 57600
+
+#define aKEY_MAKE_RECORD "do_logs"
+#define MAKE_RECORD aTrue
 
 //cubic curve for servo setpoints > 128
 // pconst + x * pa1 + x^2 * pa2 + x^3 * pa3

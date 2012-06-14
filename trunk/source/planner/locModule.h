@@ -17,8 +17,6 @@
 
 #include "accelerometer.h"
 
-#define aUSE_GPS
-
 class avcPosition 
 {
 public: 
@@ -62,8 +60,6 @@ public:
 		
 	~avcPosition(void) 
 	{
-		fputs ("</trkseg></trk></gpx>", gps_track);
-		fclose(gps_track);
 		
 		aErr e;
 		if (aIO_ReleaseLibRef(m_ioRef, &e))
@@ -72,6 +68,7 @@ public:
     free(m_pCompass);
     free(m_pAccelThread);
     free(m_pAccel);
+
 	};
 	
 	//We need a valid link to the stem network here. 
@@ -79,11 +76,7 @@ public:
 	aErr init(acpStem* Stem, aSettingFileRef setting, avcWaypointVector firstMapPoint);
 	
 	//does an EKF state update.
-	void updateState(short lastThrottleSetPoint);
-	
-	bool getGPSQuality(void);
-	
-	void recordGPSPoint(void);
+    void updateState();
 	
 	//return the current robot position.
 	avcStateVector getPosition(void) { return m_curPos; }
@@ -95,8 +88,7 @@ public:
     m_curPos.h = newPos.state.h; 
   }
   
-  // gps member class
-  gps* m_gps;
+
 	
 
 #ifdef aDEBUG_FLOC
@@ -107,7 +99,9 @@ private:
 	acpStem* m_pStem;
 	aIOLib m_ioRef;
 	logger* m_logger;
-	FILE* gps_track;
+    // gps member object (singleton)
+    gps* m_pGPS;
+
 	//We'll use this time reading to get GPS updates.	
 	int m_curGPSTimeSec;
 	//Millisecond timing for motion update.
@@ -129,15 +123,6 @@ private:
 	//Our controller owns this we'll let them delete.	
 	aSettingFileRef m_settings;
 	
-	int getGPSTimeSec(void);
-	
-	//longitude and latitude are in degrees...
-	//Boulder is pretty close to -105 degrees longitude, and 40 degrees latitude.
-	//We're using double precision number here so we'll compact minutes into 
-	//fractional degrees.
-	double getGPSLongitude(void);
-	double getGPSLatitude(void);
-	double getHeading(void);
 	bool getEncoderValue(int *pValue);
 	double getSteeringAngleRad(void);
   int getMotorSetPoint(void);
