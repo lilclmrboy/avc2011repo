@@ -1,4 +1,5 @@
 #include "accelerometer.h"
+#include "LSM303DLM.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -23,6 +24,7 @@ int avcAccelerometer::init(){
 
 /////////////////////////////////////////////////////////////////////////////
 // get all three axes reading
+#if 0
 int avcAccelerometer::getAccelerometerReadings(float *x, float *y, float *z){
   // Check the pointers
   if(!x || !y || !z){
@@ -33,6 +35,7 @@ int avcAccelerometer::getAccelerometerReadings(float *x, float *y, float *z){
   m_logger->log(INFO, "%s: not supported by compass type %d", __FUNCTION__, kAccelerometer_none);
   return -1;
 }
+#endif
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -92,15 +95,17 @@ int avcAccelerometerThread::getAverageAccerlerometerMeasurements(double *x, doub
   *y = m_currentCumulativeAverage.y;
   *z = m_currentCumulativeAverage.z;
   
+  m_logger->log(DEBUG,"clearing counter at %d", m_readingCounter);
   // reset the readings
-  //m_currentCumulativeAverage.x = 0.0;
-  //m_currentCumulativeAverage.y = 0.0;
-  //m_currentCumulativeAverage.z = 0.0;
-  // since we're computing the cumulative average directly, we just have to reset the counter
+  m_currentCumulativeAverage.x = 0.0;
+  m_currentCumulativeAverage.y = 0.0;
+  m_currentCumulativeAverage.z = 0.0;
   m_readingCounter=0;
   
   // release the loc
   m_accelReadingLock->unlock();
+  
+
   
   return 0;
 }
@@ -147,14 +152,14 @@ int avcAccelerometerThread::makeNewMeasurement(void){
   m_accelReadingLock->lock();
   
   //update the cumulative average
-  //m_currentCumulativeAverage.x += ((double)newX - m_currentCumulativeAverage.x) / (double)(m_readingCounter+1);
-  //m_currentCumulativeAverage.y += ((double)newY - m_currentCumulativeAverage.y) / (double)(m_readingCounter+1);
-  //m_currentCumulativeAverage.z += ((double)newZ - m_currentCumulativeAverage.z) / (double)(m_readingCounter+1);
+  m_currentCumulativeAverage.x += ((double)newX - m_currentCumulativeAverage.x) / (double)(m_readingCounter+1);
+  m_currentCumulativeAverage.y += ((double)newY - m_currentCumulativeAverage.y) / (double)(m_readingCounter+1);
+  m_currentCumulativeAverage.z += ((double)newZ - m_currentCumulativeAverage.z) / (double)(m_readingCounter+1);
   
   //do the cumulative average with a multiply so we can simply reset the counter to clear the averaging
-  m_currentCumulativeAverage.x += ((double)newX + (double)m_readingCounter * m_currentCumulativeAverage.x) / (double)(m_readingCounter+1);
-  m_currentCumulativeAverage.y += ((double)newY + (double)m_readingCounter * m_currentCumulativeAverage.y) / (double)(m_readingCounter+1);
-  m_currentCumulativeAverage.z += ((double)newZ + (double)m_readingCounter * m_currentCumulativeAverage.z) / (double)(m_readingCounter+1);
+  //m_currentCumulativeAverage.x += ((double)newX + (double)m_readingCounter * m_currentCumulativeAverage.x) / (double)(m_readingCounter+1);
+  //m_currentCumulativeAverage.y += ((double)newY + (double)m_readingCounter * m_currentCumulativeAverage.y) / (double)(m_readingCounter+1);
+  //m_currentCumulativeAverage.z += ((double)newZ + (double)m_readingCounter * m_currentCumulativeAverage.z) / (double)(m_readingCounter+1);
   m_readingCounter++;
   
   // release the lock
@@ -215,12 +220,12 @@ int main(int argc, const char* argv[]) {
   avcAccelerometer *accelerometer;
   avcAccelerometerThread *accelThread;
   
-#if 1
+#if 0
   
   ///////////////////
   printf("\n\nRunning the LSM303DLM accelerometer test\n");
  
-  accelerometer = new accelerometerLSM303DLM(&stem, &settings);
+  accelerometer = new LSM303DLM(&stem, &settings);
   accelerometer->init();
   accelThread = new avcAccelerometerThread(accelerometer);
   
@@ -228,16 +233,17 @@ int main(int argc, const char* argv[]) {
   //while(1){
     float accx=0, accy=0, accz=0;
     accelerometer->getAccelerometerReadings(&accx, &accy, &accz);
-    log->log(INFO, "accel x,y,z: %3.2f\t%3.2f\t%3.2f", accx, accy, accz);
+    log->log(INFO, "accel x,y,z:\t\t %3.2f\t%3.2f\t%3.2f", accx, accy, accz);
     
     double avgAccx=0, avgAccy=0, avgAccz=0;
     accelThread->getAverageAccerlerometerMeasurements(&avgAccx, &avgAccy, &avgAccz);
-    log->log(INFO, "avg accel x,y,z: %3.2f\t%3.2f\t%3.2f", avgAccx, avgAccy, avgAccz);
+    log->log(INFO, "avg accel x,y,z:\t %3.2f\t%3.2f\t%3.2f", avgAccx, avgAccy, avgAccz);
     
-    stem.sleep(100);
+    stem.sleep(5000);
   }
 
   free(accelerometer);
+  free(accelThread);
   
 #else
  
@@ -246,6 +252,7 @@ int main(int argc, const char* argv[]) {
   
   accelerometer = new accelerometerADXL335(&stem, &settings);
   accelerometer->init();
+  accelThread = new avcAccelerometerThread(accelerometer);
   
   for (int i=0; i<100; i++){
     //while(1){
@@ -253,7 +260,11 @@ int main(int argc, const char* argv[]) {
     accelerometer->getAccelerometerReadings(&accx, &accy, &accz);
     log->log(INFO, "accel x,y,z: %3.2f\t%3.2f\t%3.2f", accx, accy, accz);
     
-    stem.sleep(5);
+    double avgAccx=0, avgAccy=0, avgAccz=0;
+    accelThread->getAverageAccerlerometerMeasurements(&avgAccx, &avgAccy, &avgAccz);
+    log->log(INFO, "avg accel x,y,z:\t %3.2f\t%3.2f\t%3.2f", avgAccx, avgAccy, avgAccz);
+    
+    stem.sleep(5000);
   }
   
   free(accelerometer);

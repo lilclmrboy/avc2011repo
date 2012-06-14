@@ -1,7 +1,4 @@
-#include "avc.h"
-#include "compass.h"
-#include "accelerometer.h"
-#include <math.h>
+#include "LSM303DLM.h"
 
 #define DEG_TO_RAD (aPI/180)
 #define RAD_TO_DEG (180/aPI)
@@ -55,10 +52,15 @@ int g_beenInitialized=0;
 
 /////////////////////////////////////////////////////////////////////////////
 // Constructor that calls parent constructor
-compassLSM303DLM::compassLSM303DLM(acpStem *pStem, aSettingFileRef settings)
-	: avcCompass(pStem, settings)
+LSM303DLM::LSM303DLM(acpStem *pStem, aSettingFileRef settings)
+	: avcCompass(pStem, settings),
+		avcAccelerometer(pStem, settings)
 {
-	m_compassHwType = kCompass_LSM303DLM;
+	m_logger = logger::getInstance();
+  m_pStem = pStem;
+  
+  m_compassHwType = kCompass_LSM303DLM;
+  m_accelerometerHwType = kAccelerometer_LSM303DLM;
   //g_beenInitialized = 0; // moved to global (static)
   
   // set the compass calibration values
@@ -73,12 +75,12 @@ compassLSM303DLM::compassLSM303DLM(acpStem *pStem, aSettingFileRef settings)
 
 /////////////////////////////////////////////////////////////////////////////
 // Default deconstructor
-compassLSM303DLM::~compassLSM303DLM(){
+LSM303DLM::~LSM303DLM(){
 }
 
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLM::init(){
+int LSM303DLM::init(){
   // setup the various control registers
   aUInt8 reg_buffer[2];
   aPacketRef regPacket;
@@ -149,7 +151,7 @@ int compassLSM303DLM::init(){
 }
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLM::getMagnetometerReadings(int *x, int *y, int *z){
+int LSM303DLM::getMagnetometerReadings(int *x, int *y, int *z){
   // check the points
   if(!x || !y || !z){
     m_logger->log(ERROR, "%s: null pointer passed in", __FUNCTION__);
@@ -171,7 +173,7 @@ int compassLSM303DLM::getMagnetometerReadings(int *x, int *y, int *z){
 }
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLM::getHeadingDeg(float *headingDeg){
+int LSM303DLM::getHeadingDeg(float *headingDeg){
   // check pointer
   if(!headingDeg)
 		return -1;
@@ -203,7 +205,7 @@ int compassLSM303DLM::getHeadingDeg(float *headingDeg){
 
 /////////////////////////////////////////////////////////////////////////////
 // read the accelarometer values
-int compassLSM303DLM::getAccelerometerReadings(float *accX, float *accY, float *accZ){
+int LSM303DLM::getAccelerometerReadings(float *accX, float *accY, float *accZ){
   // check the pointers
   if(!accX || !accY || !accZ){
     m_logger->log(ERROR, "%s: null pointer passed in", __FUNCTION__);
@@ -240,7 +242,7 @@ int compassLSM303DLM::getAccelerometerReadings(float *accX, float *accY, float *
 // horizontal plane. The chipOrientationV vector is projected into the horizontal
 // plane and the angle between the projected vector and north is
 // returned.
-int compassLSM303DLM::calculateHeadingDeg(vector3D magV, float *headingDeg){
+int LSM303DLM::calculateHeadingDeg(vector3D magV, float *headingDeg){
   if(!headingDeg)
     return -1;
   
@@ -277,7 +279,7 @@ int compassLSM303DLM::calculateHeadingDeg(vector3D magV, float *headingDeg){
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void compassLSM303DLM::normalizeVector3D(vector3D *vec){
+void LSM303DLM::normalizeVector3D(vector3D *vec){
   double mag = sqrt(dotProductVector3D(vec, vec));
   if(fabs(mag) < 1e-9){
     m_logger->log(ERROR, "%s: magnitude is quite small: %3.2e", __FUNCTION__, mag);
@@ -288,14 +290,14 @@ void compassLSM303DLM::normalizeVector3D(vector3D *vec){
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void compassLSM303DLM::crossProductVector3D(const vector3D *a, const vector3D *b, vector3D *result){
+void LSM303DLM::crossProductVector3D(const vector3D *a, const vector3D *b, vector3D *result){
   result->x = a->y*b->z - a->z*b->y;
   result->y = a->z*b->x - a->x*b->z;
   result->z = a->x*b->y - a->y*b->x;
 }
 
 /////////////////////////////////////////////////////////////////////////////
-double compassLSM303DLM::dotProductVector3D(const vector3D *a, const vector3D *b){
+double LSM303DLM::dotProductVector3D(const vector3D *a, const vector3D *b){
   return a->x*b->x + a->y*b->y + a->z*b->z;
 }
 
@@ -303,7 +305,7 @@ double compassLSM303DLM::dotProductVector3D(const vector3D *a, const vector3D *b
 
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLM::readTwoByteTwosComplimentLittleEndian(unsigned int firstReg, int *reading){
+int LSM303DLM::readTwoByteTwosComplimentLittleEndian(unsigned int firstReg, int *reading){
 	// Check the passed pointer
   if(!reading)
     throw -1;
@@ -344,7 +346,7 @@ int compassLSM303DLM::readTwoByteTwosComplimentLittleEndian(unsigned int firstRe
 }
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLM::readTwoByteTwosComplimentBigEndian(unsigned int firstReg, int *reading){
+int LSM303DLM::readTwoByteTwosComplimentBigEndian(unsigned int firstReg, int *reading){
 	// Check the passed pointer
   if(!reading)
     throw -1;
@@ -381,7 +383,7 @@ int compassLSM303DLM::readTwoByteTwosComplimentBigEndian(unsigned int firstReg, 
 
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLM::getMagneticX(int *x){
+int LSM303DLM::getMagneticX(int *x){
   // check pointers
   if(!x)
 		throw -1;
@@ -399,7 +401,7 @@ int compassLSM303DLM::getMagneticX(int *x){
 
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLM::getMagneticY(int *y){
+int LSM303DLM::getMagneticY(int *y){
   // check pointers
   if(!y)
 		throw -1;
@@ -416,7 +418,7 @@ int compassLSM303DLM::getMagneticY(int *y){
 
 
 /////////////////////////////////////////////////////////////////////////////
-int compassLSM303DLM::getMagneticZ(int *z){
+int LSM303DLM::getMagneticZ(int *z){
   // check pointers
   if(!z)
 		throw -1;
@@ -429,25 +431,5 @@ int compassLSM303DLM::getMagneticZ(int *z){
   
   return 0;
 }
-
-
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
-// Accelerometer stuff
-/////////////////////////////////////////////////////////////////////////////
-accelerometerLSM303DLM::accelerometerLSM303DLM (acpStem *pStem, aSettingFileRef settings)
-: avcAccelerometer(pStem, settings)
-{
-	m_accelerometerHwType = kAccelerometer_LSM303DLM;
-  
-}
-/////////////////////////////////////////////////////////////////////////////  
-accelerometerLSM303DLM::~accelerometerLSM303DLM(){};
-
-
-  
-  
-  
 
 

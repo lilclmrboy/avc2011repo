@@ -10,9 +10,13 @@
 #include "avc.h"
 #include "mat_math.h"
 #include "compass.h"
+#include "LSM303DLM.h"
+
 #include "motModule.h"
 #include "gps.h"
+
 #include "accelerometer.h"
+//#include "LSM303DLM.h" // done above
 
 #define aUSE_GPS
 
@@ -66,7 +70,9 @@ public:
 		if (aIO_ReleaseLibRef(m_ioRef, &e))
  	     		throw acpException(e, "unable to destroy IO lib");	
     
-    free(m_compass);
+    free(m_pCompass);
+    free(m_pAccelThread);
+    free(m_pAccel);
 	};
 	
 	//We need a valid link to the stem network here. 
@@ -113,13 +119,13 @@ private:
 	Matrix m_P;
 	Matrix m_Q;
 	Matrix m_W;	
-	int m_Encoder;
+	long m_Encoder;
 	double m_metersPerTick; //encoder ticks per revolution.
   double m_wheelBase;
   
-  avcCompass *m_compass;
-  avcAccelerometer *m_accel;
-  avcAccelerometerThread *m_accelThread;
+  avcCompass *m_pCompass;
+  avcAccelerometer *m_pAccel;
+  avcAccelerometerThread *m_pAccelThread;
 
 	//Our controller owns this we'll let them delete.	
 	aSettingFileRef m_settings;

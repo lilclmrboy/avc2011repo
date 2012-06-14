@@ -250,7 +250,7 @@ avcController::run(void) {
 
       if(bNotStarted) {
         //Record a gps point
-        m_pos.recordGPSPoint();
+        //m_pos.recordGPSPoint();
       }
 
       extraDelay = (int) random() % 1000;
