@@ -46,7 +46,7 @@ int gyroL3G4200D::init(){
 }
 
 /////////////////////////////////////////////////////////////////////////////
-int gyroL3G4200D::gyroL3G4200DreadTwoByteTwosCompliment(unsigned int firstReg, int *reading){
+int gyroL3G4200D::gyroL3G4200DreadTwoByteTwosCompliment(unsigned char firstReg, int *reading){
   // Check the passed pointer
   if(!reading)
     return -1;
@@ -55,9 +55,9 @@ int gyroL3G4200D::gyroL3G4200DreadTwoByteTwosCompliment(unsigned int firstReg, i
   aUInt8 read_buffer[2]={0,0};
   // assert the MSB of the address to get the gyro 
 	// to do slave-transmit register auto-increment
-  aUInt8 reg_buffer[1] = {firstReg | (1 << 7)};
+  aUInt8 reg_buffer = firstReg | (1 << 7);
   
-  aPacketRef regPacket = m_pStem->createPacket(L3G4200D_IIC_ADDR, 1, reg_buffer);
+  aPacketRef regPacket = m_pStem->createPacket(L3G4200D_IIC_ADDR, 1, &reg_buffer);
   m_pStem->sendPacket(regPacket);
   m_pStem->IIC_RD(aUSBSTEM_MODULE, L3G4200D_IIC_ADDR+1, 2, read_buffer);
   

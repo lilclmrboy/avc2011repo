@@ -47,7 +47,6 @@
 #include "locModule.h"
 #include "planner.h"
 #include "logger.h"
-#include "aCmd.tea"
 #include "a40PinStem.h"
 #include "avcDefs.tea"
 #include "avcStructs.h"

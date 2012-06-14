@@ -79,9 +79,9 @@ int compassCMPS10::readTwoByteTwosCompliment(unsigned int firstReg, int *reading
   
   short ret_value = 0;
   aUInt8 read_buffer[2]={0,0};
-  aUInt8 reg_buffer[1] = {firstReg};
+  aUInt8 reg_buffer = firstReg;
   
-  aPacketRef regPacket = m_pStem->createPacket(CMPS10_IIC_ADDR, 1, reg_buffer);
+  aPacketRef regPacket = m_pStem->createPacket(CMPS10_IIC_ADDR, 1, &reg_buffer);
   m_pStem->sendPacket(regPacket);
   m_pStem->IIC_RD(aUSBSTEM_MODULE, CMPS10_IIC_ADDR+1, 2, read_buffer);
   
