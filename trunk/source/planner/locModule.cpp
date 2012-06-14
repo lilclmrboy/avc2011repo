@@ -361,11 +361,57 @@ avcPosition::getHeading(void) {
 
 
 /////////////////////////////////////////////////////////////////////////////
-int 
-avcPosition::getEncoderValue(void) {
+bool 
+avcPosition::getEncoderValue(long int *pValue) {
+	
+	int value = 0;
+  aUInt8 data[2] = {cmdMO_ENC32, channel};
+  aPacketRef p = createPacket(module, 2, data);
+	int nAttemptsReadMax = 250;
+	int nAttemptsWriteMax = 5;
+	bool bValueGood = false;
+	
+	// Check the pointer is valid
+	if (pValue == NULL) {
+		return false;
+	}
+	
+	// Otherwise we get to send off the read request
+	do {
+		// Send the request to the Moto
+		m_pThread->sendMessage(new acpSendPacketMessage(m_stemRef, p), true);
+		
+		// Begin polling over and over for the encoder 32 value
+		do {
+			
+			// Delay
+			aIO_MSSleep(m_ioRef, 1, NULL);
+			
+			// await the response packet
+			acpPacket* pPacket = peekPacket(module, cmdMO_ENC32);
+			if (pPacket) {
+				const aUInt8* pData = pPacket->getData();
+				value = aUtil_RetrieveInt((const char*)&pData[2]);
+				delete pPacket;
+				
+				// Value is good and get out of here
+				bValueGood = true;
+				
+				break;
+			}
+		
+		} while (nAttemptsReadMax--);
+		
+		
+	} while (!bValueGood && nAttemptsWriteMax--);
+	
+	// Store the value
+	*pValue = value;
+
+	return bValueGood;
 	
   //We could do more here to check for encoder wrap.
-  return m_pStem->MO_ENC32(aMOTO_MODULE, ENCODER_IDX);
+  //return m_pStem->MO_ENC32(aMOTO_MODULE, ENCODER_IDX);
   
 }
 
