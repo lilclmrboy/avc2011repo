@@ -14,14 +14,14 @@ avcPosition::init(acpStem* pStem,
 	m_pStem = pStem;
 	m_settings = settings;
 	m_logger = logger::getInstance();	
-  m_compass = new compassLSM303DLM(m_pStem, m_settings);
-  m_compass->init();
+  m_pCompass = new LSM303DLM(m_pStem, m_settings);
+  m_pCompass->init();
 	aErr e = aErrNone;
   
   // make an accelerometer class and start a thread for the EKF
-  m_accel = new accelerometerLSM303DLM(m_pStem, m_settings);
-  m_accel->init();
-  m_accelThread = new avcAccelerometerThread(m_accel);
+  m_pAccel = new accelerometerADXL335(m_pStem, m_settings);
+  m_pAccel->init();
+  m_pAccelThread = new avcAccelerometerThread(m_pAccel);
 
 	char buffer[100];
 	time_t rawtime;
@@ -66,7 +66,7 @@ avcPosition::init(acpStem* pStem,
   // Set the first position waypoint that we passed in
   setPosition(firstMapPoint);
 
-#ifdef aUSE_GPS	
+
 	if (m_pStem && m_pStem->isConnected()) {
 		
 		//Set current time.	
@@ -76,14 +76,16 @@ avcPosition::init(acpStem* pStem,
 		m_pStem->MO_ENC32(aMOTO_MODULE, ENCODER_IDX, 0);
 		m_Encoder = 0;
 		
+//#ifdef aUSE_GPS
+#if 0
 		/*lets do some initialization. First we need to find out
 		* whether we have a good GPS signal. If we do, we'll init
 		* our starting position from the GPS position information
 		* else we'll assume we're at the 0,0,0 position.	
 	  */
     
-    m_gps = gps::getInstance();
-    m_gps->init("ttyUSB1", 57600);
+    //m_gps = gps::getInstance();
+    //m_gps->init("ttyUSB1", 57600);
 		int timeout = 0;
 		bool haveGPS = false;
 		while (!(haveGPS = getGPSQuality()) && timeout < aGPS_LOCK_STEPS) {
@@ -102,7 +104,7 @@ avcPosition::init(acpStem* pStem,
 	
     } //else the default initilization of the state vector
 			//and probability matrix is zero'd.
-
+#endif
 
     //Initialize the Variance matrix Q.
     //1 meter x and y, and 1 degree heading.
@@ -123,7 +125,6 @@ avcPosition::init(acpStem* pStem,
 	else {
 		return aErrConnection;
 	}
-#endif
 	
 	return aErrNone;
 	
@@ -349,7 +350,7 @@ avcPosition::getHeading(void) {
 	
   double retVal=0.0;
 	float headingDeg=0.0f;
-  if(0 != m_compass->getHeadingDeg(&headingDeg)){
+  if(0 != m_pCompass->getHeadingDeg(&headingDeg)){
     m_logger->log(ERROR, "%s: Error getting current heading", __FUNCTION__);
   	return 0.0;
   }

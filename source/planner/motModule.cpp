@@ -259,7 +259,6 @@ avcMotion::updateControl(const avcForceVector& potential)
                __FUNCTION__, n, m_setpointHistory[n]);
   }
 
-  m_log->log(DEBUG,"here4");
   // Divide the addition of the values by the history window
   // Cast it and roundn it.
   servoSteer = (aUInt8) ((float)setpointCumulative / (float) aMOTMODULE_HISTORY_WINDOW);

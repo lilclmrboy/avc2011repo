@@ -46,52 +46,6 @@ protected:
 };
 
 
-class compassLSM303DLM : public avcCompass {
-public:
-  compassLSM303DLM(acpStem *pStem, aSettingFileRef settings);
-  ~compassLSM303DLM(void);
-  int init();
-  int getHeadingDeg(float *heading);
-  int getMagnetometerReadings(int *x, int *y, int *z);
-  
-  friend class accelerometerLSM303DLM;
-  
-private:
-  typedef struct vector3D{
-    double x, y, z;
-    
-    vector3D (double newx, double newy, double newz){
-      x = newx;
-      y = newy;
-      z = newz;
-    }
-    
-    vector3D (void){x=0; y=0; z=0;}
-    
-  } vector3D;
-  
-  int readTwoByteTwosComplimentLittleEndian(unsigned int firstReg, int *reading);
-  int readTwoByteTwosComplimentBigEndian(unsigned int firstReg, int *reading);
-  int getMagneticX(int *x);
-  int getMagneticY(int *y);
-  int getMagneticZ(int *z);
-  int getAccelerometerReadings(float *accX, float *accY, float *accZ); // this should be moved to the accelerometer class
-  
-  int calculateHeadingDeg(vector3D magV, float *headingDeg);
-    
-  // store the initial accelerometer readings so they can be used in
-  // heading calculation
-  vector3D m_initalAccelerometerReadings;
-  vector3D m_compassCalMin;
-  vector3D m_compassCalMax;
-  
-  // vector helper functions
-  void normalizeVector3D(vector3D *vec);
-  void crossProductVector3D(const vector3D *a, const vector3D *b, vector3D *result);
-  double dotProductVector3D(const vector3D *a, const vector3D *b);
-  
-};
-
 
 class compassCMPS10 : public avcCompass {
 public:
