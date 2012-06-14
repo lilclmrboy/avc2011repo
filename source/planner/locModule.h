@@ -138,7 +138,7 @@ private:
 	double getGPSLongitude(void);
 	double getGPSLatitude(void);
 	double getHeading(void);
-	int getEncoderValue(void);
+	bool getEncoderValue(long int *pValue);
 	double getSteeringAngleRad(void);
   int getMotorSetPoint(void);
   int getAccelerometerReadings (float *ddx, float *ddy, float *ddz);
