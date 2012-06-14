@@ -34,6 +34,7 @@ aErr gps::init(const acpString& port, const int baudrate) {
             m_log->log(ERROR, "Error creating serial stream %d", e);
         m_bInit = true;
     }
+
     return e;
 }
 
