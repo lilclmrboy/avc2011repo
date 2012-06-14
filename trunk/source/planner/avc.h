@@ -55,7 +55,10 @@
 #define WHEEL_BASE 0.3302f
 
 #define KEY_METER_PER_TICK "meter_per_tick"
-#define METER_PER_TICK	0.04358f // 0.47244 meters/rev divided by 10.84 ticks/rev
+//#define METER_PER_TICK	0.04358f // 0.47244 meters/rev divided by 10.84 ticks/rev
+#define METER_PER_TICK 0.0010860502f // 6.09600/5613 //meters/ticks
+
+
 
 //cubic curve for servo setpoints > 128
 // pconst + x * pa1 + x^2 * pa2 + x^3 * pa3
