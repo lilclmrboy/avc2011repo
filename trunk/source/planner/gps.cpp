@@ -54,7 +54,7 @@ aErr gps::getPosition(float *lon, float* lat, float* heading) {
 unsigned int gps::getQuality(){
   unsigned long hdop = m_gps.hdop();
 
-  m_log->log(DEBUG, "HDOP from gps: %f", hdop / 0.0f);
+  m_log->log(DEBUG, "HDOP from gps: %f", hdop / 100.0f);
 
   // No valid sentences, or HDOP > 10.0
   if (hdop == TinyGPS::GPS_INVALID_HDOP || hdop > 1000)
