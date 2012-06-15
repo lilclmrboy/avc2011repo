@@ -22,9 +22,9 @@ avcPosition::init(acpStem* pStem,
   m_pCompass->init();
 
   // make an accelerometer class and start a thread for the EKF
-  //m_pAccel = new accelerometerADXL335(m_pStem, m_settings);
-  //m_pAccel->init();
-  //m_pAccelThread = new avcAccelerometerThread(m_pAccel);
+  m_pAccel = new accelerometerADXL335(m_pStem, m_settings);
+  m_pAccel->init();
+  m_pAccelThread = new avcAccelerometerThread(m_pAccel);
 
 
 	
@@ -140,9 +140,110 @@ avcPosition::init(acpStem* pStem,
 }
 
 /////////////////////////////////////////////////////////////////////////////
-
 void 
-avcPosition::updateState() {
+avcPosition::updateState(){
+	_updateStateWithDeadReckoningAccelEncoder();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+void 
+avcPosition::_updateStateWithDeadReckoningAccelEncoder() {
+  //some statics for use in dead reckoning; these might be moved to the class
+  static double integralAccelerationX=0.0, integralAccelerationY=0.0, integralAccelerationZ=0.0;
+  //static double accelVelocityX=0.0, accelVelocityY=0.0, accelVelocityZ=0.0;
+  static double accelLocationX=m_curPos.x, accelLocationY=m_curPos.y, accelLocationZ=0.0;
+  static unsigned int integrationCount=0;
+  
+  double encoder_dx=0.0, encoder_dy=0.0, encoder_vx=0.0, encoder_vy=0.0;
+  double fDistRolled=0.0, fVelocity=0.0;
+  
+  // get the change in time
+  long unsigned int curClock;
+	aIO_GetMSTicks(m_ioRef, &curClock, NULL);
+	long unsigned int ticksElapsed = (curClock - m_curClock);
+  double tmElapsed = ticksElapsed/1000.0;
+  
+  // get new encoder
+  int curEnc = 0;
+  if(!getEncoderValue(&curEnc)) {
+		m_logger->log(ERROR, "%s: Encoder reading is fuct.", __FUNCTION__);
+  }
+  else {
+    // calculate position change based on encoder
+    fDistRolled =  m_metersPerTick * (double)(curEnc - m_Encoder);
+    
+    m_logger->log(INFO, "Encoder fDistRolled (m): %lf (tick/time=%d/%lf)", fDistRolled, (curEnc - m_Encoder), tmElapsed);
+    
+    // move the encoder distances into real-world frame using the previous bot heading
+    encoder_dx = sin(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLON_PER_METER;
+    encoder_dy = cos(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLAT_PER_METER;
+    encoder_vx = sin(m_curPos.h * DEG_TO_RAD)* fVelocity * aLON_PER_METER;
+    encoder_vy = cos(m_curPos.h * DEG_TO_RAD)* fVelocity * aLAT_PER_METER;
+    
+  } // endif getEncoderValue
+  
+  // grab the new compass heading
+  // grab the current heading to enable observation of the change in heading
+  float currentHeading = 0.0;
+  if(0 != m_pCompass->getHeadingDeg(&currentHeading)){
+    m_logger->log(ERROR, "%s: Couldn't get new compass heading", __FUNCTION__);
+  }
+  
+  // Store current readings (for the next predict phase)
+  m_curPos.x += encoder_dx;
+  m_curPos.y += encoder_dy;
+  m_curPos.h = currentHeading;
+  m_Encoder= curEnc;
+  m_curClock = curClock;
+  m_lastDistanceTraveled = fDistRolled;
+  
+  
+  //////////////////////////////////////////////
+  // pull in the accel data too
+  //////////////////////////////////////////////
+  double accelDeadReckoningScale = 0.0; // 1.0/2.5;
+  if(accelDeadReckoningScale > 0.0){
+    // grab the average accelerometer data
+    double accX=0.0, accY=0.0, accZ=0.0;
+    m_pAccelThread->getAverageAccerlerometerMeasurements(&accX, &accY, &accZ); // in bot frame
+    
+    // integrate current acceleration to velocity estimate and transform into real-world frame
+    integralAccelerationX += tmElapsed * accX * sin(m_curPos.h * DEG_TO_RAD);
+    integralAccelerationY += tmElapsed * accY * cos(m_curPos.h * DEG_TO_RAD);
+    integralAccelerationZ += tmElapsed * accZ;
+
+    // integrate previous velocity to new position
+    accelLocationX += tmElapsed * integralAccelerationX;
+    accelLocationY += tmElapsed * integralAccelerationY;
+    accelLocationZ += tmElapsed * integralAccelerationZ;
+    integrationCount++;
+    
+    // after a few cycles of dead reckoning with just the encoder,
+    // calculate the difference in the accel-based and encoder-based position in bot-frame
+    // do a weighted average of the two position estimates
+    if(integrationCount > 5){
+      double positionErrorX = accelLocationX - m_curPos.x;
+      double positionErrorY = accelLocationY - m_curPos.y;
+      m_logger->log(INFO, "Updating location based on accel errors: %lf, %lf", positionErrorX, positionErrorY);
+      
+      // weight the accel-based position with the encoder-based
+      m_curPos.x += accelDeadReckoningScale * positionErrorX;
+      m_curPos.y += accelDeadReckoningScale * positionErrorY;
+      
+      // reset the accel based location
+      accelLocationX = m_curPos.x;
+      accelLocationY = m_curPos.y;
+      
+      integrationCount=0; 
+    }
+	}
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+void 
+avcPosition::_updateStateWithGpsEkf() {
 	
 	// Grab the clock. Use the aIO verison, clock is not accurate when 
 	// we have stem processes running

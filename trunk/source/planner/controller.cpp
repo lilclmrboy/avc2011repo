@@ -208,7 +208,7 @@ avcController::run(void) {
       }
       m_log->log(INFO, "starting log: %s", buffer);
 
-      fprintf(locPlanTrackFile, "Long\tLat\tDistRolled\tHeading\tTargetLong\tTargetLat\tDistToNextPoint\tHeadingToNextPointRad\n");
+      fprintf(locPlanTrackFile, "Long\tLat\tDistRolled\tHeading\tCompassHeading\tTargetLong\tTargetLat\tDistToNextPoint\tHeadingToNextPointRad\n");
       fflush(locPlanTrackFile);
 
 #ifdef aUSE_GPS
@@ -338,22 +338,24 @@ avcController::run(void) {
       //make plotable log entry
       if (doRecord) {
         avcStateVector tempPos = m_pos.getPosition();
+        double compassHeading = m_pos.getCompassHeading(); 
         double lastDistanceRolled = m_pos.getLastDistanceTraveled();
         avcWaypointVector tempTarget = m_planner.getNextMapPoint();
         // distance to point and heading to point
         double tempHeadingToNextPointRad = m_planner.getHeadingToNextPointRad() ; 
         double tempDistanceToNextPoint = m_planner.getDistanceToNextPoint();
         
-        m_log->log(DEBUG, "Plot: %f,%f,%f,%f,%f,%f,%f", tempPos.x, tempPos.y, tempPos.h, tempTarget.state.x, tempTarget.state.y, tempDistanceToNextPoint, tempHeadingToNextPointRad*RAD_TO_DEG);
-        fprintf(locPlanTrackFile, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
+        m_log->log(DEBUG, "Plot: %f,%f,%f,%f,%f,%f,%f,%f", tempPos.x, tempPos.y, tempPos.h, compassHeading, tempTarget.state.x, tempTarget.state.y, tempDistanceToNextPoint, tempHeadingToNextPointRad*RAD_TO_DEG);
+        fprintf(locPlanTrackFile, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
                 tempPos.x/aLON_PER_METER, 
                 tempPos.y/aLAT_PER_METER,
                 lastDistanceRolled,
                 (-1.0*tempPos.h*DEG_TO_RAD+(aPI/2.0)), //shift bearing to account for plotting frame difference 0=N and CW vs CCW
+                (-1.0*compassHeading+(aPI/2.0)), //shift bearing to account for plotting frame difference 0=N and CW vs CCW
                 tempTarget.state.x/aLON_PER_METER,
                 tempTarget.state.y/aLAT_PER_METER,
                 tempDistanceToNextPoint,
-                (-1.0*tempHeadingToNextPointRad) + (aPI/2.0));
+                (-1.0*tempHeadingToNextPointRad) + (aPI/2.0)); //shift bearing to account for plotting frame difference 0=N and CW vs CCW
         fflush(locPlanTrackFile); 
       }
     
