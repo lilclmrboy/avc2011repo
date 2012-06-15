@@ -57,20 +57,20 @@
 #define KEY_METER_PER_TICK "meter_per_tick"
 #define METER_PER_TICK 0.0038700f //meters/ticks
 
-#Translation (m/tick):
-# # Valid numbers      	=   	5
-# Sum                  	=	   1.9350e-2
-# Mean                 	=	   3.8700e-3
-# Median               	=	   3.8120e-3
-# Quartile 1           	=	   3.7796e-3
-# Quartile 3           	=	   3.9123e-3
-# Minimum              	=	   3.7167e-3
-# Maximum              	=	   4.1296e-3
-# Standard deviation   	=	   1.6143e-4
-# Mean abs. deviation  	=	   1.2073e-4
-# Variance             	=	   2.6059e-8
-# Skewness             	=	   0.6193
-# Kurtosis             	=	  -1.4757
+//Translation (m/tick):
+// # Valid numbers      	=   	5
+// Sum                  	=	   1.9350e-2
+// Mean                 	=	   3.8700e-3
+// Median               	=	   3.8120e-3
+// Quartile 1           	=	   3.7796e-3
+// Quartile 3           	=	   3.9123e-3
+// Minimum              	=	   3.7167e-3
+// Maximum              	=	   4.1296e-3
+// Standard deviation   	=	   1.6143e-4
+// Mean abs. deviation  	=	   1.2073e-4
+// Variance             	=	   2.6059e-8
+// Skewness             	=	   0.6193
+// Kurtosis             	=	  -1.4757
 
 #define aKEY_GPS_PORTNAME "gps_portname"
 #define GPS_PORTNAME "dev/ttyS0"
