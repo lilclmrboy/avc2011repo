@@ -17,6 +17,10 @@ int PlaySound(const char * file);
 /////////////////////////////////////////////////////////////////////////////
 // We may want to move this out somewhere or into it's own seperate class
 // so other modules can use it
+
+// Turn up the system volume
+int gSetSystemVolume = 0;
+
 int PlaySound(const char * file)
 {
 	
@@ -30,6 +34,13 @@ int PlaySound(const char * file)
 	command = "afplay ";
 #else
         command = "play ";
+	
+	// Set the volume all the way up
+	if (gSetSystemVolume == 0) {
+			gSetSystemVolume = 1;
+		system("aumix -v100 &");
+	}
+	
 #endif 
 	
 	command += SOUND_DIRECTORY;
