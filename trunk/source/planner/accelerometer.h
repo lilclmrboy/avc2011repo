@@ -50,7 +50,7 @@ public:
   ~avcAccelerometerThread(void);
   
   // Returns the resultant force vector
-  aErr getAverageAcceleration(double *x, double *y, double *z);
+  //aErr getAverageAcceleration(double *x, double *y, double *z);
   
   // acpRunable virtual
   //void step (const double time);
