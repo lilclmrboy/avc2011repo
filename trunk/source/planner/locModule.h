@@ -80,6 +80,9 @@ public:
 	
 	//return the current robot position.
 	avcStateVector getPosition(void) { return m_curPos; }
+  
+  // return the last recorded distance traveled
+  double getLastDistanceTraveled();
 	
 	//Set the current robot position.
   void setPosition(avcWaypointVector newPos) { 
@@ -115,6 +118,7 @@ private:
 	long m_Encoder;
 	double m_metersPerTick; //encoder ticks per revolution.
   double m_wheelBase;
+  double m_lastDistanceTraveled;
   
   avcCompass *m_pCompass;
   avcAccelerometer *m_pAccel;

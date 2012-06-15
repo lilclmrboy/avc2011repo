@@ -306,6 +306,10 @@ avcController::run(void) {
       //First do the localization step. Let's find out what our system is at.
       m_pos.updateState();
       
+      // get repulsive forces
+      //m_repulse.getForceResultant(&rv);
+      //m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
+      
       // motion planning step
       wayPointWasPassed=0; //reset before getting update from planner
       m_planner.getMotivation(&motivation, m_pos.getPosition(), rv, &wayPointWasPassed);
@@ -321,28 +325,25 @@ avcController::run(void) {
       //make plotable log entry
       if (doRecord) {
         avcStateVector tempPos = m_pos.getPosition();
+        double lastDistanceRolled = m_pos.getLastDistanceTraveled();
         avcWaypointVector tempTarget = m_planner.getNextMapPoint();
         // distance to point and heading to point
         double tempHeadingToNextPointRad = m_planner.getHeadingToNextPointRad() ; 
         double tempDistanceToNextPoint = m_planner.getDistanceToNextPoint();
         
         m_log->log(DEBUG, "Plot: %f,%f,%f,%f,%f,%f,%f", tempPos.x, tempPos.y, tempPos.h, tempTarget.state.x, tempTarget.state.y, tempDistanceToNextPoint, tempHeadingToNextPointRad*RAD_TO_DEG);
-        fprintf(locPlanTrackFile, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
+        fprintf(locPlanTrackFile, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
                 tempPos.x/aLON_PER_METER, 
-                tempPos.y/aLON_PER_METER, 
+                tempPos.y/aLAT_PER_METER,
+                lastDistanceRolled,
                 (-1.0*tempPos.h*DEG_TO_RAD+(aPI/2.0)), //shift bearing to account for plotting frame difference 0=N and CW vs CCW
                 tempTarget.state.x/aLON_PER_METER,
-                tempTarget.state.y/aLON_PER_METER,
+                tempTarget.state.y/aLAT_PER_METER,
                 tempDistanceToNextPoint,
                 (-1.0*tempHeadingToNextPointRad) + (aPI/2.0));
         fflush(locPlanTrackFile); 
       }
-      
-      // get repulsive forces
-      //m_repulse.getForceResultant(&rv);
-      //m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
-      
-
+    
       // Update the control system
       m_mot.updateControl(motivation);
 
