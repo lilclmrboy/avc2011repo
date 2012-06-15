@@ -133,6 +133,11 @@ private:
 	double getSteeringAngleRad(void);
   int getMotorSetPoint(void);
   int getAccelerometerReadings (float *ddx, float *ddy, float *ddz);
+  
+  void _updateStateWithDeadReckoningAccelEncoder();
+  void _updateStateWithDeadReckoningEncoderGps();
+  void _updateStateWithDeadReckoning();
+  void _updateStateWithGpsEkf();
 	
 };
 
