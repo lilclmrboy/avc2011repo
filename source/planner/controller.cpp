@@ -206,8 +206,9 @@ avcController::run(void) {
           m_log->log(ERROR, "Not able to write locPlanTrack.");
           return aErrIO;
       }
+      m_log->log(INFO, "starting log: %s", buffer);
 
-      fprintf(locPlanTrackFile, "Long\tLat\tHeading\tTargetLong\tTargetLat\tDistToNextPoint\tHeadingToNextPointRad\n");
+      fprintf(locPlanTrackFile, "Long\tLat\tDistRolled\tHeading\tTargetLong\tTargetLat\tDistToNextPoint\tHeadingToNextPointRad\n");
       fflush(locPlanTrackFile);
 
 #ifdef aUSE_GPS
@@ -297,7 +298,7 @@ avcController::run(void) {
 
         if(tmpGPS->getPosition(&curLon, &curLat, &curHed) == aErrNone) {
           fprintf(gps_track, "%3.12f, %2.12f, %3.1f\n",
-                  curLon, curLat, curHed);
+                  curLon, curLat, m_pos.getCompassHeading());
           fflush(gps_track);
         }
 
@@ -307,6 +308,7 @@ avcController::run(void) {
       extraDelay = (int) random() % 1000;
       // Wait for 1600 msec (long enough for clucking to finish
       aIO_MSSleep(m_ioRef, 500 + extraDelay, NULL);
+      m_pos.updateState();
 
     } else {
       
