@@ -22,9 +22,9 @@ avcPosition::init(acpStem* pStem,
   m_pCompass->init();
 
   // make an accelerometer class and start a thread for the EKF
-  m_pAccel = new accelerometerADXL335(m_pStem, m_settings);
-  m_pAccel->init();
-  m_pAccelThread = new avcAccelerometerThread(m_pAccel);
+  //m_pAccel = new accelerometerADXL335(m_pStem, m_settings);
+  //m_pAccel->init();
+  //m_pAccelThread = new avcAccelerometerThread(m_pAccel);
 
 
 	
@@ -66,14 +66,16 @@ avcPosition::init(acpStem* pStem,
     if(aSettingFile_GetString(m_ioRef, m_settings, aKEY_GPS_PORTNAME,
                              &buf, GPS_PORTNAME, &e))
       throw acpException(e, "gps Portname");
+    portname = buf;
 
     int baud;
     if(aSettingFile_GetInt(m_ioRef, m_settings, aKEY_GPS_BAUDRATE,
                              &baud, GPS_BAUDRATE, &e))
       throw acpException(e, "gps Baudrate");
 
-    m_pGPS->init(portname, baud);
-    m_pGPS->run();
+    m_pGPS->init(c, baud);
+    m_pGpsThread = acpOSFactory::thread("gps");
+    m_pGpsThread->start(m_pGPS);
 
     int timeout = 0;
     bool haveGPS = false;
@@ -88,7 +90,7 @@ avcPosition::init(acpStem* pStem,
         aIO_MSSleep(m_ioRef, 2000, NULL);
         ++timeout;
     }
-	  
+
     if (haveGPS) {
         // Lets get a lat, lon, and heading. We shouldn't
         // be moving yet. We're also not going to get
@@ -165,7 +167,7 @@ avcPosition::updateState() {
 	
 	//Get the new encoder readings.
 	int curEnc = 0;
-	if(getEncoderValue(&curEnc))
+	if(!getEncoderValue(&curEnc))
 		m_logger->log(ERROR, "%s: Encoder reading is fuct.", __FUNCTION__);
   
 	// Calculate the rear wheel velociy in meters / second.
@@ -213,7 +215,7 @@ avcPosition::updateState() {
 //  m_curPos.x += dx;
 //  m_curPos.y += dy;
 //  m_curPos.h = currentHeading;
-//  m_lastDistanceTraveled = fDistRolled;
+  m_lastDistanceTraveled = fDistRolled;
   
 	Matrix state(3,1);
 	//JLG flipped cos/sin - world cordinate system aligns latitude values with,
@@ -239,13 +241,16 @@ avcPosition::updateState() {
   G(2,1) = tmElapsed*sin(m_curPos.h); 				G(2,2) = 0.0;
   G(3,1) = tan(steerAngleRad)/m_wheelBase; 		G(3,2) = fDistRolled/(m_wheelBase * cos(steerAngleRad) * cos(steerAngleRad));
   m_logger->log(INFO, "Calculated F and G: ");
-	
+  
 	//Now calculate the probability matrix for the position.
 	m_P = F * m_P * F.transpose() + G * m_Q * G.transpose();
   
+  m_logger->log(INFO, "Done m_P");
+
+#ifdef aUSE_GPS  
   //We really only want to use GPS information if enough time has passed.
 	if ((curClock - m_gpsClock) > 500 && m_pGPS->getQuality()) {
-	
+		m_logger->log(INFO, "here1");
     float curLon, curLat, curHed;
     //If we got any invalid BS, don't do this update.
     if(m_pGPS->getPosition(&curLon, &curLat, &curHed) == aErrNone) {
@@ -269,7 +274,7 @@ avcPosition::updateState() {
 			m_gpsClock = curClock;
     }
 	}
-
+#endif
 	//Localization is done. Update the current robot state.
 	m_curPos.x = state(1, 1);
 	m_curPos.y = state(2, 1);

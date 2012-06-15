@@ -55,7 +55,8 @@
 #define WHEEL_BASE 0.3302f
 
 #define KEY_METER_PER_TICK "meter_per_tick"
-#define METER_PER_TICK 0.0038700f //meters/ticks
+//#define METER_PER_TICK 0.0038700f //meters/ticks
+#define METER_PER_TICK 0.01089f //meters/ticks
 
 //Translation (m/tick):
 // # Valid numbers      	=   	5
@@ -73,7 +74,7 @@
 // Kurtosis             	=	  -1.4757
 
 #define aKEY_GPS_PORTNAME "gps_portname"
-#define GPS_PORTNAME "dev/ttyS0"
+#define GPS_PORTNAME "ttyS0"
 
 #define aKEY_GPS_BAUDRATE "gps_baudrate"
 #define GPS_BAUDRATE 57600

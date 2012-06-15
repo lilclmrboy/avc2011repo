@@ -80,6 +80,7 @@ public:
 	
 	//return the current robot position.
 	avcStateVector getPosition(void) { return m_curPos; }
+  double getCompassHeading(void) { float head=0.0; m_pCompass->getHeadingDeg(&head); return head;}
   
   // return the last recorded distance traveled
   double getLastDistanceTraveled();
@@ -102,8 +103,9 @@ private:
 	acpStem* m_pStem;
 	aIOLib m_ioRef;
 	logger* m_logger;
-    // gps member object (singleton)
-    gps* m_pGPS;
+  // gps member object (singleton)
+  gps* m_pGPS;
+  acpThread* m_pGpsThread;
 
 	//We'll use this time reading to get GPS updates.	
 	int m_curGPSTimeSec;
