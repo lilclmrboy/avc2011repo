@@ -12,8 +12,8 @@
  VCC(3.3V) = 329.0625 mV/g   
  */
 #define ADXL335_SCALE_FACTOR 0.3290625f // V/g
-#define ADXL335_AVERAGE_SAMPLES 3
-#define ADXL335_AVERAGE_DELAY 3
+#define ADXL335_AVERAGE_SAMPLES 1
+#define ADXL335_AVERAGE_DELAY 1
 
 
 /////////////////////////////////////////////////////////////////////////////

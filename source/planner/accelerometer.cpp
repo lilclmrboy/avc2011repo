@@ -95,7 +95,7 @@ int avcAccelerometerThread::getAverageAccerlerometerMeasurements(double *x, doub
   *y = m_currentCumulativeAverage.y;
   *z = m_currentCumulativeAverage.z;
   
-  m_logger->log(DEBUG,"clearing counter at %d", m_readingCounter);
+  //m_logger->log(DEBUG,"clearing counter at %d", m_readingCounter);
   // reset the readings
   m_currentCumulativeAverage.x = 0.0;
   m_currentCumulativeAverage.y = 0.0;
@@ -173,14 +173,22 @@ int avcAccelerometerThread::makeNewMeasurement(void){
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 #ifdef aDEBUG_ACCELEROMETER
+
+#include <iostream>
+#include <fstream>
+using namespace std;
+
 int main(int argc, const char* argv[]) {
   
-	logger* log = logger::getInstance();
+  //logger* log = logger::getInstance();
   
   acpStem stem;
   aSettingFileRef settings;
   aErr e = aErrNone;
   aIOLib ioRef;
+	ofstream logfile;
+	acpString data;
+	
   
   // Grab an aIO reference object to gain the setting to talk to the stem.
   aIO_GetLibRef(&ioRef, &e);
@@ -220,57 +228,41 @@ int main(int argc, const char* argv[]) {
   avcAccelerometer *accelerometer;
   avcAccelerometerThread *accelThread;
   
-#if 0
-  
-  ///////////////////
-  printf("\n\nRunning the LSM303DLM accelerometer test\n");
- 
-  accelerometer = new LSM303DLM(&stem, &settings);
-  accelerometer->init();
-  accelThread = new avcAccelerometerThread(accelerometer);
-  
-  for (int i=0; i<100; i++){
-  //while(1){
-    float accx=0, accy=0, accz=0;
-    accelerometer->getAccelerometerReadings(&accx, &accy, &accz);
-    log->log(INFO, "accel x,y,z:\t\t %3.2f\t%3.2f\t%3.2f", accx, accy, accz);
-    
-    double avgAccx=0, avgAccy=0, avgAccz=0;
-    accelThread->getAverageAccerlerometerMeasurements(&avgAccx, &avgAccy, &avgAccz);
-    log->log(INFO, "avg accel x,y,z:\t %3.2f\t%3.2f\t%3.2f", avgAccx, avgAccy, avgAccz);
-    
-    stem.sleep(5000);
-  }
-
-  free(accelerometer);
-  free(accelThread);
-  
-#else
- 
   ////////////////////
+#if 1
   printf("\n\nRunning the AXDL335 accelerometer test\n");
-  
   accelerometer = new accelerometerADXL335(&stem, &settings);
+	logfile.open("../aUser/axdl335.csv");
+#else
+  printf("\n\nRunning the LSM303DLM accelerometer test\n");
+  accelerometer = new LSM303DLM(&stem, &settings);
+	logfile.open("../aUser/lsm303dlm.csv");
+#endif
+
   accelerometer->init();
   accelThread = new avcAccelerometerThread(accelerometer);
   
-  for (int i=0; i<100; i++){
+  for (int i=0; i<500; i++){
     //while(1){
     float accx=0, accy=0, accz=0;
     accelerometer->getAccelerometerReadings(&accx, &accy, &accz);
-    log->log(INFO, "accel x,y,z: %3.2f\t%3.2f\t%3.2f", accx, accy, accz);
+    //log->log(INFO, "accel x,y,z:     %3.2f\t%3.2f\t%3.2f", accx, accy, accz);
     
     double avgAccx=0, avgAccy=0, avgAccz=0;
     accelThread->getAverageAccerlerometerMeasurements(&avgAccx, &avgAccy, &avgAccz);
-    log->log(INFO, "avg accel x,y,z:\t %3.2f\t%3.2f\t%3.2f", avgAccx, avgAccy, avgAccz);
+    //log->log(INFO, "avg accel x,y,z: %3.2f\t%3.2f\t%3.2f", avgAccx, avgAccy, avgAccz);
+    data.format("%f, %f, %f", accx, accy, accz);
+		
+		if (!(avgAccx == 0 && avgAccy == 0 && avgAccz == 0))
+			logfile << avgAccx << ", " << avgAccy << ", " << avgAccz << endl;
     
-    stem.sleep(5000);
+    stem.sleep(100);
   }
+	
+	logfile.close();
   
   free(accelerometer);
-#endif
 
-  
 }
 
 #endif
