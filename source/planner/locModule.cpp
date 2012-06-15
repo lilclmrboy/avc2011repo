@@ -52,6 +52,7 @@ avcPosition::init(acpStem* pStem,
     //Lets initialize the encoders to zero.
     m_pStem->MO_ENC32(aMOTO_MODULE, ENCODER_IDX, 0);
     m_Encoder = 0;
+    m_lastDistanceTraveled = 0;
 		
 #ifdef aUSE_GPS
 
@@ -205,6 +206,7 @@ avcPosition::updateState() {
   m_curPos.x += dx;
   m_curPos.y += dy;
   m_pCompass->getHeadingDeg((float *)&m_curPos.h);
+  m_lastDistanceTraveled = fDistRolled;
 	
 	/*
 	Matrix state(3,1);
@@ -360,6 +362,13 @@ avcPosition::getMotorSetPoint(void) {
 	unsigned char setpoint = m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT+1);
 	return setpoint;
 	
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Accessor function for logging in controller; return the last distance traveled
+// based on encoder tick delta
+double avcPosition::getLastDistanceTraveled(){
+  return m_lastDistanceTraveled;
 }
 
 

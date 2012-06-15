@@ -56,7 +56,10 @@
 
 #define KEY_METER_PER_TICK "meter_per_tick"
 //#define METER_PER_TICK	0.04358f // 0.47244 meters/rev divided by 10.84 ticks/rev
-#define METER_PER_TICK 0.0010860502f // 6.09600/5613 //meters/ticks
+//#define METER_PER_TICK 0.00010860502f // 6.09600/5613 //meters/ticks
+#define METER_PER_TICK 9.9640405361e-4f
+//#define METER_PER_TICK 0.0039840637f // empirical
+//#define METER_PER_TICK 0.060483871f
 
 #define aKEY_GPS_PORTNAME "gps_portname"
 #define GPS_PORTNAME "dev/ttyS0"
@@ -87,10 +90,10 @@
 #define MAX_TURNANGLE 0.707 //0.3168111
 
 // degree of latitude per meter at 40 degrees latitude.
-#define aLAT_PER_METER 0.00000900620125
+#define aLAT_PER_METER 0.00000900620125f
 
 // degree of Longitude per meter
-#define aLON_PER_METER 0.000011710448481
+#define aLON_PER_METER 0.000011710448481f
 
 // Main controller loop cycle delay
 #define aCONTROLLER_LOOP_DELAY_KEY     "loopdelay"
