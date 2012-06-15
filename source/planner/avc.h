@@ -55,11 +55,22 @@
 #define WHEEL_BASE 0.3302f
 
 #define KEY_METER_PER_TICK "meter_per_tick"
-//#define METER_PER_TICK	0.04358f // 0.47244 meters/rev divided by 10.84 ticks/rev
-//#define METER_PER_TICK 0.00010860502f // 6.09600/5613 //meters/ticks
-#define METER_PER_TICK 9.9640405361e-4f
-//#define METER_PER_TICK 0.0039840637f // empirical
-//#define METER_PER_TICK 0.060483871f
+#define METER_PER_TICK 0.0038700f //meters/ticks
+
+#Translation (m/tick):
+# # Valid numbers      	=   	5
+# Sum                  	=	   1.9350e-2
+# Mean                 	=	   3.8700e-3
+# Median               	=	   3.8120e-3
+# Quartile 1           	=	   3.7796e-3
+# Quartile 3           	=	   3.9123e-3
+# Minimum              	=	   3.7167e-3
+# Maximum              	=	   4.1296e-3
+# Standard deviation   	=	   1.6143e-4
+# Mean abs. deviation  	=	   1.2073e-4
+# Variance             	=	   2.6059e-8
+# Skewness             	=	   0.6193
+# Kurtosis             	=	  -1.4757
 
 #define aKEY_GPS_PORTNAME "gps_portname"
 #define GPS_PORTNAME "dev/ttyS0"
