@@ -26,7 +26,7 @@ public:
 	
   // Must call this first before doing any updates. Failure to do so will
   // cause all calls on updateControl to return an error.
-  aErr init(const acpString& port, const int baud);
+  aErr init(aSettingFileRef gpsSettings);
   
   // Returns the resultant force vector
   aErr getPosition(float *lon, float *lat, float* heading);
