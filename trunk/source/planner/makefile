@@ -40,7 +40,7 @@ CFLAGS += -m32 -Wall -Werror
 CFLAGS += -Woverloaded-virtual
 
 ## Uncomment this line if you want to use the GPS unit.
-#CFLAGS += -DaUSE_GPS
+CFLAGS += -DaUSE_GPS
 
 LFLAGS = -Wl,-rpath,.
 LFLAGS += -Wl,-rpath,@loader_path/. 

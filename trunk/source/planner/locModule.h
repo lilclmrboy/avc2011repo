@@ -30,7 +30,9 @@ public:
 		m_W(3,3),
 		m_Encoder(0),
 		m_metersPerTick(METER_PER_TICK), 
-		m_settings(NULL)
+		m_settings(NULL),
+    m_fScalingErrorPosition(1.0f),
+	  m_fScalingErrorHeading(1.0f)
 	{	
 		aErr e;
 
@@ -138,6 +140,10 @@ private:
   void _updateStateWithDeadReckoningEncoderGps();
   void _updateStateWithDeadReckoning();
   void _updateStateWithGpsEkf();
+	
+	float m_fScalingErrorPosition;
+	float m_fScalingErrorHeading;
+	
 	
 };
 
