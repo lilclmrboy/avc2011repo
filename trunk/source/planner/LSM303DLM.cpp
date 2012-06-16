@@ -196,9 +196,9 @@ int LSM303DLM::getHeadingDeg(float *headingDeg){
   calculateHeadingDeg(magV, headingDeg);
   
   // offset for declination
-  //*headingDeg -= 14.6;
+  *headingDeg += 14.4; // originaly 14.6; change to 14.4 to correct for a slight left veer
   
-  //if(*headingDeg < 0) *headingDeg += 360;
+  if(*headingDeg < 0) *headingDeg += 360;
   
   return 0;
 }

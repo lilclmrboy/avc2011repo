@@ -119,7 +119,7 @@ avcController::init(const int argc, const char* argv[]) {
 												m_settings, 
 												"repulsiveon", 
 												&m_bUseRepulsiveForces, 
-												aFalse, &e);
+												aTrue, &e);
 
   // Wait until we have a solid heartbeat connection so we know there is
   // someone to talk to.
@@ -241,7 +241,6 @@ avcController::run(void) {
   } // end if doRecord
 
   while (aErrNone == checkAndWaitForStem() && !bSuccess) {
-
     // Read the scratchpad for the RC enable bit
     // Need to read the second byte, since the PAD_IO writes 2 bytes at a time
     int rcswitch = m_stem.PAD_IO(aSERVO_MODULE, RCPAD_ENABLE);
@@ -273,7 +272,6 @@ avcController::run(void) {
     }
 
     if(bManualOverride) {
-
       int temp = (int) random() % 5;
 
       switch (temp) {

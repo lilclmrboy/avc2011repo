@@ -311,9 +311,9 @@ avcPosition::_updateStateWithDeadReckoningEncoderGps() {
     if(m_pGPS->getPosition(&curLon, &curLat, &curHed) == aErrNone) {
 			
 			// Now we do the error subtraction
-			float errorLon = m_curPos.x - curLon;
-			float errorLat = m_curPos.y - curLat;
-			float errorHeading = m_curPos.h - curHed;
+			float errorLon = curLon - m_curPos.x;
+			float errorLat = curLat - m_curPos.y;
+			float errorHeading = curHed - m_curPos.h;
 			
 			// Only time GPS heading values are any good is when 
 			// you are actually moving
