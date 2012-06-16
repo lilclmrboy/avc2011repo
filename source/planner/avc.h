@@ -116,6 +116,7 @@
 #define aCONTROLLER_INPUTV_CONTROLLER_KEY     "minInputVoltageController"
 #define aCONTROLLER_INPUTV_CONTROLLER_DEFAULT 12.0f
 
+
 /////////////////////////////////////////////////////////////////////////////
 // We may want to move this out somewhere or into it's own seperate class
 // so other modules can use it

@@ -40,7 +40,15 @@ avcPosition::init(acpStem* pStem,
                            &fSetVar, WHEEL_BASE, &e))
     throw acpException(e, "getting wheel track from settings");
   m_wheelBase = fSetVar;
+	
+	if(aSettingFile_GetFloat(m_ioRef, m_settings, "gpsdead_scaling_heading",
+                           &m_fScalingErrorHeading, 1.0f, &e))
+    throw acpException(e, "getting heading scaling constant");
   
+	if(aSettingFile_GetFloat(m_ioRef, m_settings, "gpsdead_scaling_position",
+                           &m_fScalingErrorPosition, 1.0f, &e))
+    throw acpException(e, "getting position scaling constant");
+	
   // Set the first position waypoint that we passed in
   setPosition(firstMapPoint);
 
@@ -73,7 +81,7 @@ avcPosition::init(acpStem* pStem,
                              &baud, GPS_BAUDRATE, &e))
       throw acpException(e, "gps Baudrate");
 
-    m_pGPS->init(c, baud);
+    m_pGPS->init(portname, baud);
     m_pGpsThread = acpOSFactory::thread("gps");
     m_pGpsThread->start(m_pGPS);
 
@@ -142,7 +150,8 @@ avcPosition::init(acpStem* pStem,
 /////////////////////////////////////////////////////////////////////////////
 void 
 avcPosition::updateState(){
-	_updateStateWithDeadReckoningAccelEncoder();
+	// _updateStateWithDeadReckoningAccelEncoder();
+	_updateStateWithDeadReckoningEncoderGps();
 }
 
 
@@ -238,6 +247,103 @@ avcPosition::_updateStateWithDeadReckoningAccelEncoder() {
       integrationCount=0; 
     }
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+void 
+avcPosition::_updateStateWithDeadReckoningEncoderGps() {
+	
+	// Grab the clock. Use the aIO verison, clock is not accurate when 
+	// we have stem processes running
+	long unsigned int curClock;
+	aIO_GetMSTicks(m_ioRef, &curClock, NULL);
+	long unsigned int ticksElapsed = (curClock - m_curClock);
+  double tmElapsed = ticksElapsed/1000.0;
+	
+	double encoder_dx=0.0, encoder_dy=0.0; //encoder_vx=0.0, encoder_vy=0.0;
+  double fDistRolled=0.0;// fVelocity=0.0;
+	
+	// Check that we have actually had some time go by
+  if(tmElapsed <= 0)
+    m_logger->log(ERROR, "%s: Elapsed time is invalid", __FUNCTION__);
+	
+  // get new encoder
+  int curEnc = 0;
+  if(!getEncoderValue(&curEnc)) {
+		m_logger->log(ERROR, "%s: Encoder reading is fuct.", __FUNCTION__);
+  }
+  else {
+    // calculate position change based on encoder
+    fDistRolled =  m_metersPerTick * (double)(curEnc - m_Encoder);
+    
+    m_logger->log(INFO, "Encoder fDistRolled (m): %lf (tick/time=%d/%lf)", fDistRolled, (curEnc - m_Encoder), tmElapsed);
+    
+    // move the encoder distances into real-world frame using the previous bot heading
+    encoder_dx = sin(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLON_PER_METER;
+    encoder_dy = cos(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLAT_PER_METER;
+    
+  } // endif getEncoderValue
+	
+	// grab the new compass heading
+  // grab the current heading to enable observation of the change in heading
+  float currentHeading = 0.0;
+  if(0 != m_pCompass->getHeadingDeg(&currentHeading)){
+    m_logger->log(ERROR, "%s: Couldn't get new compass heading", __FUNCTION__);
+  }
+  
+  // Store current readings (for the next predict phase)
+  m_curPos.x += encoder_dx;
+  m_curPos.y += encoder_dy;
+  m_curPos.h = currentHeading;
+  m_Encoder= curEnc;
+  m_curClock = curClock;
+  m_lastDistanceTraveled = fDistRolled;
+	
+
+  if(1){//(curEnc - m_Encoder) {
+  	m_logger->log(INFO, "%s: --- fDist: %f", __FUNCTION__, fDistRolled);
+    m_logger->log(INFO, "%s: --- hed: %f", __FUNCTION__, m_curPos.h);
+  }
+	
+	m_logger->log(INFO, "%s: Set Integrate GPS State: ", __FUNCTION__);
+	
+
+#ifdef aUSE_GPS  
+  //We really only want to use GPS information if enough time has passed.
+	if ((curClock - m_gpsClock) > 500 && m_pGPS->getQuality()) {
+		
+		m_logger->log(INFO, "%s: Got good GPS quality");
+		
+    float curLon, curLat, curHed;
+		
+    //If we got any invalid BS, don't do this update.
+    if(m_pGPS->getPosition(&curLon, &curLat, &curHed) == aErrNone) {
+			
+			// Now we do the error subtraction
+			float errorLon = m_curPos.x - curLon;
+			float errorLat = m_curPos.y - curLat;
+			float errorHeading = m_curPos.h - curHed;
+			
+			// Only time GPS heading values are any good is when 
+			// you are actually moving
+			// We expect to be moving at a rate of 1/2 a meter a second
+			// The we trust the compass is not lieing to us. If one of 
+			// you fuckers are, we will rm -rf on your ass.
+			if (tmElapsed && (fDistRolled / tmElapsed) > 0.5f) {
+				errorHeading = 0.0f;
+			}
+			
+			// Let's perform some crazy, arbitrary scaling values 
+			// These will shape change our robots world. 
+			m_curPos.x += m_fScalingErrorPosition * errorLon;
+			m_curPos.y += m_fScalingErrorPosition * errorLat;
+			m_curPos.h += m_fScalingErrorHeading * errorHeading;
+			
+			m_gpsClock = curClock;
+    }
+	}
+#endif
+	
 }
 
 
