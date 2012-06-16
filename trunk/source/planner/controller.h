@@ -87,6 +87,7 @@ private:
 	float m_fInputVoltageContollerMin;
   
   unsigned long m_loopdelay;
+	aBool m_bUseRepulsiveForces;
   
 };
 
