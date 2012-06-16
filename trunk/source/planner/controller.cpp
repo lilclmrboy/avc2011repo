@@ -119,7 +119,7 @@ avcController::init(const int argc, const char* argv[]) {
 												m_settings, 
 												"repulsiveon", 
 												&m_bUseRepulsiveForces, 
-												aTrue, &e);
+												aFalse, &e);
 
   // Wait until we have a solid heartbeat connection so we know there is
   // someone to talk to.
