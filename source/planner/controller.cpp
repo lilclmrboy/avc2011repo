@@ -58,7 +58,8 @@ avcController::avcController(void) :
 m_settings(NULL),
 m_ioRef(NULL),
 m_fInputVoltageContollerMin(12.0f),
-m_loopdelay(aCONTROLLER_LOOP_DELAY_DEFAULT)
+m_loopdelay(aCONTROLLER_LOOP_DELAY_DEFAULT),
+m_bUseRepulsiveForces(false)
 {
   aErr e;
 	
@@ -113,6 +114,12 @@ avcController::init(const int argc, const char* argv[]) {
 												aCONTROLLER_INPUTV_CONTROLLER_KEY, 
 												&m_fInputVoltageContollerMin, 
 												aCONTROLLER_INPUTV_CONTROLLER_DEFAULT, &e);
+	
+	aSettingFile_GetBool(m_ioRef, 
+												m_settings, 
+												"repulsiveon", 
+												&m_bUseRepulsiveForces, 
+												aFalse, &e);
 
   // Wait until we have a solid heartbeat connection so we know there is
   // someone to talk to.
@@ -170,8 +177,11 @@ avcController::run(void) {
   avcForceVector rv;
   avcForceVector motivation;
 	
+	acpThread* repulseThread = acpOSFactory::thread("repulse");
 	//Need to start taking repulsive forces.
-	//m_repulse.run();
+	if (m_bUseRepulsiveForces) {
+    repulseThread->start(&m_repulse);
+	}
 
   bool bManualOverride = false;
   bool bNotStarted = true;
@@ -320,8 +330,10 @@ avcController::run(void) {
       m_pos.updateState();
       
       // get repulsive forces
-      //m_repulse.getForceResultant(&rv);
-      //m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
+			if (m_bUseRepulsiveForces) {
+				m_repulse.getForceResultant(&rv);
+				m_log->log(INFO, "Repulsive Force: %f,%f", rv.x, rv.y);
+			}
       
       // motion planning step
       wayPointWasPassed=0; //reset before getting update from planner
