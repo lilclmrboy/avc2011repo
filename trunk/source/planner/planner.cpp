@@ -148,8 +148,9 @@ avcPlanner::getMotivation(avcForceVector *pForceResult,
 #endif
     }
     
-    goal.x = 0.0;
-		goal.y = 0.0;
+    motivationVector.x = 0.0;
+		motivationVector.y = 0.0;
+    *pForceResult = motivationVector;
     return aErrNone;
 
 	}
@@ -249,7 +250,8 @@ avcPlanner::checkForPassedWayPoints(const avcStateVector& pos, int *wayPointWasP
 	}
 	catch (int &e) {
 		m_logger->log(INFO, "All waypoints in map are passed.");
-		firstUnpassedWaypoint = (int)m_waypoints.size()-1;
+		//firstUnpassedWaypoint = (int)m_waypoints.size()-1;
+    firstUnpassedWaypoint = -1;
 	}
 
 	if (-1 == firstUnpassedWaypoint) {

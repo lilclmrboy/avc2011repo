@@ -22,9 +22,9 @@ avcPosition::init(acpStem* pStem,
   m_pCompass->init();
 
   // make an accelerometer class and start a thread for the EKF
-  m_pAccel = new accelerometerADXL335(m_pStem, m_settings);
-  m_pAccel->init();
-  m_pAccelThread = new avcAccelerometerThread(m_pAccel);
+  //m_pAccel = new accelerometerADXL335(m_pStem, m_settings);
+  //m_pAccel->init();
+  //m_pAccelThread = new avcAccelerometerThread(m_pAccel);
 
 
 	
@@ -155,8 +155,8 @@ avcPosition::_updateStateWithDeadReckoningAccelEncoder() {
   static double accelLocationX=m_curPos.x, accelLocationY=m_curPos.y, accelLocationZ=0.0;
   static unsigned int integrationCount=0;
   
-  double encoder_dx=0.0, encoder_dy=0.0, encoder_vx=0.0, encoder_vy=0.0;
-  double fDistRolled=0.0, fVelocity=0.0;
+  double encoder_dx=0.0, encoder_dy=0.0; //encoder_vx=0.0, encoder_vy=0.0;
+  double fDistRolled=0.0;// fVelocity=0.0;
   
   // get the change in time
   long unsigned int curClock;
@@ -178,8 +178,8 @@ avcPosition::_updateStateWithDeadReckoningAccelEncoder() {
     // move the encoder distances into real-world frame using the previous bot heading
     encoder_dx = sin(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLON_PER_METER;
     encoder_dy = cos(m_curPos.h * DEG_TO_RAD)* fDistRolled * aLAT_PER_METER;
-    encoder_vx = sin(m_curPos.h * DEG_TO_RAD)* fVelocity * aLON_PER_METER;
-    encoder_vy = cos(m_curPos.h * DEG_TO_RAD)* fVelocity * aLAT_PER_METER;
+    //encoder_vx = sin(m_curPos.h * DEG_TO_RAD)* fVelocity * aLON_PER_METER;
+    //encoder_vy = cos(m_curPos.h * DEG_TO_RAD)* fVelocity * aLAT_PER_METER;
     
   } // endif getEncoderValue
   

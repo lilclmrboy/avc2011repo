@@ -38,7 +38,7 @@ int PlaySound(const char * file)
 	// Set the volume all the way up
 	if (gSetSystemVolume == 0) {
 			gSetSystemVolume = 1;
-		system("aumix -v100 &");
+		system("amixer -c 0 -- sset Master playback 0dB");
 	}
 	
 #endif 

@@ -164,12 +164,14 @@ avcMotion::updateControl(const avcForceVector& potential)
   magnitude = sqrt(potential.x * potential.x + potential.y * potential.y);
   delta = atan2(potential.y, potential.x);
   
+  
+  // don't go backwards!
   if (potential.x < 0)
   	magnitude = magnitude * -1.0;
   
   if (delta < 0) {
     //printf("delta is negative\n  delta: %f deltad: %f", delta, aPI*2 + delta);
-    delta += aPI*2 + delta;
+    delta += aPI*2;
   }
   
   // The magnitude value directly translates to the gas pedal for the 
@@ -179,18 +181,29 @@ avcMotion::updateControl(const avcForceVector& potential)
                                              + ((SERVO_NEUT-1) * m_fThrottleWindow * magnitude));
   unsigned char servoSteer = SERVO_NEUT;
   
+  // slow the bot down if we're going backwards since the steering is more
+  // sensitive in reverse (it's easier to flip it)
+  if (magnitude < 0) servoDrive = (unsigned char)(SERVO_NEUT + ((SERVO_NEUT-1) * m_fThrottleWindow * magnitude*0.8));
+  
   // Update the servo values
   // The magnitude value directly translates to the gas pedal for the 
   // rear drive motor.
-  unsigned char steerdelta = 0;
+#if 0
+  unsigned char servoOffset = (unsigned char) (delta/(aPI/2.0)* (float)SERVO_MAX);
+  servoOffset = servoOffset > (unsigned char)SERVO_MAX-1 ? (unsigned char)SERVO_MAX-1 : servoOffset;
+  servoOffset = servoOffset < (unsigned char)SERVO_MIN+1 ? (unsigned char)SERVO_MIN+1 : servoOffset;
   
+  servoSteer = SERVO_NEUT + servoOffset;
+#endif  
+#if 1  
+  unsigned char steerdelta = 0;
   // See how things should unfold
   if ((delta >= 0.0f) && (delta < MAX_TURNANGLE)) {
     steerdelta = (unsigned char)(delta/MAX_TURNANGLE * SERVO_NEUT);
     servoSteer = SERVO_NEUT + steerdelta;
   }
   else if ((delta >= MAX_TURNANGLE) && (delta < (aPI - MAX_TURNANGLE))) {
-    steerdelta = SERVO_MIN;
+    //steerdelta = SERVO_MIN;
     servoSteer = SERVO_MAX;
   }
   else if ((delta >= (aPI - MAX_TURNANGLE)) && (delta < aPI)) {
@@ -201,14 +214,15 @@ avcMotion::updateControl(const avcForceVector& potential)
     steerdelta = (unsigned char)((delta - aPI)/(MAX_TURNANGLE) * SERVO_NEUT);
     servoSteer = SERVO_NEUT - steerdelta;
   }
-  else if ((delta >= (aPI + MAX_TURNANGLE)) && (delta < (aPI*2 - MAX_TURNANGLE))) {
-    steerdelta = SERVO_MIN;
+  else if ((delta >= (aPI + MAX_TURNANGLE)) && (delta < (2.0*aPI - MAX_TURNANGLE))) {
+    //steerdelta = SERVO_MIN;
     servoSteer = SERVO_MIN;
   }	
-  else if ((delta >= (aPI*2 - MAX_TURNANGLE)) && (delta < aPI*2)) {
-    steerdelta = (unsigned char)((2*aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
+  else if ((delta >= (aPI*2.0 - MAX_TURNANGLE)) && (delta < aPI*2.0)) {
+    steerdelta = (unsigned char)((2.0*aPI - delta)/(MAX_TURNANGLE) * SERVO_NEUT);
     servoSteer = SERVO_NEUT - steerdelta;
   }
+#endif
   
 #ifdef aDEBUG_MOTMODULE	
   // Show us what we got
@@ -234,15 +248,16 @@ avcMotion::updateControl(const avcForceVector& potential)
          (m_setpointLast[0] < SERVO_NEUT && servoDrive > SERVO_NEUT)){
         
         m_log->log(INFO, "MotionModule: Detected rapid reversal in throttle (%d to %d)", m_setpointLast[0], servoDrive);
-        //m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
-        //m_pStem->sleep(200); // short sleep for it to set
+        m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
+        m_pStem->sleep(1000); // short sleep for it to set
         m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) SERVO_NEUT);
-        m_pStem->sleep(500); // short sleep for it to set      
+        m_pStem->sleep(1000); // short sleep for it to set      
       }
   
   // Do a running average on the steering servo setpoint. Use this value to 
   // send to the controller.
-  
+
+#if 1
   for (int i=aMOTMODULE_HISTORY_WINDOW-1; i>0; i--){
     m_setpointHistory[i] = m_setpointHistory[i-1];
   }
@@ -255,23 +270,28 @@ avcMotion::updateControl(const avcForceVector& potential)
     setpointCumulative += m_setpointHistory[n];
     
     // Debug the cumulative setpoint total
-    m_log->log(DEBUG, "%s: setpoint @%d: %d", 
-               __FUNCTION__, n, m_setpointHistory[n]);
+    //m_log->log(DEBUG, "%s: setpoint %d: %d", 
+    //           __FUNCTION__, n, m_setpointHistory[n]);
   }
 
   // Divide the addition of the values by the history window
   // Cast it and roundn it.
   servoSteer = (aUInt8) ((float)setpointCumulative / (float) aMOTMODULE_HISTORY_WINDOW);
+#endif
   
   m_log->log(INFO, "MotionModule: Throttle, Steer: %d, %d", servoDrive, servoSteer);
   
-  m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, (aUInt8) servoDrive);
-  m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, (aUInt8) servoSteer);
+  aUInt16 temp = servoDrive << 8 | servoDrive;
+  m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT, temp);
+  temp = servoSteer << 8 | servoSteer;
+  m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER, temp);
   
   // Make sure the reading took
   if ((m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_THROT+1) != servoDrive) || 
-      (m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER+1) != servoSteer))
+      (m_pStem->PAD_IO(aSERVO_MODULE, AUTPAD_STEER+1) != servoSteer)){
+    m_log->log(ERROR, "MotionModule: Throttle or steer were not set: %d, %d", servoDrive, servoSteer);
     e = aErrNotReady;
+  }
   
   // store the current settings for next loop
   m_setpointLast[0] = servoDrive;

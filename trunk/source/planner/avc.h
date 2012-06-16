@@ -99,8 +99,8 @@
 
 
 // Maximum turn angle (26.167125˚)
-//#define MAX_TURNANGLE 0.707 //0.3168111
-#define MAX_TURNANGLE 0.456702487f
+#define MAX_TURNANGLE 0.707 //0.3168111
+//#define MAX_TURNANGLE 0.456702487f
 
 // degree of latitude per meter at 40 degrees latitude.
 #define aLAT_PER_METER 0.00000900620125f
