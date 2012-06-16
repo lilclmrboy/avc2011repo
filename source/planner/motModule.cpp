@@ -107,8 +107,8 @@ avcMotion::init(acpStem *pStem, aSettingFileRef settings) {
                      bitCMD_DEST_HOST | 0x81);
     m_pStem->SRV_CFG(aSERVO_MODULE, STEER_SERVO, 
                      bitCMD_DEST_HOST | 0x00);
-  } catch (acpException &e) {
-    m_log->log(ERROR, "%s: error writing ramp to GP", __FUNCTION__, e.msg());
+  } catch (acpException &err) {
+    m_log->log(ERROR, "%s: error writing ramp to GP", __FUNCTION__, err.msg());
   }
   
   // Read back the servo configuration from each servo motor

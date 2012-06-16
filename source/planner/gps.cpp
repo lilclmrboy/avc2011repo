@@ -21,7 +21,7 @@ gps::getInstance() {
 
 /////////////////////////////////////////////////////////////////////////////
 
-aErr gps::init(const acpString& port, const int baudrate) {
+aErr gps::init(aSettingFileRef settings) {
 	
     //Start up the serial stream.
 
@@ -30,9 +30,21 @@ aErr gps::init(const acpString& port, const int baudrate) {
     if(!m_bInit) {
         m_log = logger::getInstance();
       
-        m_log->log(INFO, "GPS: opening %s at %d", (const char*)port, baudrate);
+			char* buf;
+			acpString portname;
+			if(aSettingFile_GetString(m_ioRef, settings, "portname",
+																&buf, "ttyUSB0", &e))
+				throw acpException(e, "gps Portname");
+			portname = buf;
+			
+			int baud;
+			if(aSettingFile_GetInt(m_ioRef, settings, "baudrate",
+                             &baud, 57600, &e))
+				throw acpException(e, "gps Baudrate");
+			
+        m_log->log(INFO, "GPS: opening %s at %d", (const char*)portname, baud);
 	
-        if (aStream_CreateSerial(m_ioRef, port, baudrate, &m_serialStream, &e))
+        if (aStream_CreateFromSettings(m_ioRef, settings, &m_serialStream, &e))
             m_log->log(ERROR, "Error creating serial stream %d", e);
         m_bInit = true;
     }
@@ -57,7 +69,7 @@ aErr gps::getPosition(float *lon, float* lat, float* heading) {
 unsigned int gps::getQuality(){
   unsigned long hdop = m_gps.hdop();
 
-  m_log->log(DEBUG, "HDOP from gps: %f", hdop / 100.0f);
+  m_log->log(DEBUG, "HDOP from gps: %lf", (int) hdop / 100.0f);
 
   // No valid sentences, or HDOP > 10.0
   if (hdop == TinyGPS::GPS_INVALID_HDOP || hdop > 1000)

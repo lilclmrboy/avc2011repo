@@ -68,20 +68,11 @@ avcPosition::init(acpStem* pStem,
     */
     
     m_pGPS = gps::getInstance();
+		
+		aSettingFileRef gpsSettings;
+		aSettingFile_Create(m_ioRef, "gps.config", &gpsSettings, &e);
 
-    char* buf;
-    acpString portname;
-    if(aSettingFile_GetString(m_ioRef, m_settings, aKEY_GPS_PORTNAME,
-                             &buf, GPS_PORTNAME, &e))
-      throw acpException(e, "gps Portname");
-    portname = buf;
-
-    int baud;
-    if(aSettingFile_GetInt(m_ioRef, m_settings, aKEY_GPS_BAUDRATE,
-                             &baud, GPS_BAUDRATE, &e))
-      throw acpException(e, "gps Baudrate");
-
-    m_pGPS->init(portname, baud);
+    m_pGPS->init(gpsSettings);
     m_pGpsThread = acpOSFactory::thread("gps");
     m_pGpsThread->start(m_pGPS);
 
@@ -194,7 +185,7 @@ avcPosition::_updateStateWithDeadReckoningAccelEncoder() {
   
   // grab the new compass heading
   // grab the current heading to enable observation of the change in heading
-  float currentHeading = 0.0;
+  float currentHeading = 0.0f;
   if(0 != m_pCompass->getHeadingDeg(&currentHeading)){
     m_logger->log(ERROR, "%s: Couldn't get new compass heading", __FUNCTION__);
   }
@@ -286,7 +277,7 @@ avcPosition::_updateStateWithDeadReckoningEncoderGps() {
 	
 	// grab the new compass heading
   // grab the current heading to enable observation of the change in heading
-  float currentHeading = 0.0;
+  float currentHeading = 0.0f;
   if(0 != m_pCompass->getHeadingDeg(&currentHeading)){
     m_logger->log(ERROR, "%s: Couldn't get new compass heading", __FUNCTION__);
   }
@@ -398,7 +389,7 @@ avcPosition::_updateStateWithGpsEkf() {
   double predicted_dh = fDistRolled/m_wheelBase * tan(steerAngleRad);
   
   // grab the current heading to enable observation of the change in heading
-  float currentHeading = 0.0;
+  float currentHeading = 0.0f;
   if(0 != m_pCompass->getHeadingDeg(&currentHeading)){
     m_logger->log(ERROR, "%s: Couldn't get new compass heading", __FUNCTION__);
   }

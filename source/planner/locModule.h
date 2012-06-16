@@ -82,7 +82,7 @@ public:
 	
 	//return the current robot position.
 	avcStateVector getPosition(void) { return m_curPos; }
-  double getCompassHeading(void) { float head=0.0; m_pCompass->getHeadingDeg(&head); return head;}
+  double getCompassHeading(void) { float head=0.0f; m_pCompass->getHeadingDeg(&head); return head;}
   
   // return the last recorded distance traveled
   double getLastDistanceTraveled();

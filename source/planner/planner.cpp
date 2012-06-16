@@ -401,7 +401,7 @@ avcWaypointVector avcPlanner::getNextMapPoint(void) {
   try {
     nextWaypointIdx = getFirstUnpassedWayPoint();
   } catch (int &e) {
-    nextWaypointIdx = m_waypoints.size()-1;
+    nextWaypointIdx = (int) m_waypoints.size()- 1;
   }
     
   return m_waypoints[nextWaypointIdx];
