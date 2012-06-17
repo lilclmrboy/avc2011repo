@@ -34,7 +34,7 @@
 #define aREPULSIVE_SENSOR_CONFIG_PREFIX "sensor_"
 
 #define aREPULSIVE_DELAY_KEY            "repulsive_delay"
-#define aREPULSIVE_DELAY_DEFAULT        33
+#define aREPULSIVE_DELAY_DEFAULT        400
 
 #define aREPULSIVE_MAX_SENSORS          10
 
@@ -96,6 +96,7 @@ protected:
   
   // Sensor a2d port that it may be attached to
   unsigned char m_a2dport;
+
   
 }; // end class avcRepulsiveForce
 
@@ -149,6 +150,7 @@ public:
   
   // acpThread run handle
   int run(void);
+  int update(void);
   
 private: 
   
@@ -171,6 +173,8 @@ private:
   
   // Handle on thread object
   acpThread* m_pThread;
+  
+  acpMutex* m_repulseReadingLock;
   
 };
 

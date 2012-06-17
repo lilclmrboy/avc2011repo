@@ -174,7 +174,7 @@ avcPlanner::getMotivation(avcForceVector *pForceResult,
 	// sum the goal vector with sensor repluse vector
 	// get summing weight from config settings
 	motivationVector.x = (goal.x + (double)m_repulseVectorWeight * repulse.x);
-	motivationVector.y = (goal.y + (double)m_repulseVectorWeight * repulse.y);
+	motivationVector.y = (goal.y + (double)m_repulseVectorWeight * -1 * repulse.y);
 	
 	//limit the motivation vector to ±1
 	motivationVector.x = motivationVector.x >  1.0 ?  1.0 : motivationVector.x;

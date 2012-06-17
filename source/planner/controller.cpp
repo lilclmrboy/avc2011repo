@@ -177,11 +177,15 @@ avcController::run(void) {
   avcForceVector rv;
   avcForceVector motivation;
 	
-	acpThread* repulseThread = acpOSFactory::thread("repulse");
+  
+  
+	//acpThread* repulseThread = acpOSFactory::thread("repulse");
 	//Need to start taking repulsive forces.
 	if (m_bUseRepulsiveForces) {
-    repulseThread->start(&m_repulse);
-	}
+  //  repulseThread->start(&m_repulse);
+    m_repulse.update();
+  
+  }
 
   bool bManualOverride = false;
   bool bNotStarted = true;
