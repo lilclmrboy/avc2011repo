@@ -161,8 +161,8 @@ avcGP2Y0A710K::update(void) {
   float reading = 0.0f;
   float distance = 0.0f;
   float force_distance = 0.0f;
-  float a1 = 1.0f;
-  float k = 0.0f;
+  float a1 = -1.0;
+  float k =1.5f;
   
   printf("fuck ya\n");
     
@@ -178,19 +178,21 @@ avcGP2Y0A710K::update(void) {
   distance = (a1 * reading + k) / 100.0f;
   
   // We can't get a negative distance
-  if (distance < 0.0f) distance = 0.0f;
+  //if (distance < 0.0f) distance = 0.0f;
+  if(reading < 2.0) reading = 0.0;
   
   // Get the force distance and normalize it
   // when things are detected very close, we want a very large force
   // when they are far away, we want small force effects 
-  force_distance = (m_radiusMax - distance) / m_radiusMax;
+  force_distance = (3.0*m_radiusMax - distance) / (3.0*m_radiusMax); // long range looks for 3x dist max
+  force_distance = reading/3.2;
   
   // Get the x and y components
   // This is repulsive, so we want to go backwards
   m_force.x = cos(m_theta + aPI) * force_distance;
   m_force.y = sin(m_theta + aPI) * force_distance;
   
-#ifdef aDEBUG_FREPULSIVEZ
+#if 1 //aDEBUG_FREPULSIVEZ
   
   m_log->log(INFO, "%s %s CH%d: %f (%f cm) [%f] Rx: %f Ry: %f",
              "",
@@ -327,6 +329,8 @@ avcRepulsiveForces::init(acpStem *pStem, aSettingFileRef settings) {
   
   m_log->log(INFO, "Starting thread process");
   
+  m_repulseReadingLock = acpOSFactory::mutex("repulseLock");
+  
   // Fire off the thread
   m_pThread = acpOSFactory::thread("repForce");
   m_pThread->start(this);
@@ -373,7 +377,7 @@ avcRepulsiveForces::run(void)
 {
   
   while (!m_pThread->isDone()) {
-    bool bIdle = true;
+    //bool bIdle = true;
     
     // Update all the sensors since we are not busy
 #ifdef aDEBUG_FREPULSIVEZ    
@@ -398,21 +402,63 @@ avcRepulsiveForces::run(void)
       
       // Add the new force
       Uresult += *m_pForces[i]; 
+      m_pStem->sleep((int)((float)m_threadDelay/4.0));
+      //m_pThread->yield((int)((float)m_threadDelay/4.0));
       
     } while (m_pForces[++i] != NULL);
     
+    m_repulseReadingLock->lock();
     m_RepulsiveResult.x = Uresult.getUx();
     m_RepulsiveResult.y = Uresult.getUy();
+    m_repulseReadingLock->unlock();
     
     // handle any messages first
-    if (m_pThread->handleMessage())
-      bIdle = false;
+    //if (m_pThread->handleMessage())
+    //  bIdle = false;
     
     // yield if nothing is happening
-    if (bIdle)
-      m_pThread->yield(m_threadDelay);
+    //if (bIdle)
+    //  m_pThread->yield(m_threadDelay);
   }
   
+  return 0;
+  
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+// Thread run handle
+
+int
+avcRepulsiveForces::update(void) 
+{
+  
+     // Make sure you other hackers initialized this first
+    if (!m_pStem || !m_bInit) {
+      m_log->log(ERROR,"%s::%s failed. acpStem is NULL"
+                 " or class not intialized\n"
+                 " \tCall %s::%s(acpStem *)", 
+                 __FILE__, __PRETTY_FUNCTION__,
+                 __FILE__, __PRETTY_FUNCTION__);
+      return aErrInitialization;
+    }
+    
+    // Update the sensor readings for all the sensors we care about
+    avcRepulsiveForce Uresult;
+    int i = 0;
+    do {
+      m_pForces[i]->update();
+      
+      // Add the new force
+      Uresult += *m_pForces[i]; 
+      m_pStem->sleep((int)((float)m_threadDelay/4.0));
+      //m_pThread->yield((int)((float)m_threadDelay/4.0));
+      
+    } while (m_pForces[++i] != NULL);
+
+    m_RepulsiveResult.x = Uresult.getUx();
+    m_RepulsiveResult.y = Uresult.getUy();
+      
   return 0;
   
 }
